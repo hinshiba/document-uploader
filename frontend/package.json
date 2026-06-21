@@ -1,8 +1,12 @@
 {
   "name": "frontend",
-  "module": "index.ts",
+  "module": "src/scripts/main.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev": "bun --hot src/pages/*.html",
+    "build": "bun build src/pages/*.html --outdir=out"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
