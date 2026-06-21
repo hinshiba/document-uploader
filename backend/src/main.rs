@@ -1,5 +1,5 @@
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> anyhow::Result<()> {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
 
     let app = axum::Router::new()
