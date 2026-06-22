@@ -1,0 +1,99 @@
+openapi: 3.1.0
+info:
+  title: 過去問アップローダーAPI
+  version: 0.1.0
+servers:
+  - url: http://localhost:3030/api/v1
+
+paths:
+  /alive:
+    get:
+      summary: 稼働かどうかを判定
+      responses:
+        "200":
+          description: 稼働中である．文字列は指定されない
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ok
+  /docs:
+    post:
+      summary: ファイルとメタデータのアップロード
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: アップロードファイル
+                metadata:
+                  $ref: "#/components/schemas/DocumentMetadata"
+              required:
+                - file
+                - metadata
+            encoding:
+              file:
+                contentType: application/octet-stream
+              metadata:
+                contentType: application/json
+      responses:
+        "201":
+          description: アップロード成功
+        "400":
+          description: リクエストが不正
+
+components:
+  schemas:
+    DocumentMetadata:
+      type: object
+      properties:
+        faculty:
+          type: string
+          format: uuid
+          description: 学部名のUUID
+        major:
+          type: string
+          format: uuid
+          description: 専攻等のUUID
+        year:
+          type: integer
+          description: 年度
+          examples: [2026]
+        term:
+          type: integer
+          description: 学期
+          examples: [2]
+        subject:
+          type: string
+          description: 科目名
+          examples: [線形代数]
+        teacher:
+          type: string
+          description: 教員名
+          examples: [岡山 聖彦]
+        examtype:
+          type: string
+          description: 試験種別
+          enum:
+            - 小テスト
+            - 中間試験
+            - 期末試験
+            - 期末試験再試
+
+      required:
+        - faculty
+        - major
+        - year
+        - term
+        - subject
+        - teacher
+
+# 問題点
+# 複数回のテストの場合(小テスト等)
+# 複数ファイル(画像等)
+# 解答のアップロード
