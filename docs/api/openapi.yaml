@@ -3,7 +3,8 @@ info:
   title: 過去問アップローダーAPI
   version: 0.1.0
 servers:
-  - url: http://localhost:3030/api/v1
+  - url: http://localhost:3000/api/v1
+    description: 開発用
 
 paths:
   /alive:
