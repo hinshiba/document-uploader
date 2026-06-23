@@ -34,7 +34,7 @@ paths:
                 metadata:
                   $ref: "#/components/schemas/DocumentMetadata"
               required:
-                - file
+                - files
                 - metadata
             encoding:
               metadata:
