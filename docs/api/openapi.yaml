@@ -30,6 +30,25 @@ paths:
               schema:
                 type: string
               example: ok
+
+  /faculties:
+    get:
+      tags: [faculties]
+      summary: 学部・専攻一覧の取得
+      description: |
+        学部とその専攻を返す
+      responses:
+        "200":
+          description: 学部とその専攻の一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Faculty"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
   /docs:
     post:
       summary: ファイルとメタデータのアップロード
