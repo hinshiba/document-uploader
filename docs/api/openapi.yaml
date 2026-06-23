@@ -20,6 +20,7 @@ security:
 paths:
   /alive:
     get:
+      tags: [meta]
       summary: 稼働かどうかを判定
       responses:
         "200":
