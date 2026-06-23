@@ -6,6 +6,17 @@ servers:
   - url: http://localhost:3000/api/v1
     description: 開発用
 
+tags:
+  - name: meta
+    description: 稼働確認等のメタ情報
+  - name: faculties
+    description: 学部・専攻のマスタ情報
+  - name: docs
+    description: ファイルの操作
+
+security:
+  - cloudflareAccess: []
+
 paths:
   /alive:
     get:
