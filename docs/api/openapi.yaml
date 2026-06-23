@@ -27,18 +27,16 @@ paths:
             schema:
               type: object
               properties:
-                file:
-                  type: string
-                  format: binary
-                  description: アップロードファイル
+                files:
+                  type: array
+                  minItems: 1
+                  items: { type: string, format: binary }
                 metadata:
                   $ref: "#/components/schemas/DocumentMetadata"
               required:
                 - file
                 - metadata
             encoding:
-              file:
-                contentType: application/octet-stream
               metadata:
                 contentType: application/json
       responses:
@@ -83,8 +81,14 @@ components:
             - 小テスト
             - 中間試験
             - 期末試験
-            - 期末試験再試
-
+            - その他
+        isanswer:
+          type: boolean
+          description: 解答かどうか
+        num:
+          type: integer
+          description: 番目
+          examples: [0, 1, 7]
       required:
         - faculty
         - major
@@ -92,8 +96,6 @@ components:
         - term
         - subject
         - teacher
-
-# 問題点
-# 複数回のテストの場合(小テスト等)
-# 複数ファイル(画像等)
-# 解答のアップロード
+        - examtype
+        - isanswer
+        - num
