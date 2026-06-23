@@ -100,7 +100,77 @@ paths:
                 $ref: "#/components/schemas/Error"
 
 components:
+  securitySchemes:
+    cloudflareAccess:
+      type: apiKey
+      in: header
+      name: Cf-Access-Jwt-Assertion
+      description: |
+        Cloudflare Accessが前段で付与するJWT
+        このJWTからアップロード者を特定できる
+
+  responses:
+    BadRequest:
+      description: リクエストが不正
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Cloudflare Accessによる認証がない，または無効
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
   schemas:
+    Faculty:
+      type: object
+      description: 学部とそれに属する専攻
+      required: [id, name, majors]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 学部のUUID
+        name:
+          type: string
+          description: 学部名
+          examples: [工学部]
+        majors:
+          type: array
+          description: この学部に属する専攻の一覧
+          items:
+            $ref: "#/components/schemas/Major"
+
+    Major:
+      type: object
+      description: 専攻等
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 専攻のUUID
+        name:
+          type: string
+          description: 専攻名
+          examples: [情報工学科]
+
+    ExamType:
+      type: string
+      description: 試験種別
+      enum:
+        - quiz
+        - midterm
+        - final
+        - other
+      x-enum-descriptions:
+        quiz: 小テスト
+        midterm: 中間試験
+        final: 期末試験
+        other: その他
+
     DocumentMetadata:
       type: object
       properties:
