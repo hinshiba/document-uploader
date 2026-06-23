@@ -53,6 +53,17 @@ paths:
     post:
       tags: [docs]
       summary: ファイルとメタデータのアップロード
+      description: |
+        サーバ側で検証すべきこと
+
+        - サイズ: 1ファイルあたり100MBまで
+        - 拡張子: 
+          - 画像(jpg, jpe, jpeg, webp, png)
+          - ドキュメント(doc, docx, pdf)
+          - プレーンテキスト(txt)
+          - マークアップ(md, typ, tex)
+
+        アップロード者はCloudflare Accessの認証情報から記録する
       requestBody:
         required: true
         content:
