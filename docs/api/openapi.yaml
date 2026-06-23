@@ -177,18 +177,21 @@ components:
         faculty:
           type: string
           format: uuid
-          description: 学部名のUUID
+          description: 学部のUUID
         major:
           type: string
           format: uuid
-          description: 専攻等のUUID
+          description: 専攻等のUUID(指定したfacultyに属するmajorのid)
         year:
           type: integer
-          description: 年度
+          description: 西暦
+          minimum: 1949
           examples: [2026]
         term:
           type: integer
           description: 学期
+          minimum: 1
+          maximum: 4
           examples: [2]
         subject:
           type: string
@@ -199,20 +202,15 @@ components:
           description: 教員名
           examples: [岡山 聖彦]
         examtype:
-          type: string
-          description: 試験種別
-          enum:
-            - 小テスト
-            - 中間試験
-            - 期末試験
-            - その他
+          $ref: "#/components/schemas/ExamType"
         isanswer:
           type: boolean
           description: 解答かどうか
         num:
           type: integer
-          description: 番目
-          examples: [0, 1, 7]
+          description: 何番目の試験か
+          minimum: 1
+          examples: [1, 7]
       required:
         - faculty
         - major
