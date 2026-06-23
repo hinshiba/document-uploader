@@ -221,3 +221,14 @@ components:
         - examtype
         - isanswer
         - num
+
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: 形式自由なエラーの概要
+        details:
+          type: string
+          description: 形式自由な追加情報
