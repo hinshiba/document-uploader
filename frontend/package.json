@@ -3,6 +3,7 @@
   "module": "src/scripts/main.ts",
   "devDependencies": {
     "@types/bun": "latest",
+    "@stoplight/prism-cli": "^5.15.11",
     "openapi-typescript": "^7.13.0",
     "typescript": "5"
   },
@@ -11,7 +12,11 @@
     "dev": "bun run gen && bun --hot src/pages/*.html",
     "build": "bun run gen && bun build src/pages/*.html --outdir=out",
     "gen": "bun run gen:api",
-    "gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/scripts/api/types.ts"
+    "gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/scripts/api/types.ts",
+    "mock": "prism mock ../docs/api/openapi.yaml --port 4010"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   },
   "type": "module"
 }
