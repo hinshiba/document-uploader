@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "bun --hot src/pages/*.html",
-    "build": "bun build src/pages/*.html --outdir=out"
+    "build": "bun build src/pages/*.html --outdir=out",
+    "mock": "prism mock ../docs/api/openapi.yaml --port 4010"
   },
   "devDependencies": {
+    "@stoplight/prism-cli": "^5.15.11",
     "@types/bun": "latest"
   },
   "peerDependencies": {
