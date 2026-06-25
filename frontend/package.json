@@ -1,16 +1,17 @@
 {
   "name": "frontend",
   "module": "src/scripts/main.ts",
-  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "openapi-typescript": "^7.13.0",
+    "typescript": "5"
+  },
   "private": true,
   "scripts": {
-    "dev": "bun --hot src/pages/*.html",
-    "build": "bun build src/pages/*.html --outdir=out"
+    "dev": "bun run gen && bun --hot src/pages/*.html",
+    "build": "bun run gen && bun build src/pages/*.html --outdir=out",
+    "gen": "bun run gen:api",
+    "gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/scripts/api/types.ts"
   },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+  "type": "module"
 }
