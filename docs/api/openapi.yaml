@@ -1,0 +1,246 @@
+openapi: 3.1.0
+info:
+  title: 過去問アップローダーAPI
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000/api/v1
+    description: 開発用
+
+tags:
+  - name: meta
+    description: 稼働確認等のメタ情報
+  - name: faculties
+    description: 学部・専攻のマスタ情報
+  - name: docs
+    description: ファイルの操作
+
+security:
+  - cloudflareAccess: []
+
+paths:
+  /alive:
+    get:
+      tags: [meta]
+      security: []
+      summary: 稼働かどうかを判定
+      responses:
+        "200":
+          description: 稼働中である．文字列は指定されない
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: ok
+
+  /faculties:
+    get:
+      tags: [faculties]
+      summary: 学部・専攻一覧の取得
+      description: |
+        学部とその専攻を返す
+      responses:
+        "200":
+          description: 学部とその専攻の一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Faculty"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /docs:
+    post:
+      tags: [docs]
+      summary: ファイルとメタデータのアップロード
+      description: |
+        サーバ側で検証すべきこと
+
+        - サイズ: 1ファイルあたり100MBまで
+        - 許可される形式: 
+          - 画像(jpg, jpe, jpeg, webp, png)
+          - ドキュメント(doc, docx, pdf)
+          - プレーンテキスト(txt)
+          - マークアップ(md, typ, tex)
+
+        アップロード者はCloudflare Accessの認証情報から記録する
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  minItems: 1
+                  items: { type: string, format: binary }
+                metadata:
+                  $ref: "#/components/schemas/DocumentMetadata"
+              required:
+                - files
+                - metadata
+            encoding:
+              metadata:
+                contentType: application/json
+      responses:
+        "201":
+          description: アップロード成功
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "413":
+          description: ファイルサイズが上限を超過
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "415":
+          description: 許可されていないファイル種別
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    cloudflareAccess:
+      type: apiKey
+      in: header
+      name: Cf-Access-Jwt-Assertion
+      description: |
+        Cloudflare Accessが前段で付与するJWT
+        このJWTからアップロード者を特定できる
+
+  responses:
+    BadRequest:
+      description: リクエストが不正
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Cloudflare Accessによる認証がない，または無効
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Faculty:
+      type: object
+      description: 学部とそれに属する専攻
+      required: [id, name, majors]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 学部のUUID
+        name:
+          type: string
+          description: 学部名
+          examples: [工学部]
+        majors:
+          type: array
+          description: この学部に属する専攻の一覧
+          items:
+            $ref: "#/components/schemas/Major"
+
+    Major:
+      type: object
+      description: 専攻等
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 専攻のUUID
+        name:
+          type: string
+          description: 専攻名
+          examples: [情報工学科]
+
+    ExamType:
+      type: string
+      description: 試験種別
+      enum:
+        - quiz
+        - midterm
+        - final
+        - other
+      x-enum-descriptions:
+        quiz: 小テスト
+        midterm: 中間試験
+        final: 期末試験
+        other: その他
+
+    DocumentMetadata:
+      type: object
+      properties:
+        faculty:
+          type: string
+          format: uuid
+          description: 学部のUUID
+        major:
+          type: string
+          format: uuid
+          description: 専攻等のUUID(指定したfacultyに属するmajorのid)
+        year:
+          type: integer
+          description: 西暦
+          minimum: 1949
+          examples: [2026]
+        term:
+          type: integer
+          description: 学期
+          minimum: 1
+          maximum: 4
+          examples: [2]
+        grade:
+          type: integer
+          description: テストが行われる学年
+          minimum: 1
+          maximum: 9
+          examples: [1]
+        subject:
+          type: string
+          description: 科目名
+          examples: [線形代数]
+        teacher:
+          type: string
+          description: 教員名
+          examples: [岡山 聖彦]
+        examtype:
+          $ref: "#/components/schemas/ExamType"
+        isanswer:
+          type: boolean
+          description: 解答かどうか
+        num:
+          type: integer
+          description: 何番目の試験か
+          minimum: 1
+          examples: [1, 7]
+      required:
+        - faculty
+        - major
+        - year
+        - term
+        - grade
+        - subject
+        - teacher
+        - examtype
+        - isanswer
+        - num
+
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: 形式自由なエラーの概要
+        details:
+          type: string
+          description: 形式自由な追加情報
