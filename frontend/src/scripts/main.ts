@@ -1,3 +1,5 @@
+import type { components } from "./api/types";
+
 // 実バックエンドテスト
 // "http://localhost:3000/api/v1"
 const API_BASE = "http://127.0.0.1:4010";
@@ -6,9 +8,7 @@ const API_BASE = "http://127.0.0.1:4010";
 // モックは検証しないので何でもよい
 const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
 
-// 問題なければ，前のマージでapiの型は自動生成されているはずなのでそちらに変えてください
-type Major = { id: string; name: string };
-type Faculty = { id: string; name: string; majors: Major[] };
+type Faculty = components["schemas"]["Faculty"];
 
 async function checkAlive(): Promise<string> {
     const res = await fetch(`${API_BASE}/alive`);
