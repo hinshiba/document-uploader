@@ -47,7 +47,7 @@ impl<T> std::hash::Hash for Id<T> {
     }
 }
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 #[repr(i64)]
 pub enum ExamType {
     Quiz = 0,
@@ -167,7 +167,7 @@ impl Teacher {
     }
 }
 
-#[derive(Debug, Hash, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct DocumentMetadata {
     faculty_id: Id<Faculty>,
     major_id: Id<Major>,
@@ -246,7 +246,7 @@ impl std::fmt::Display for UnsupportedFileType {
 }
 impl std::error::Error for UnsupportedFileType {}
 
-#[derive(Debug, Hash, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum DocumentFileType {
     Jpeg,
     Webp,
