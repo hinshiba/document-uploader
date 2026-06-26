@@ -272,7 +272,7 @@ impl std::str::FromStr for DocumentFileType {
             "txt" => Ok(Txt),
             "md" => Ok(Markdown),
             "typ" => Ok(Typst),
-            "Tex" => Ok(Tex),
+            "tex" => Ok(Tex),
             _ => Err(UnsupportedFileType(s.to_owned())),
         }
     }
