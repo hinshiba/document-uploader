@@ -191,32 +191,118 @@ impl Teacher {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct RangeValidationError {
+    pub actual: i64,
+    pub expect_upper: Option<i64>,
+    pub expect_lower: Option<i64>
+}
+
+impl std::fmt::Display for RangeValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let &Self {
+            actual,
+            expect_upper,
+            expect_lower
+        } = self;
+
+        let expect_upper = expect_upper.map_or("None".into(), |u| u.to_string());
+        let expect_lower = expect_lower.map_or("None".into(), |l| l.to_string());
+
+        write!(f, "range validation error: expect: ({}, {}), actual: {}", expect_lower, expect_upper, actual)
+    }
+}
+impl std::error::Error for RangeValidationError {}
+
+#[inline(always)]
+fn construct_with_range_validation<T>(ctor: impl FnOnce(i64) -> T, value: i64, range: (Option<i64>, Option<i64>)) -> Result<T, RangeValidationError> {
+    if range.0.map_or(true, |l| l <= value)
+        && range.1.map_or(true, |u| value <= u)
+    {
+        Ok(ctor(value))
+    } else {
+        Err(RangeValidationError { actual: value, expect_upper: range.0, expect_lower: range.1 })
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct DocumentMetadataYear(i64);
+
+impl DocumentMetadataYear {
+    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
+        construct_with_range_validation(Self, year, (Some(1949), None))
+    }
+
+    pub fn inner(&self) -> i64 {
+        self.0
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct DocumentMetadataTerm(i64);
+
+impl DocumentMetadataTerm {
+    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
+        construct_with_range_validation(Self, year, (Some(1), Some(4)))
+    }
+
+    pub fn inner(&self) -> i64 {
+        self.0
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct DocumentMetadataGrade(i64);
+
+impl DocumentMetadataGrade {
+    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
+        construct_with_range_validation(Self, year, (Some(1), Some(9)))
+    }
+
+    pub fn inner(&self) -> i64 {
+        self.0
+    }
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct DocumentMetadataNum(i64);
+
+impl DocumentMetadataNum {
+    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
+        construct_with_range_validation(Self, year, (Some(1), None))
+    }
+
+    pub fn inner(&self) -> i64 {
+        self.0
+    }
+}
+
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct DocumentMetadata {
     faculty_id: Id<Faculty>,
     major_id: Id<Major>,
-    year: i64,
-    term: i64,
-    grade: i64,
+    year: DocumentMetadataYear,
+    term: DocumentMetadataTerm,
+    grade: DocumentMetadataGrade,
     subject_id: Id<Subject>,
     teacher_id: Id<Teacher>,
     exam_type: ExamType,
     is_answer: bool,
-    num: i64,
+    num: DocumentMetadataNum,
 }
 
 impl DocumentMetadata {
     pub fn new(
         faculty_id: Id<Faculty>,
         major_id: Id<Major>,
-        year: i64,
-        term: i64,
-        grade: i64,
+        year: DocumentMetadataYear,
+        term: DocumentMetadataTerm,
+        grade: DocumentMetadataGrade,
         subject_id: Id<Subject>,
         teacher_id: Id<Teacher>,
         exam_type: ExamType,
         is_answer: bool,
-        num: i64,
+        num: DocumentMetadataNum,
     ) -> Self {
         Self {
             faculty_id,
@@ -237,13 +323,13 @@ impl DocumentMetadata {
     pub fn major_id(&self) -> &Id<Major> {
         &self.major_id
     }
-    pub fn year(&self) -> &i64 {
+    pub fn year(&self) -> &DocumentMetadataYear {
         &self.year
     }
-    pub fn term(&self) -> &i64 {
+    pub fn term(&self) -> &DocumentMetadataTerm {
         &self.term
     }
-    pub fn grade(&self) -> &i64 {
+    pub fn grade(&self) -> &DocumentMetadataGrade {
         &self.grade
     }
     pub fn subject_id(&self) -> &Id<Subject> {
@@ -258,7 +344,7 @@ impl DocumentMetadata {
     pub fn is_answer(&self) -> &bool {
         &self.is_answer
     }
-    pub fn num(&self) -> &i64 {
+    pub fn num(&self) -> &DocumentMetadataNum {
         &self.num
     }
 }
