@@ -195,7 +195,7 @@ impl Teacher {
 pub struct RangeValidationError {
     pub actual: i64,
     pub expect_upper: Option<i64>,
-    pub expect_lower: Option<i64>
+    pub expect_lower: Option<i64>,
 }
 
 impl std::fmt::Display for RangeValidationError {
