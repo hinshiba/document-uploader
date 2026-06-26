@@ -234,6 +234,9 @@ impl DocumentMetadata {
     pub fn faculty_id(&self) -> &Id<Faculty> {
         &self.faculty_id
     }
+    pub fn major_id(&self) -> &Id<Major> {
+        &self.major_id
+    }
     pub fn year(&self) -> &i64 {
         &self.year
     }
