@@ -293,6 +293,8 @@ impl std::str::FromStr for DocumentFileType {
         use DocumentFileType::*;
         match s {
             "jpg" | "jpe" | "jpeg" => Ok(Jpeg),
+            "webp" => Ok(Webp),
+            "png" => Ok(Png),
             "doc" => Ok(Doc),
             "docx" => Ok(Docx),
             "pdf" => Ok(Pdf),
