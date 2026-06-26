@@ -47,7 +47,7 @@ impl<T> std::hash::Hash for Id<T> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ParseExamTypeError;
 
 impl std::fmt::Display for ParseExamTypeError {
@@ -260,7 +260,7 @@ impl DocumentMetadata {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct UnsupportedFileType(String);
 
 impl std::fmt::Display for UnsupportedFileType {
