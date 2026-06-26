@@ -67,6 +67,38 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
+                        /**
+                         * @example [
+                         *       {
+                         *         "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                         *         "name": "工学部",
+                         *         "majors": [
+                         *           {
+                         *             "id": "550e8400-e29b-41d4-a716-446655440000",
+                         *             "name": "情電数理系/情報工学コース"
+                         *           },
+                         *           {
+                         *             "id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+                         *             "name": "情電数理系/ネットワーク工学コース"
+                         *           }
+                         *         ]
+                         *       },
+                         *       {
+                         *         "id": "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+                         *         "name": "理学部",
+                         *         "majors": [
+                         *           {
+                         *             "id": "6ba7b813-9dad-11d1-80b4-00c04fd430c8",
+                         *             "name": "数学科"
+                         *           },
+                         *           {
+                         *             "id": "6ba7b814-9dad-11d1-80b4-00c04fd430c8",
+                         *             "name": "物理学科"
+                         *           }
+                         *         ]
+                         *       }
+                         *     ]
+                         */
                         "application/json": components["schemas"]["Faculty"][];
                     };
                 };
@@ -134,6 +166,12 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
+                        /**
+                         * @example {
+                         *       "message": "file size exceeds the limit of 100MB per file",
+                         *       "details": "uploaded file size: {}MB. must <= 100MB"
+                         *     }
+                         */
                         "application/json": components["schemas"]["Error"];
                     };
                 };
@@ -143,6 +181,12 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
+                        /**
+                         * @example {
+                         *       "message": "allowed: jpg, jpeg, jpe, webp, png, doc, docx, pdf, txt, md, typ, tex",
+                         *       "details": "uploaded type: {}."
+                         *     }
+                         */
                         "application/json": components["schemas"]["Error"];
                     };
                 };
@@ -158,7 +202,23 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description 学部とそれに属する専攻 */
+        /**
+         * @description 学部とそれに属する専攻
+         * @example {
+         *       "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+         *       "name": "工学部",
+         *       "majors": [
+         *         {
+         *           "id": "550e8400-e29b-41d4-a716-446655440000",
+         *           "name": "情電数理系/情報工学コース"
+         *         },
+         *         {
+         *           "id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+         *           "name": "情電数理系/ネットワーク工学コース"
+         *         }
+         *       ]
+         *     }
+         */
         Faculty: {
             /**
              * Format: uuid
@@ -173,7 +233,13 @@ export interface components {
             /** @description この学部に属する専攻の一覧 */
             majors: components["schemas"]["Major"][];
         };
-        /** @description 専攻等 */
+        /**
+         * @description 専攻等
+         * @example {
+         *       "id": "550e8400-e29b-41d4-a716-446655440000",
+         *       "name": "情電数理系/情報工学コース"
+         *     }
+         */
         Major: {
             /**
              * Format: uuid
@@ -182,7 +248,7 @@ export interface components {
             id: string;
             /**
              * @description 専攻名
-             * @example 情報工学科
+             * @example 情電数理系/情報工学コース
              */
             name: string;
         };
@@ -191,6 +257,20 @@ export interface components {
          * @enum {string}
          */
         ExamType: "quiz" | "midterm" | "final" | "other";
+        /**
+         * @example {
+         *       "faculty": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+         *       "major": "550e8400-e29b-41d4-a716-446655440000",
+         *       "year": 2025,
+         *       "term": 2,
+         *       "grade": 2,
+         *       "subject": "線形代数",
+         *       "teacher": "岡山 聖彦",
+         *       "examtype": "final",
+         *       "isanswer": false,
+         *       "num": 1
+         *     }
+         */
         DocumentMetadata: {
             /**
              * Format: uuid
@@ -220,6 +300,7 @@ export interface components {
             /**
              * @description 科目名
              * @example 線形代数
+             * @example アルゴリズムと計算量
              */
             subject: string;
             /**
@@ -237,6 +318,12 @@ export interface components {
              */
             num: number;
         };
+        /**
+         * @example {
+         *       "message": "unexpected error occurred",
+         *       "details": "please try again later"
+         *     }
+         */
         Error: {
             /** @description 形式自由なエラーの概要 */
             message: string;
@@ -251,6 +338,12 @@ export interface components {
                 [name: string]: unknown;
             };
             content: {
+                /**
+                 * @example {
+                 *       "message": "missing required field",
+                 *       "details": "field 'metadata.faculty' is required"
+                 *     }
+                 */
                 "application/json": components["schemas"]["Error"];
             };
         };
@@ -260,6 +353,11 @@ export interface components {
                 [name: string]: unknown;
             };
             content: {
+                /**
+                 * @example {
+                 *       "message": "missing or invalid Cf-Access-Jwt-Assertion"
+                 *     }
+                 */
                 "application/json": components["schemas"]["Error"];
             };
         };
