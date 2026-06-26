@@ -47,6 +47,16 @@ impl<T> std::hash::Hash for Id<T> {
     }
 }
 
+#[derive(Debug)]
+pub struct ParseExamTypeError;
+
+impl std::fmt::Display for ParseExamTypeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "invalid examtype")
+    }
+}
+impl std::error::Error for ParseExamTypeError {}
+
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 #[repr(i64)]
 pub enum ExamType {
@@ -68,6 +78,20 @@ impl ExamType {
     }
     pub fn to_int(self) -> i64 {
         self as i64
+    }
+}
+
+impl std::str::FromStr for ExamType {
+    type Err = ParseExamTypeError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        use ExamType::*;
+        match s {
+            "quiz" => Ok(Quiz),
+            "midterm" => Ok(MidTerm),
+            "final" | "finalterm" => Ok(FinalTerm),
+            "other" => Ok(Other),
+            _ => Err(ParseExamTypeError)
+        }
     }
 }
 
