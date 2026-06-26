@@ -90,7 +90,7 @@ impl std::str::FromStr for ExamType {
             "midterm" => Ok(MidTerm),
             "final" | "finalterm" => Ok(FinalTerm),
             "other" => Ok(Other),
-            _ => Err(ParseExamTypeError)
+            _ => Err(ParseExamTypeError),
         }
     }
 }
