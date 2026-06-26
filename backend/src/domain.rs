@@ -107,7 +107,7 @@ impl Faculty {
         Self {
             id,
             name,
-            majors: majors,
+            majors,
         }
     }
     pub fn id(&self) -> &Id<Faculty> {
