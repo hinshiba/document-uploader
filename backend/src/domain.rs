@@ -221,7 +221,7 @@ fn construct_with_range_validation<T>(ctor: impl FnOnce(i64) -> T, value: i64, r
     {
         Ok(ctor(value))
     } else {
-        Err(RangeValidationError { actual: value, expect_upper: range.0, expect_lower: range.1 })
+        Err(RangeValidationError { actual: value, expect_upper: range.1, expect_lower: range.0 })
     }
 }
 
