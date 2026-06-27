@@ -29,3 +29,47 @@ checkAlive()
 fetchFaculties()
     .then((faculties) => console.info("/faculties", faculties))
     .catch((err) => console.error("/faculties 失敗", err));
+
+
+
+
+
+// const homebtn = document.querySelector(".homebtn");
+// const changescreens = document.querySelector(".addbtn") as HTMLElement;
+// const behindbtn = document.querySelector(".homebtn");
+
+
+// homebtn?.addEventListener("click", () => {
+//     homebtn?.classList.add("behind");
+//     changescreens?.classList.add("ahead");
+// })
+
+// for (const screen of changescreens) {
+//     screen.addEventListener("click", () => {
+//         screen.classList.add("afterchange");
+//     }
+// }
+
+
+
+const file = document.getElementById("file") as HTMLInputElement;
+const uploadbtn = document.getElementById("uploadbtn")
+
+// console.log(file.files);
+uploadbtn?.addEventListener("click", async () => {
+    const filedata = file.files?.[0];
+
+    if (!filedata) return;
+
+    const formData = new FormData();
+    formData.append("file", filedata);
+    // formData.append("metaData",JSON.stringify(metadata))
+
+    await fetch("../../../docs", {
+        method: "POST",
+        body: formData
+    });
+});
+
+
+

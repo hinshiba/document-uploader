@@ -1,3 +1,7 @@
 :root {
   font-family: system-ui, sans-serif;
 }
+
+.afterchange {
+  display: none;
+}
