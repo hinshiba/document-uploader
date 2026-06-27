@@ -206,6 +206,49 @@ components:
         id: "550e8400-e29b-41d4-a716-446655440000"
         name: "情電数理系/情報工学コース"
 
+    Subject:
+      type: object
+      description: |
+        科目が持つべき情報
+        同名でも faculty / major / grade / term が異なれば別科目
+      required: [id, name, faculty, major, grade, term]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 科目のUUID
+        name:
+          type: string
+          description: 科目名
+          examples: [線形代数, アルゴリズムと計算量]
+        faculty:
+          type: string
+          format: uuid
+          description: 学部のUUID
+        major:
+          type: string
+          format: uuid
+          description: 専攻のUUID
+        grade:
+          type: integer
+          description: テストが行われる学年
+          minimum: 1
+          maximum: 9
+          examples: [1]
+        term:
+          type: integer
+          description: 学期
+          minimum: 1
+          maximum: 4
+          examples: [1]
+      example:
+        id: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
+        name: "線形代数"
+        faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        major: "550e8400-e29b-41d4-a716-446655440000"
+        grade: 1
+        term: 1
+
     ExamType:
       type: string
       description: 試験種別
