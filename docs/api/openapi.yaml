@@ -250,8 +250,8 @@ components:
           examples: [1]
         subject:
           type: string
-          description: 科目名
-          examples: [線形代数, アルゴリズムと計算量]
+          format: uuid
+          description: 科目のUUID(指定したfaculty/major/grade/termに属するsubjectのid)
         teacher:
           type: string
           description: 教員名
