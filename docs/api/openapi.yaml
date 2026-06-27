@@ -269,10 +269,10 @@ components:
       required:
         - faculty
         - major
-        - year
-        - term
         - grade
+        - term
         - subject
+        - year
         - teacher
         - examtype
         - isanswer
