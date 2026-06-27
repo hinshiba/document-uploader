@@ -1,0 +1,58 @@
+post:
+  tags: [docs]
+  summary: ファイルとメタデータのアップロード
+  description: |
+    サーバ側で検証すべきこと
+
+    - サイズ: 1ファイルあたり100MBまで
+    - 許可される形式:
+      - 画像(jpg, jpe, jpeg, webp, png)
+      - ドキュメント(doc, docx, pdf)
+      - プレーンテキスト(txt)
+      - マークアップ(md, typ, tex)
+
+    アップロード者はCloudflare Accessの認証情報から記録する
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            files:
+              type: array
+              minItems: 1
+              items: { type: string, format: binary }
+            metadata:
+              $ref: "../openapi.yaml#/components/schemas/DocumentMetadata"
+          required:
+            - files
+            - metadata
+        encoding:
+          metadata:
+            contentType: application/json
+  responses:
+    "201":
+      description: アップロード成功
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "413":
+      description: ファイルサイズが上限を超過
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+          example:
+            message: "file size exceeds the limit of 100MB per file"
+            details: "uploaded file size: {}MB. must <= 100MB"
+    "415":
+      description: 許可されていないファイル種別
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Error"
+          example:
+            message: "allowed: jpg, jpeg, jpe, webp, png, doc, docx, pdf, txt, md, typ, tex"
+            details: "uploaded type: {}."

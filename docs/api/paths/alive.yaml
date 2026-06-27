@@ -1,0 +1,12 @@
+get:
+  tags: [meta]
+  security: []
+  summary: 稼働かどうかを判定
+  responses:
+    "200":
+      description: 稼働中である．文字列は指定されない
+      content:
+        text/plain:
+          schema:
+            type: string
+          example: ok

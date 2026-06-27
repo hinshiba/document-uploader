@@ -1,0 +1,31 @@
+get:
+  tags: [faculties]
+  summary: 学部・専攻一覧の取得
+  description: |
+    学部とその専攻を返す
+  responses:
+    "200":
+      description: 学部とその専攻の一覧
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/Faculty"
+          example:
+            - id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+              name: "工学部"
+              majors:
+                - id: "550e8400-e29b-41d4-a716-446655440000"
+                  name: "情電数理系/情報工学コース"
+                - id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+                  name: "情電数理系/ネットワーク工学コース"
+            - id: "6ba7b812-9dad-11d1-80b4-00c04fd430c8"
+              name: "理学部"
+              majors:
+                - id: "6ba7b813-9dad-11d1-80b4-00c04fd430c8"
+                  name: "数学科"
+                - id: "6ba7b814-9dad-11d1-80b4-00c04fd430c8"
+                  name: "物理学科"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
