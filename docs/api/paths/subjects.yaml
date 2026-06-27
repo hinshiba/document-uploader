@@ -1,0 +1,62 @@
+get:
+  tags: [subjects]
+  summary: 科目候補の取得
+  description: |
+    指定した分類で絞り込んだ科目の候補を返す
+  parameters:
+    - name: faculty
+      in: query
+      required: true
+      description: 学部のUUID
+      schema:
+        type: string
+        format: uuid
+    - name: major
+      in: query
+      required: false
+      description: 専攻のUUID(指定したfacultyに属するmajorのid)
+      schema:
+        type: string
+        format: uuid
+    - name: grade
+      in: query
+      required: false
+      description: テストが行われる学年
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 9
+    - name: term
+      in: query
+      required: false
+      description: 学期
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 4
+  responses:
+    "200":
+      description: 条件に合致する科目の一覧
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/Subject"
+          example:
+            - id: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
+              name: "線形代数"
+              faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+              major: "550e8400-e29b-41d4-a716-446655440000"
+              grade: 1
+              term: 1
+            - id: "a1b2c3d4-e5f6-4a5b-9c8d-7e6f5a4b3c2d"
+              name: "アルゴリズムと計算量"
+              faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+              major: "550e8400-e29b-41d4-a716-446655440000"
+              grade: 2
+              term: 2
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
