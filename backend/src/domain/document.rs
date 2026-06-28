@@ -1,5 +1,9 @@
 use super::{
     Id,
+    Grade,
+    Term,
+    Year,
+    Num,
     faculty::Faculty,
     major::Major,
     subject::Subject,
@@ -90,95 +94,32 @@ impl std::str::FromStr for ExamType {
     }
 }
 
-#[inline(always)]
-fn construct_with_range_validation<T>(ctor: impl FnOnce(i64) -> T, value: i64, range: (Option<i64>, Option<i64>)) -> Result<T, RangeValidationError> {
-    if range.0.map_or(true, |l| l <= value)
-        && range.1.map_or(true, |u| value <= u)
-    {
-        Ok(ctor(value))
-    } else {
-        Err(RangeValidationError { actual: value, expect_upper: range.1, expect_lower: range.0 })
-    }
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct DocumentMetadataYear(i64);
-
-impl DocumentMetadataYear {
-    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
-        construct_with_range_validation(Self, year, (Some(1949), None))
-    }
-
-    pub fn inner(&self) -> i64 {
-        self.0
-    }
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct DocumentMetadataTerm(i64);
-
-impl DocumentMetadataTerm {
-    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
-        construct_with_range_validation(Self, year, (Some(1), Some(4)))
-    }
-
-    pub fn inner(&self) -> i64 {
-        self.0
-    }
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct DocumentMetadataGrade(i64);
-
-impl DocumentMetadataGrade {
-    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
-        construct_with_range_validation(Self, year, (Some(1), Some(9)))
-    }
-
-    pub fn inner(&self) -> i64 {
-        self.0
-    }
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct DocumentMetadataNum(i64);
-
-impl DocumentMetadataNum {
-    pub fn new(year: i64) -> Result<Self, RangeValidationError> {
-        construct_with_range_validation(Self, year, (Some(1), None))
-    }
-
-    pub fn inner(&self) -> i64 {
-        self.0
-    }
-}
-
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct DocumentMetadata {
     faculty_id: Id<Faculty>,
     major_id: Id<Major>,
-    year: DocumentMetadataYear,
-    term: DocumentMetadataTerm,
-    grade: DocumentMetadataGrade,
+    year: Year<DocumentMetadata>,
+    term: Term<DocumentMetadata>,
+    grade: Grade<DocumentMetadata>,
     subject_id: Id<Subject>,
     teacher_id: Id<Teacher>,
     exam_type: ExamType,
     is_answer: bool,
-    num: DocumentMetadataNum,
+    num: Num<DocumentMetadata>,
 }
 
 impl DocumentMetadata {
     pub fn new(
         faculty_id: Id<Faculty>,
         major_id: Id<Major>,
-        year: DocumentMetadataYear,
-        term: DocumentMetadataTerm,
-        grade: DocumentMetadataGrade,
+        year: Year<DocumentMetadata>,
+        term: Term<DocumentMetadata>,
+        grade: Grade<DocumentMetadata>,
         subject_id: Id<Subject>,
         teacher_id: Id<Teacher>,
         exam_type: ExamType,
         is_answer: bool,
-        num: DocumentMetadataNum,
+        num: Num<DocumentMetadata>,
     ) -> Self {
         Self {
             faculty_id,
@@ -199,13 +140,13 @@ impl DocumentMetadata {
     pub fn major_id(&self) -> &Id<Major> {
         &self.major_id
     }
-    pub fn year(&self) -> &DocumentMetadataYear {
+    pub fn year(&self) -> &Year<DocumentMetadata> {
         &self.year
     }
-    pub fn term(&self) -> &DocumentMetadataTerm {
+    pub fn term(&self) -> &Term<DocumentMetadata> {
         &self.term
     }
-    pub fn grade(&self) -> &DocumentMetadataGrade {
+    pub fn grade(&self) -> &Grade<DocumentMetadata> {
         &self.grade
     }
     pub fn subject_id(&self) -> &Id<Subject> {
@@ -220,7 +161,7 @@ impl DocumentMetadata {
     pub fn is_answer(&self) -> &bool {
         &self.is_answer
     }
-    pub fn num(&self) -> &DocumentMetadataNum {
+    pub fn num(&self) -> &Num<DocumentMetadata> {
         &self.num
     }
 }
