@@ -11,24 +11,31 @@
 
 	<body>
 		<header>
+
+			過去問アップローダー!!
 		</header>
 		<main id="main">
-			<!-- ファイルタグを作っている -->
-			<input type="file" id="file" multiple>
-			<label for="file">ファイルを選択してください</label>
+			<form>
+				ここのBoxからアップロードしたい教科を選んでください．
 
-			<div id="drop-area">
+				<select id="subject"
+				        name="subject"
+				></select>
+				<input type="file" id="file" multiple>
+				<label for="file">ファイルを選択してください</label>
 
-				<p id="message">ここにファイルをドラッグしてください</p>
-				<ul id="makelist"></ul>
-			</div>
-			<button id="uploadbtn">送信</button>
-			<p id="thank"></p>
+				<div id="drop-area">
+
+					<p id="message">ここにファイルをドラッグしてください</p>
+					<ul id="makelist"></ul>
+				</div>
+				<button id="uploadbtn">送信</button>
+				<p id="thank"></p>
+			</form>
 		</main>
 		<footer>
-			フッター
 		</footer>
-		<script src=../scripts/main.ts></script>
+		<script type="module" src=../scripts/form.ts></script>
 		<script src=../scripts/upload.ts></script>
 	</body>
 </html>
