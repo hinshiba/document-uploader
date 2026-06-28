@@ -32,30 +32,6 @@ impl std::fmt::Display for ParseExamTypeError {
 
 impl std::error::Error for ParseExamTypeError {}
 
-#[derive(Clone, Debug)]
-pub struct RangeValidationError {
-    pub actual: i64,
-    pub expect_upper: Option<i64>,
-    pub expect_lower: Option<i64>,
-}
-
-impl std::fmt::Display for RangeValidationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let &Self {
-            actual,
-            expect_upper,
-            expect_lower
-        } = self;
-
-        let expect_upper = expect_upper.map_or("None".into(), |u| u.to_string());
-        let expect_lower = expect_lower.map_or("None".into(), |l| l.to_string());
-
-        write!(f, "range validation error: expect: ({}, {}), actual: {}", expect_lower, expect_upper, actual)
-    }
-}
-
-impl std::error::Error for RangeValidationError {}
-
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 #[repr(i64)]
 pub enum ExamType {
