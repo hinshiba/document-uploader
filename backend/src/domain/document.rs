@@ -1,51 +1,21 @@
-pub struct Id<T> {
-    id: uuid::Uuid,
-    _phantom: std::marker::PhantomData<fn() -> T>,
-}
+use super::{
+    Id,
+    faculty::Faculty,
+    major::Major,
+    subject::Subject,
+    teacher::Teacher,
+};
 
-impl<T> Id<T> {
-    pub fn new(id: uuid::Uuid) -> Self {
-        Self {
-            id,
-            _phantom: std::marker::PhantomData,
-        }
-    }
-    pub fn id(&self) -> &uuid::Uuid {
-        &self.id
-    }
-}
+#[derive(Clone, Debug)]
+pub struct UnsupportedFileType(String);
 
-impl<T> std::fmt::Debug for Id<T> {
+impl std::fmt::Display for UnsupportedFileType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.id)
+        write!(f, "file type `{}` is unsupported", self.0)
     }
 }
 
-impl<T> Clone for Id<T> {
-    fn clone(&self) -> Self {
-        Self {
-            id: self.id.clone(),
-            _phantom: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<T> Copy for Id<T> {}
-
-impl<T> PartialEq for Id<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.id.eq(other.id())
-    }
-}
-
-impl<T> Eq for Id<T> {}
-
-impl<T> std::hash::Hash for Id<T> {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
-        self._phantom.hash(state);
-    }
-}
+impl std::error::Error for UnsupportedFileType {}
 
 #[derive(Clone, Debug)]
 pub struct ParseExamTypeError;
@@ -55,7 +25,32 @@ impl std::fmt::Display for ParseExamTypeError {
         write!(f, "invalid examtype")
     }
 }
+
 impl std::error::Error for ParseExamTypeError {}
+
+#[derive(Clone, Debug)]
+pub struct RangeValidationError {
+    pub actual: i64,
+    pub expect_upper: Option<i64>,
+    pub expect_lower: Option<i64>,
+}
+
+impl std::fmt::Display for RangeValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let &Self {
+            actual,
+            expect_upper,
+            expect_lower
+        } = self;
+
+        let expect_upper = expect_upper.map_or("None".into(), |u| u.to_string());
+        let expect_lower = expect_lower.map_or("None".into(), |l| l.to_string());
+
+        write!(f, "range validation error: expect: ({}, {}), actual: {}", expect_lower, expect_upper, actual)
+    }
+}
+
+impl std::error::Error for RangeValidationError {}
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 #[repr(i64)]
@@ -94,125 +89,6 @@ impl std::str::FromStr for ExamType {
         }
     }
 }
-
-#[derive(Debug, Hash)]
-pub struct Faculty {
-    id: Id<Faculty>,
-    name: String,
-    majors: Vec<Major>,
-}
-
-impl Faculty {
-    pub fn new(id: Id<Faculty>, name: String, majors: Vec<Major>) -> Self {
-        Self {
-            id,
-            name,
-            majors,
-        }
-    }
-    pub fn id(&self) -> &Id<Faculty> {
-        &self.id
-    }
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-    pub fn majors(&self) -> &[Major] {
-        &self.majors
-    }
-}
-
-#[derive(Debug, Hash)]
-pub struct Major {
-    id: Id<Major>,
-    name: String,
-}
-
-impl Major {
-    pub fn new(id: Id<Major>, name: String) -> Self {
-        Self { id, name }
-    }
-    pub fn id(&self) -> &Id<Major> {
-        &self.id
-    }
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-}
-
-#[derive(Debug, Hash)]
-pub struct Subject {
-    id: Id<Subject>,
-    name: String,
-    faculty_id: Option<Id<Faculty>>,
-}
-
-impl Subject {
-    pub fn new(id: Id<Subject>, name: String, faculty_id: Option<Id<Faculty>>) -> Self {
-        Self {
-            id,
-            name,
-            faculty_id,
-        }
-    }
-    pub fn id(&self) -> &Id<Subject> {
-        &self.id
-    }
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-    pub fn faculty_id(&self) -> Option<&Id<Faculty>> {
-        self.faculty_id.as_ref()
-    }
-}
-
-#[derive(Debug, Hash)]
-pub struct Teacher {
-    id: Id<Teacher>,
-    name: String,
-    belong_faculty_id: Option<Id<Faculty>>,
-}
-
-impl Teacher {
-    pub fn new(id: Id<Teacher>, name: String, belong_faculty_id: Option<Id<Faculty>>) -> Self {
-        Self {
-            id,
-            name,
-            belong_faculty_id,
-        }
-    }
-    pub fn id(&self) -> &Id<Teacher> {
-        &self.id
-    }
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-    pub fn belong_faculty_id(&self) -> Option<&Id<Faculty>> {
-        self.belong_faculty_id.as_ref()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct RangeValidationError {
-    pub actual: i64,
-    pub expect_upper: Option<i64>,
-    pub expect_lower: Option<i64>,
-}
-
-impl std::fmt::Display for RangeValidationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let &Self {
-            actual,
-            expect_upper,
-            expect_lower
-        } = self;
-
-        let expect_upper = expect_upper.map_or("None".into(), |u| u.to_string());
-        let expect_lower = expect_lower.map_or("None".into(), |l| l.to_string());
-
-        write!(f, "range validation error: expect: ({}, {}), actual: {}", expect_lower, expect_upper, actual)
-    }
-}
-impl std::error::Error for RangeValidationError {}
 
 #[inline(always)]
 fn construct_with_range_validation<T>(ctor: impl FnOnce(i64) -> T, value: i64, range: (Option<i64>, Option<i64>)) -> Result<T, RangeValidationError> {
@@ -348,16 +224,6 @@ impl DocumentMetadata {
         &self.num
     }
 }
-
-#[derive(Clone, Debug)]
-pub struct UnsupportedFileType(String);
-
-impl std::fmt::Display for UnsupportedFileType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "file type `{}` is unsupported", self.0)
-    }
-}
-impl std::error::Error for UnsupportedFileType {}
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub enum DocumentFileType {
