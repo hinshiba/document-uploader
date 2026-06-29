@@ -18,3 +18,21 @@ uploadbtn?.addEventListener("click", async () => {
         body: formData
     });
 });
+
+
+
+// const homebtn = document.querySelector(".homebtn");
+// const changescreens = document.querySelector(".addbtn") as HTMLElement;
+// const behindbtn = document.querySelector(".homebtn");
+
+
+// homebtn?.addEventListener("click", () => {
+//     homebtn?.classList.add("behind");
+//     changescreens?.classList.add("ahead");
+// })
+
+// for (const screen of changescreens) {
+//     screen.addEventListener("click", () => {
+//         screen.classList.add("afterchange");
+//     }
+// }

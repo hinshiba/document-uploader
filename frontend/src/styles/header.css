@@ -4,15 +4,15 @@ body>header nav ul {
     justify-content: space-between;
     padding: 0 20px;
     list-style: none;
-    font-size: 25px;
+    font-size: 27px;
 }
 
 body>header nav ul li {
-    border-left: solid 1px rgba(227, 10, 162, 0.1);
+    border-left: solid 8px rgb(27, 27, 27);
     padding: 0;
     transition: 0.3s;
     background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.4)), #0b73bb;
-    flex: 1;
+    flex: 2;
 }
 
 body>header nav ul li:hover {
@@ -41,3 +41,37 @@ body>header nav.target ul li a span {
     text-align: center;
     width: 100%;
 }
+
+
+
+
+
+
+
+
+body>header form {
+    margin: 0 10px 10px 10px;
+
+    width: 50rem;
+}
+
+body>header.fix form {
+    position: fixed;
+    top: 4px;
+    height: 30px;
+}
+
+body>header form.search-active {
+    width: calc(100% - 50px);
+}
+
+body>header input.search {
+    width: 90%;
+    height: 30px;
+    box-sizing: border-box;
+    border: solid 1px #f0f0f0;
+}
+
+/* body>header input {
+    width: calc(100% - 45px);
+} */

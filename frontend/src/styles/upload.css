@@ -8,7 +8,7 @@ body main section {
     align-items: center;
 }
 
-#drop-area.dragover {
+body main section.dragover {
     background-color: #eef;
     border-color: blue;
 }
