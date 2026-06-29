@@ -35,8 +35,6 @@ impl<T> Clone for Id<T> {
     }
 }
 
-impl<T> Copy for Id<T> {}
-
 impl<T> PartialEq for Id<T> {
     fn eq(&self, other: &Self) -> bool {
         self.id.eq(other.id())
