@@ -1,3 +1,5 @@
+mod domain;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     init_tracing_subscriber();
