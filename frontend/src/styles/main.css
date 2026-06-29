@@ -1,18 +1,3 @@
 :root {
   font-family: system-ui, sans-serif;
 }
-
-header {
-  background: #5ac30f;
-
-  /* 固定表示のため */
-  position: fixed;
-  width: 100%;
-  z-index: 1000;
-
-}
-
-header ul li {
-  display: flex;
-  margin: 10px;
-}

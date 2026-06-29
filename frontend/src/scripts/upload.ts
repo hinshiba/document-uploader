@@ -13,26 +13,35 @@ uploadbtn?.addEventListener("click", async () => {
     }
     // formData.append("metaData",JSON.stringify(metadata))すなくんに任せる場所
 
-    await fetch("../../../docs", {
+    await fetch("/docs", {
         method: "POST",
         body: formData
     });
 });
 
-// const dropArea = document.getElementById("drop-area") as HTMLDivElement;
+const dropArea = document.getElementById("drop-area") as HTMLDivElement;
 
-// dropArea.addEventListener("dragover", (event) => {
-//     event.preventDefault();
-// });
 
-// dropArea.addEventListener("drop", (event) => {
-//     event.preventDefault();
 
-//     const files = event.dataTransfer?.files;
+dropArea.addEventListener("dragover", (event) => {
+    event.preventDefault();
+});
 
-//     if (!files) return;
 
-//     for (const file of files) {
-//         console.log(file.name);
-//     }
-// });
+
+dropArea.addEventListener("drop", (event) => {
+    event.preventDefault();
+
+    const files = event.dataTransfer?.files;
+
+    if (!files) return;
+
+    // let text = "<ul>";
+    for (const file of files) {
+        console.log(file.name);
+
+        message.style.display = "none";
+        makelist.innerHTML += `<li>${file.name}</li>`;
+    }
+});
+
