@@ -2,7 +2,6 @@ pub mod document;
 pub mod faculty;
 pub mod major;
 pub mod subject;
-pub mod teacher;
 
 pub struct Id<T> {
     id: uuid::Uuid,

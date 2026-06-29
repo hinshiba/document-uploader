@@ -7,7 +7,6 @@ use super::{
     faculty::Faculty,
     major::Major,
     subject::Subject,
-    teacher::Teacher,
 };
 
 #[derive(Clone, Debug)]
@@ -78,7 +77,7 @@ pub struct DocumentMetadata {
     term: Term<DocumentMetadata>,
     grade: Grade<DocumentMetadata>,
     subject_id: Id<Subject>,
-    teacher_id: Id<Teacher>,
+    teacher: String,
     exam_type: ExamType,
     is_answer: bool,
     num: Num<DocumentMetadata>,
@@ -92,7 +91,7 @@ impl DocumentMetadata {
         term: Term<DocumentMetadata>,
         grade: Grade<DocumentMetadata>,
         subject_id: Id<Subject>,
-        teacher_id: Id<Teacher>,
+        teacher: String,
         exam_type: ExamType,
         is_answer: bool,
         num: Num<DocumentMetadata>,
@@ -104,7 +103,7 @@ impl DocumentMetadata {
             term,
             grade,
             subject_id,
-            teacher_id,
+            teacher,
             exam_type,
             is_answer,
             num,
@@ -128,8 +127,8 @@ impl DocumentMetadata {
     pub fn subject_id(&self) -> &Id<Subject> {
         &self.subject_id
     }
-    pub fn teacher_id(&self) -> &Id<Teacher> {
-        &self.teacher_id
+    pub fn teacher(&self) -> &str {
+        &self.teacher
     }
     pub fn exam_type(&self) -> &ExamType {
         &self.exam_type
