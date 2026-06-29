@@ -1,14 +1,22 @@
-pub use super::Id;
+pub use super::{
+    Id,
+    faculty::Faculty,
+};
 
 #[derive(Debug, Hash)]
 pub struct Major {
     id: Id<Major>,
     name: String,
+    faculty_id: Id<Faculty>,
 }
 
 impl Major {
-    pub fn new(id: Id<Major>, name: String) -> Self {
-        Self { id, name }
+    pub fn new(id: Id<Major>, name: String, faculty_id: Id<Faculty>) -> Self {
+        Self {
+            id,
+            name,
+            faculty_id
+        }
     }
     pub fn id(&self) -> &Id<Major> {
         &self.id
