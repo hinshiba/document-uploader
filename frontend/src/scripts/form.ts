@@ -43,7 +43,6 @@ fetchFaculties()
         }
 
         faculties.forEach((faculty) => {
-
             const option = document.createElement("option");
 
             // APIの数だけoptionを作る
@@ -60,7 +59,6 @@ fetchFaculties()
 form?.addEventListener("submit", (event)=>{
         // 通常起きるページの再読み込みを防ぐ
         event.preventDefault();
-
         if (!form) {
             alert("Html側にtag \"form\"がありません");
             return;
