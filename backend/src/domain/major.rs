@@ -24,4 +24,7 @@ impl Major {
     pub fn name(&self) -> &str {
         &self.name
     }
+    pub fn faculty_id(&self) -> &Id<Faculty> {
+        &self.faculty_id
+    }
 }
