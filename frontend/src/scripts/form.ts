@@ -63,6 +63,5 @@ form?.addEventListener("submit", (event)=>{
         const json = JSON.stringify(data, null, 2);
 
         console.log(json);
-        alert(json);
     }
 );
