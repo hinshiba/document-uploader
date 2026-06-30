@@ -22,14 +22,6 @@ async function fetchFaculties(): Promise<Faculty[]> {
     return (await res.json()) as Faculty[];
 }
 
-checkAlive()
-    .then((text) => console.info("/alive", text))
-    .catch((err) => console.error("/alive 失敗", err));
-
-fetchFaculties()
-    .then((faculties) => console.info("/faculties", faculties))
-    .catch((err) => console.error("/faculties 失敗", err));
-
 const select = document.querySelector<HTMLSelectElement>("select");
 
 const form = document.querySelector<HTMLFormElement>("form");
@@ -38,7 +30,7 @@ const form = document.querySelector<HTMLFormElement>("form");
 fetchFaculties()
     .then((faculties) => {
         if (!select) {
-            alert("Html側にtag \"select\"がありません");
+            console.error("Html側にtag \"select\"がありません");
             return;
         }
 
@@ -46,26 +38,27 @@ fetchFaculties()
             const option = document.createElement("option");
 
             // APIの数だけoptionを作る
-            option.value = String(faculty.id);
+            option.value = faculty.id;
 
             // optionの表示名をAPIのnameにする
             option.textContent = faculty.name;
             select.appendChild(option);
         });
     })
+    .catch((err) => console.error("/faculties 失敗", err));
 
 
 // form送信処理
 form?.addEventListener("submit", (event)=>{
         // 通常起きるページの再読み込みを防ぐ
         event.preventDefault();
-        if (!form) {
-            alert("Html側にtag \"form\"がありません");
-            return;
-        }
 
         // formの値を取得してオブジェクトにする
-        const data = Object.fromEntries(new FormData(form).entries());
+        const formData = new FormData(form);
+
+        const data = {
+            faculty: formData.get("faculty"),
+        };
         // JSON化
         const json = JSON.stringify(data, null, 2);
 

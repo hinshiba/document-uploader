@@ -6,7 +6,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Document Uploader</title>
 		<link rel="stylesheet" href="../styles/main.css">
-		<link rel="stylesheet" href="../styles/upload.css">
 	</head>
 
 	<body>
@@ -17,10 +16,8 @@
 		<main id="main">
 			<form>
 				ここのBoxからアップロードしたい教科を選んでください．
-
-				<select id="subject"
-				        name="subject"
-				></select>
+				<label for="faculty">学部を選択してください</label>
+				<select id="faculty" name="faculty"></select>
 				<input type="file" id="file" multiple>
 				<label for="file">ファイルを選択してください</label>
 
@@ -31,6 +28,7 @@
 				</div>
 				<button id="uploadbtn">送信</button>
 				<p id="thank"></p>
+				<input type="submit" value="送信">
 			</form>
 		</main>
 		<footer>
@@ -39,3 +37,5 @@
 		<script src=../scripts/upload.ts></script>
 	</body>
 </html>
+
+<!-- ラベルを使う -->
