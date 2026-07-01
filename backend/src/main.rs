@@ -1,6 +1,8 @@
 mod domain;
 mod interface;
 
+mod repository;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     init_tracing_subscriber();
