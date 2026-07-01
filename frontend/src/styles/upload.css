@@ -1,18 +1,16 @@
+/* ドロップエリアの設定 */
 body main div {
     width: 100%;
+    margin: 20px 0;
     height: auto;
-    border: 2px dashed #888;
+    border: 2px dashed #df048784;
     border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-body main div.dragover {
-    background-color: #eef;
-    border-color: blue;
-}
-
+/* ドロップエリア内箇条書きの表示設定 */
 body main div ul {
     display: flex;
     flex-wrap: wrap;
@@ -24,15 +22,20 @@ body main div ul {
     text-align: center;
 }
 
+/* 感謝のためのCSS */
 body>main>p#thank {
+    font-weight: bold;
+    font-size: 30px;
     color: rgb(239, 16, 187);
 }
 
+/* ファイルのinputを削除 */
 body>main>input {
     display: none;
 }
 
-label {
+/* ラベルの設定 */
+body main label {
     margin-top: 10px;
     padding: 10px 20px;
     background: #007bff;
@@ -41,7 +44,8 @@ label {
     border-radius: 10px 10px 10px 10px;
 }
 
-label:hover {
+/* ボタンにホバーしたときの変化 */
+body main label:hover {
     background: #0b6aeeb1;
     box-shadow: 0 2px #3f1d22;
     top: 1px;

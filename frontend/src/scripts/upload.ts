@@ -1,6 +1,5 @@
 const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
 const API_BASE = "http://127.0.0.1:4010";
-const API_BA = "http://localhost:3000";
 const dropArea = document.getElementById("drop-area") as HTMLDivElement;
 
 
@@ -11,17 +10,17 @@ dropArea.addEventListener("dragover", (event) => {
 // ドラッグした時の処理
 dropArea.addEventListener("drop", (event) => {
     event.preventDefault();
-
+    // ドラッグしたファイルをfilesに格納する
     const files = event.dataTransfer?.files ?? null;
-
     if (!files) return;
-    // inputにセット
-    file.files = files;
+
+    file.files = files; //送信ボタン押したときに処理するための代入//
     const makelist = document.getElementById("makelist") as HTMLElement;
     const message = document.getElementById("message") as HTMLElement;
     for (const file of files) {
         // 無事できたかコンソールに表示
         console.log(file.name);
+        // ファイルをアップロードした時の文字関連
         message.style.display = "none";
         const li = document.createElement("li");
         li.textContent = `${file.name}`;
@@ -30,29 +29,25 @@ dropArea.addEventListener("drop", (event) => {
 });
 
 // ファイルを選択して選んだ場合に処理する
-const fileInput = document.getElementById("file") as HTMLInputElement;
-
 function showFiles(files: FileList) {
     const makelist = document.getElementById("makelist") as HTMLUListElement;
 
-
-
     for (const file of files) {
-        // 実験用
-        console.log(files);
-
+        // 無事できたかコンソールに表示
+        console.log(file.name);
+        // 箇条書きにしている
         const li = document.createElement("li");
         li.textContent = file.name;
         makelist.appendChild(li);
     }
+    // ファイルアップロード時の文字関連
     const message = document.getElementById("message") as HTMLElement;
     message.style.display = "none";
 }
-
-
+// ファイルに入力された内容をshowFiles関数で表示処理する
+const fileInput = document.getElementById("file") as HTMLInputElement;
 fileInput.addEventListener("change", () => {
     if (!fileInput.files) return;
-
     showFiles(fileInput.files);
 });
 
@@ -76,7 +71,7 @@ uploadbtn?.addEventListener("click", async () => {
     for (const filedata of alldata) {
         formData.append("file", filedata)
     }
-    // DocumentMetadata.append("metaData",JSON.stringify(metadata))すなくんに任せる場所
+    // DocumentMetadata.append("metaData", JSON.stringify(metadata)); //すなくんに任せる場所
     try {
         const res = await fetch(`${API_BASE}/docs`, {
             headers: DEV_HEADERS,
