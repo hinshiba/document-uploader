@@ -1,4 +1,5 @@
 mod domain;
+mod interface;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
