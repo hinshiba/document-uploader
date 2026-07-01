@@ -57,12 +57,12 @@ impl ExampleRepository {
                     Major::new(
                         Id::new(uuid::uuid!("6ba7b813-9dad-11d1-80b4-00c04fd430c8")),
                         "数学科".to_owned(),
-                        Id::new(uuid::uuid!("6ba7b813-9dad-11d1-80b4-00c04fd430c8")),
+                        Id::new(uuid::uuid!("6ba7b812-9dad-11d1-80b4-00c04fd430c8")),
                     ),
                     Major::new(
-                        Id::new(uuid::uuid!("6ba7b813-9dad-11d1-80b4-00c04fd430c8")),
+                        Id::new(uuid::uuid!("6ba7b814-9dad-11d1-80b4-00c04fd430c8")),
                         "物理学科".to_owned(),
-                        Id::new(uuid::uuid!("6ba7b813-9dad-11d1-80b4-00c04fd430c8")),
+                        Id::new(uuid::uuid!("6ba7b812-9dad-11d1-80b4-00c04fd430c8")),
                     ),
                 ]
             ),
