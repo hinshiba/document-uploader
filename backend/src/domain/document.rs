@@ -31,6 +31,17 @@ impl std::fmt::Display for ParseExamTypeError {
 
 impl std::error::Error for ParseExamTypeError {}
 
+#[derive(Clone, Debug)]
+pub struct EmptyDocumentFiles;
+
+impl std::fmt::Display for EmptyDocumentFiles {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "must have at least one document file")
+    }
+}
+
+impl std::error::Error for EmptyDocumentFiles {}
+
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 #[repr(i64)]
 pub enum ExamType {
@@ -200,8 +211,12 @@ pub struct Document {
 }
 
 impl Document {
-    pub fn new(metadata: DocumentMetadata, files: Vec<DocumentFile>) -> Self {
-        Self { metadata, files }
+    pub fn new(metadata: DocumentMetadata, files: Vec<DocumentFile>) -> Result<Self, EmptyDocumentFiles> {
+        if files.len() >= 1 {
+            Ok(Self { metadata, files })
+        } else {
+            Err(EmptyDocumentFiles)
+        }
     }
     pub fn metadata(&self) -> &DocumentMetadata {
         &self.metadata
