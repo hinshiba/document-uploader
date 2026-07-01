@@ -6,19 +6,29 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Document Uploader</title>
 		<link rel="stylesheet" href="../styles/main.css">
-		<script src=../scripts/main.ts></script>
+		<link rel="stylesheet" href="../styles/upload.css">
 	</head>
 
 	<body>
 		<header>
-			Document Uploader
-			<nav>ナビゲーションのためのなにか</nav>
 		</header>
-		<main>
-			主な要素
+		<main id="main">
+			<!-- ファイルタグを作っている -->
+			<input type="file" id="file" multiple>
+			<label for="file">ファイルを選択してください</label>
+
+			<div id="drop-area">
+
+				<p id="message">ここにファイルをドラッグしてください</p>
+				<ul id="makelist"></ul>
+			</div>
+			<button id="uploadbtn">送信</button>
+			<p id="thank"></p>
 		</main>
 		<footer>
 			フッター
 		</footer>
+		<script src=../scripts/main.ts></script>
+		<script src=../scripts/upload.ts></script>
 	</body>
 </html>
