@@ -1,4 +1,4 @@
-body main section {
+body main div {
     width: 100%;
     height: auto;
     border: 2px dashed #888;
@@ -8,12 +8,12 @@ body main section {
     align-items: center;
 }
 
-body main section.dragover {
+body main div.dragover {
     background-color: #eef;
     border-color: blue;
 }
 
-body main section ul {
+body main div ul {
     display: flex;
     flex-wrap: wrap;
     color: blue;
@@ -22,4 +22,27 @@ body main section ul {
     justify-content: space-between;
     flex: 1;
     text-align: center;
+}
+
+body>main>p#thank {
+    color: rgb(239, 16, 187);
+}
+
+body>main>input {
+    display: none;
+}
+
+label {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 10px 10px 10px 10px;
+}
+
+label:hover {
+    background: #0b6aeeb1;
+    box-shadow: 0 2px #3f1d22;
+    top: 1px;
 }

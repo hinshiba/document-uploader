@@ -1,52 +1,104 @@
-
-
-
-
+const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
+const API_BASE = "http://127.0.0.1:4010";
+const API_BA = "http://localhost:3000";
 const dropArea = document.getElementById("drop-area") as HTMLDivElement;
 
 
-
+// ドラッグした時の変化
 dropArea.addEventListener("dragover", (event) => {
     event.preventDefault();
 });
-
+// ドラッグした時の処理
 dropArea.addEventListener("drop", (event) => {
     event.preventDefault();
 
-    const files = event.dataTransfer?.files;
+    const files = event.dataTransfer?.files ?? null;
 
     if (!files) return;
     // inputにセット
     file.files = files;
-
+    const makelist = document.getElementById("makelist") as HTMLElement;
+    const message = document.getElementById("message") as HTMLElement;
     for (const file of files) {
+        // 無事できたかコンソールに表示
         console.log(file.name);
-
         message.style.display = "none";
-        makelist.innerHTML += `<li>${file.name}</li>`;
+        const li = document.createElement("li");
+        li.textContent = `${file.name}`;
+        makelist.appendChild(li);
     }
 });
 
-const file = document.getElementById("file") as HTMLInputElement;
-const uploadbtn = document.getElementById("uploadbtn")
+// ファイルを選択して選んだ場合に処理する
+const fileInput = document.getElementById("file") as HTMLInputElement;
+
+function showFiles(files: FileList) {
+    const makelist = document.getElementById("makelist") as HTMLUListElement;
+
+
+
+    for (const file of files) {
+        // 実験用
+        console.log(files);
+
+        const li = document.createElement("li");
+        li.textContent = file.name;
+        makelist.appendChild(li);
+    }
+    const message = document.getElementById("message") as HTMLElement;
+    message.style.display = "none";
+}
+
+
+fileInput.addEventListener("change", () => {
+    if (!fileInput.files) return;
+
+    showFiles(fileInput.files);
+});
+
+
+
+
 // 送信ボタンを押した後にユーザが入力したデータをformDataに内容を保存して得られたすべての情報を送信する
+const file = document.getElementById("file") as HTMLInputElement;
+const uploadbtn = document.getElementById("uploadbtn") as HTMLButtonElement;
+
 uploadbtn?.addEventListener("click", async () => {
     // ファイルに直接入力の場合
     const alldata = file.files;
     if (!alldata || alldata.length === 0) return;
 
     const formData = new FormData();
+    // 送信中に送信中を表示
+    uploadbtn.disabled = true;
+    uploadbtn.textContent = "送信中...";
 
     for (const filedata of alldata) {
         formData.append("file", filedata)
     }
-    // formData.append("metaData",JSON.stringify(metadata))すなくんに任せる場所
+    // DocumentMetadata.append("metaData",JSON.stringify(metadata))すなくんに任せる場所
+    try {
+        const res = await fetch(`${API_BASE}/docs`, {
+            headers: DEV_HEADERS,
+            method: "POST",
+            body: formData
+        });
 
-    await fetch("/docs", {
-        method: "POST",
-        body: formData
-    });
-    makelist.innerHTML = "";
-    message.style.display = "block";
-    thank.innerHTML = "協力ありがとうございます！"
+        if (!res.ok) {
+            throw new Error(`送信失敗: ${res.status}`);
+        }
+
+        console.log("アップロード成功");
+    } catch (error) {
+        console.error(error);
+    }
+
+    // ユーザ通知として画面に表示する＋送信ボタンなどを画面から削除，ほぼ初期化されている
+    file.value = ""
+    const makelist = document.getElementById("makelist") as HTMLElement;
+    makelist.textContent = "";
+    const thank = document.getElementById("thank") as HTMLParagraphElement;
+    thank.textContent = "送信完了！！協力ありがとうございました";
+    uploadbtn.style.display = "none"
+    file.style.display = "none"
 });

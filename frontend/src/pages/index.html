@@ -1,40 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
 
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document Uploader</title>
-	<link rel="stylesheet" href="../styles/main.css">
-	<link rel="stylesheet" href="../styles/upload.css">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document Uploader</title>
+		<link rel="stylesheet" href="../styles/main.css">
+		<link rel="stylesheet" href="../styles/upload.css">
+	</head>
 
-</head>
+	<body>
+		<header>
+		</header>
+		<main id="main">
+			<input type="file" id="file" multiple>
+			<label for="file">ファイルを選択してください</label>
 
-<body>
-	<header>
+			<p>ファイルを直接選択する場合は↑を使用</p>
+			<p>ファイルをドラッグ&ドロップする場合は↓を使用</p>
+			<div id="drop-area">
 
-	</header>
-	<main>
-		<input type="file" id="file" multiple>
-
-		<p>ファイルを直接選択する場合は↑を使用</p>
-		<p>ファイルをドラッグ&ドロップする場合は↓を使用</p>
-		<section id="drop-area">
-
-
-			<p id="message">ここにファイルをドラッグしてください
-			</p>
-			<ul id="makelist"></ul>
-
-		</section>
-		<button id="uploadbtn">送信</button>
-		<p id="thank"></p>
-	</main>
-	<footer>
-		フッター
-	</footer>
-	<script src=../scripts/main.ts></script>
-	<script src=../scripts/upload.ts></script>
-</body>
-
+				<p id="message">ここにファイルをドラッグしてください</p>
+				<ul id="makelist"></ul>
+			</div>
+			<button id="uploadbtn">送信</button>
+			<p id="thank"></p>
+		</main>
+		<footer>
+			フッター
+		</footer>
+		<!-- <script src=../scripts/main.ts></script> -->
+		<script src=../scripts/upload.ts></script>
+	</body>
 </html>
