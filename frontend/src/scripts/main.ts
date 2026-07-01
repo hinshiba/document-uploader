@@ -29,10 +29,3 @@ checkAlive()
 fetchFaculties()
     .then((faculties) => console.info("/faculties", faculties))
     .catch((err) => console.error("/faculties 失敗", err));
-
-
-
-
-
-
-
