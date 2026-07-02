@@ -1,0 +1,4 @@
+{
+  "tabWidth": 4,
+  "ignorePatterns": ["**/*.html", "src/scripts/api/types.ts"]
+}
