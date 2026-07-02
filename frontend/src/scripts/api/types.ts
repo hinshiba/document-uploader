@@ -113,6 +113,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/subjects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 科目候補の取得
+         * @description 指定した分類で絞り込んだ科目の候補を返す
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description 学部のUUID */
+                    faculty: string;
+                    /** @description 専攻のUUID(指定したfacultyに属するmajorのid) */
+                    major?: string;
+                    /** @description テストが行われる学年 */
+                    grade?: number;
+                    /** @description 学期 */
+                    term?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 条件に合致する科目の一覧 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example [
+                         *       {
+                         *         "id": "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c",
+                         *         "name": "線形代数",
+                         *         "faculty": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                         *         "major": "550e8400-e29b-41d4-a716-446655440000",
+                         *         "grade": 1,
+                         *         "term": 1
+                         *       },
+                         *       {
+                         *         "id": "a1b2c3d4-e5f6-4a5b-9c8d-7e6f5a4b3c2d",
+                         *         "name": "アルゴリズムと計算量",
+                         *         "faculty": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                         *         "major": "550e8400-e29b-41d4-a716-446655440000",
+                         *         "grade": 2,
+                         *         "term": 2
+                         *       }
+                         *     ]
+                         */
+                        "application/json": components["schemas"]["Subject"][];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/docs": {
         parameters: {
             query?: never;
@@ -253,6 +323,51 @@ export interface components {
             name: string;
         };
         /**
+         * @description 科目が持つべき情報
+         *     同名でも faculty / major / grade / term が異なれば別科目
+         * @example {
+         *       "id": "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c",
+         *       "name": "線形代数",
+         *       "faculty": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+         *       "major": "550e8400-e29b-41d4-a716-446655440000",
+         *       "grade": 1,
+         *       "term": 1
+         *     }
+         */
+        Subject: {
+            /**
+             * Format: uuid
+             * @description 科目のUUID
+             */
+            id: string;
+            /**
+             * @description 科目名
+             * @example 線形代数
+             * @example アルゴリズムと計算量
+             */
+            name: string;
+            /**
+             * Format: uuid
+             * @description 学部のUUID
+             */
+            faculty: string;
+            /**
+             * Format: uuid
+             * @description 専攻のUUID
+             */
+            major: string;
+            /**
+             * @description テストが行われる学年
+             * @example 1
+             */
+            grade: number;
+            /**
+             * @description 学期
+             * @example 1
+             */
+            term: number;
+        };
+        /**
          * @description 試験種別
          * @enum {string}
          */
@@ -264,7 +379,7 @@ export interface components {
          *       "year": 2025,
          *       "term": 2,
          *       "grade": 2,
-         *       "subject": "線形代数",
+         *       "subject": "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c",
          *       "teacher": "岡山 聖彦",
          *       "examtype": "final",
          *       "isanswer": false,
@@ -298,9 +413,8 @@ export interface components {
              */
             grade: number;
             /**
-             * @description 科目名
-             * @example 線形代数
-             * @example アルゴリズムと計算量
+             * Format: uuid
+             * @description 科目のUUID(指定したfaculty/major/grade/termに属するsubjectのid)
              */
             subject: string;
             /**
