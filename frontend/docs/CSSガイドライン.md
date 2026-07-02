@@ -74,10 +74,9 @@
 @use "../../_var" as *;
 
 .drop-area {
-  border: 2px dashed $border-color;
 
-  h2 {
-    font-size: 1.5em;
+  div {
+    border: 2px $border-color;
   }
 
   ul {
