@@ -1,10 +1,3 @@
 :root {
   font-family: system-ui, sans-serif;
 }
-
-body {
-  display: flex;
-  flex-direction: column; /* これで中身が強制的に「縦並び」になります */
-  align-items: flex-start; /* 左寄せにします（中央寄せなら center） */
-  gap: 15px; /* 要素同士の縦の隙間をちょうどよく空けます */
-}

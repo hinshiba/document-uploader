@@ -10,12 +10,6 @@ const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
 
 type Faculty = components["schemas"]["Faculty"];
 
-async function checkAlive(): Promise<string> {
-    const res = await fetch(`${API_BASE}/alive`);
-    if (!res.ok) throw new Error(`/alive return ${res.status}`);
-    return res.text();
-}
-
 async function fetchFaculties(): Promise<Faculty[]> {
     const res = await fetch(`${API_BASE}/faculties`, { headers: DEV_HEADERS });
     if (!res.ok) throw new Error(`/faculties return ${res.status}`);
