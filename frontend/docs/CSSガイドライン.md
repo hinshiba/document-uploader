@@ -103,7 +103,7 @@
 .drop-area {
 
   div {
-    border: 2px $border-color;
+    border: 2px solid $border-color;
   }
 
   ul {
