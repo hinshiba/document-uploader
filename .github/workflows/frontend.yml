@@ -1,0 +1,44 @@
+name: frontend
+
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", "docs/api/**", ".github/workflows/frontend.yml"]
+  pull_request:
+    paths: ["frontend/**", "docs/api/**", ".github/workflows/frontend.yml"]
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install superhtml
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -fsSL -o superhtml.tar.xz \
+            https://github.com/kristoff-it/superhtml/releases/download/v0.7.0/x86_64-linux-musl.tar.xz
+          tar -xJf superhtml.tar.xz
+          echo "$PWD" >> "$GITHUB_PATH"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint (oxlint / stylelint / superhtml)
+        run: bun run lint
+
+      - name: Format check (oxfmt / prettier)
+        run: bun run format:check
+
+      - name: Typecheck (tsc)
+        run: bun run gen && bun run typecheck
