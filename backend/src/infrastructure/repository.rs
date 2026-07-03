@@ -8,7 +8,7 @@ use crate::domain::{
     major::Major,
 };
 
-use crate::interface::repository::{
+use crate::usecase::repository::{
     DocumentRepository,
     FacultyRepository,
     SubjectRepository,

@@ -1,7 +1,6 @@
 mod domain;
-mod interface;
-
-mod repository;
+mod infrastructure;
+mod usecase;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
