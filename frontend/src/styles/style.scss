@@ -1,0 +1,23 @@
+@use "var" as *;
+@use "tags/footer" as *;
+@use "tags/form" as *;
+@use "tags/header" as *;
+@use "tags/nav" as *;
+@use "pages/upload/main" as *;
+@use "pages/upload/drop-area" as *;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    line-height: 1.6;
+    color: $text-color;
+    background-color: $bg-color;
+}

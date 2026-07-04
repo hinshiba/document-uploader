@@ -1,0 +1,9 @@
+@use "../../var" as *;
+
+$content-width: 640px;
+
+main {
+    max-width: $content-width;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}

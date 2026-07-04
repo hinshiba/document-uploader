@@ -1,128 +1,107 @@
 {
-  "extends": "stylelint-config-standard-scss",
-  "rules": {
-    "selector-max-id": 0,
-    "declaration-no-important": true,
-    "selector-class-pattern": [
-      "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
-      {
-        "message": "クラス名はケバブケースで命名する (CSSガイドライン)"
-      }
-    ],
-    "scss/dollar-variable-pattern": [
-      "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
-      {
-        "message": "変数名はケバブケースで命名する (CSSガイドライン)"
-      }
-    ],
-    "selector-max-compound-selectors": [
-      2,
-      {
-        "message": "セレクタはクラス直下のタグまで．長い子孫セレクタは書かない (CSSガイドライン)"
-      }
-    ],
-    "selector-max-type": [
-      1,
-      {
-        "message": "タグセレクタは連鎖させず，ネストして書く (CSSガイドライン)"
-      }
-    ],
-    "selector-max-class": [
-      1,
-      {
-        "message": "クラスの連鎖は書かず，修飾クラスは&でネストする (CSSガイドライン)"
-      }
-    ],
-    "selector-max-universal": [
-      0,
-      {
-        "message": "*へのスタイルはエントリファイル(style.scss)でのみ許可 (CSSガイドライン)"
-      }
-    ],
-    "max-nesting-depth": [
-      1,
-      {
-        "ignore": [
-          "blockless-at-rules"
+    "extends": "stylelint-config-standard-scss",
+    "rules": {
+        "selector-max-id": 0,
+        "declaration-no-important": true,
+        "selector-class-pattern": [
+            "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+            {
+                "message": "クラス名はケバブケースで命名する (CSSガイドライン)"
+            }
         ],
-        "ignoreRules": [
-          "/^&[.:]/"
+        "scss/dollar-variable-pattern": [
+            "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+            {
+                "message": "変数名はケバブケースで命名する (CSSガイドライン)"
+            }
         ],
-        "message": "ネストはクラス直下のタグと擬似クラスまで (CSSガイドライン)"
-      }
-    ],
-    "selector-disallowed-list": [
-      [
-        "/^(html|body)\\b/"
-      ],
-      {
-        "message": "html/bodyへのスタイルはエントリファイル(style.scss)でのみ許可 (CSSガイドライン)"
-      }
-    ],
-    "color-no-hex": [
-      true,
-      {
-        "message": "色は_var.scssに集約する (CSSガイドライン)"
-      }
-    ],
-    "color-named": [
-      "never",
-      {
-        "message": "色は_var.scssに集約する (CSSガイドライン)"
-      }
-    ],
-    "function-disallowed-list": [
-      [
-        "rgb",
-        "rgba",
-        "hsl",
-        "hsla"
-      ],
-      {
-        "message": "色は_var.scssに集約する (CSSガイドライン)"
-      }
-    ],
-    "declaration-property-value-disallowed-list": [
-      {
-        "font-size": [
-          "/^[.0-9]/"
-        ]
-      },
-      {
-        "message": "フォント寸法は_var.scssに集約する (CSSガイドライン)"
-      }
-    ]
-  },
-  "overrides": [
-    {
-      "files": [
-        "**/style.scss"
-      ],
-      "rules": {
+        "selector-max-compound-selectors": [
+            2,
+            {
+                "message": "セレクタはクラス直下のタグまで．長い子孫セレクタは書かない (CSSガイドライン)"
+            }
+        ],
+        "selector-max-type": [
+            1,
+            {
+                "message": "タグセレクタは連鎖させず，ネストして書く (CSSガイドライン)"
+            }
+        ],
+        "selector-max-class": [
+            1,
+            {
+                "message": "クラスの連鎖は書かず，修飾クラスは&でネストする (CSSガイドライン)"
+            }
+        ],
+        "selector-max-universal": [
+            0,
+            {
+                "message": "*へのスタイルはエントリファイル(style.scss)でのみ許可 (CSSガイドライン)"
+            }
+        ],
+        "max-nesting-depth": [
+            1,
+            {
+                "ignore": ["blockless-at-rules"],
+                "ignoreRules": ["/^&[.:]/"],
+                "message": "ネストはクラス直下のタグと擬似クラスまで (CSSガイドライン)"
+            }
+        ],
         "selector-disallowed-list": [
-          [
-            "/^(?!(\\*|html|body)$).*$/"
-          ],
-          {
-            "message": "エントリファイルのセレクタは*, html, bodyのみ許可 (CSSガイドライン)"
-          }
+            ["/^(html|body)\\b/"],
+            {
+                "message": "html/bodyへのスタイルはエントリファイル(style.scss)でのみ許可 (CSSガイドライン)"
+            }
         ],
-        "at-rule-allowed-list": [
-          "use"
+        "color-no-hex": [
+            true,
+            {
+                "message": "色はvar.scssに集約する (CSSガイドライン)"
+            }
         ],
-        "selector-max-universal": null
-      }
+        "color-named": [
+            "never",
+            {
+                "message": "色はvar.scssに集約する (CSSガイドライン)"
+            }
+        ],
+        "function-disallowed-list": [
+            ["rgb", "rgba", "hsl", "hsla"],
+            {
+                "message": "色はvar.scssに集約する (CSSガイドライン)"
+            }
+        ],
+        "declaration-property-value-disallowed-list": [
+            {
+                "font-size": ["/^[.0-9]/"]
+            },
+            {
+                "message": "フォント寸法はvar.scssに集約する (CSSガイドライン)"
+            }
+        ]
     },
-    {
-      "files": [
-        "**/_var.scss"
-      ],
-      "rules": {
-        "color-no-hex": null,
-        "color-named": null,
-        "function-disallowed-list": null,
-        "declaration-property-value-disallowed-list": null
-      }
-    }
-  ]
+    "overrides": [
+        {
+            "files": ["**/style.scss"],
+            "rules": {
+                "selector-disallowed-list": [
+                    ["/^(?!(\\*|html|body)$).*$/"],
+                    {
+                        "message": "エントリファイルのセレクタは*, html, bodyのみ許可 (CSSガイドライン)"
+                    }
+                ],
+                "at-rule-allowed-list": ["use"],
+                "selector-max-universal": null
+            }
+        },
+        {
+            "files": ["**/var.scss"],
+            "rules": {
+                "color-no-hex": null,
+                "color-named": null,
+                "function-disallowed-list": null,
+                "declaration-property-value-disallowed-list": null
+            }
+        }
+    ]
 }
