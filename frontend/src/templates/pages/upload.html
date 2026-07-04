@@ -1,0 +1,22 @@
+{% extends "base.html" %} {% block content %}
+<main>
+    <h2>アップロード</h2>
+    <span>貢献に感謝します</span>
+    <form>
+        ここのBoxからアップロードしたい教科を選んでください．
+        <label for="faculty">学部を選択してください</label>
+        <select id="faculty" name="faculty"></select>
+        <input type="file" id="file" multiple>
+        <label for="file">ファイルを選択してください</label>
+
+        <div id="drop-area">
+            <p id="message">ここにファイルをドラッグしてください</p>
+            <ul id="makelist"></ul>
+        </div>
+        <button id="uploadbtn">送信</button>
+        <p id="thank"></p>
+        <input type="submit" value="送信">
+    </form>
+</main>
+
+{% endblock content %}
