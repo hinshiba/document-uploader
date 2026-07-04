@@ -48,7 +48,14 @@ for (const page_template of pattern.scanSync()) {
 }
 
 // CIで引っかからないように整形
-const { stderr, success } = Bun.spawnSync(["bunx", "prettier", "--write", OUTPUT_DIR]);
+const { stderr, success } = Bun.spawnSync([
+    "bunx",
+    "prettier",
+    "--write",
+    "--ignore-path",
+    ".prettierignore",
+    OUTPUT_DIR,
+]);
 if (!success) {
     console.error(`prettier failed.`);
     console.error(stderr);
