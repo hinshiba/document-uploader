@@ -38,5 +38,8 @@
     "peerDependencies": {
         "typescript": "^5"
     },
-    "type": "module"
+    "type": "module",
+    "dependencies": {
+        "lit": "^3.3.3"
+    }
 }

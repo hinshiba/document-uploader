@@ -24,6 +24,10 @@
         <button id="uploadbtn" type="submit">送信</button>
         <p id="thank"></p>
     </form>
+    <major-select></major-select>
 </main>
 
-{% endblock content %}
+{% endblock content %} {% block scripts %}
+<script type="module" src="../scripts/upload.ts"></script>
+<script type="module" src="../scripts/components/major-select.ts"></script>
+{% endblock %}
