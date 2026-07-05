@@ -1,4 +1,4 @@
 node_modules
 out
 src/scripts/api/types.ts
-src/temp/style.css
+src/temp/*.css
