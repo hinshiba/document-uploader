@@ -1,5 +1,5 @@
 import { Glob, spawnSync } from "bun";
-import { watch } from "node:fs";
+import { mkdirSync, watch } from "node:fs";
 import path from "node:path";
 
 /** exitcodeの定義 */
@@ -31,6 +31,10 @@ if (!spawnSync(["tera", "--help"]).success) {
 
 /** 全テンプレートページからHTMLを生成し，整形する */
 function generate(): void {
+    // 出力先はgitignore対象でクリーンな環境には存在しないため，先に用意する
+    // For CI
+    mkdirSync(OUTPUT_DIR, { recursive: true });
+
     // 全テンプレートページから生成
     for (const page_template of pattern.scanSync()) {
         const out_path = path.join(OUTPUT_DIR, path.basename(page_template));
