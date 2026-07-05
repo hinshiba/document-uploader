@@ -1,99 +1,113 @@
-const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
-const API_BASE = "http://127.0.0.1:4010";
-const dropArea = document.getElementById("drop-area") as HTMLDivElement;
+import { fetchFaculties, postDocuments, type DocumentMetadata } from "./api/client";
 
+/**
+ * 要素を型付きで取得するヘルパ
+ * @param selector セレクタ
+ * @returns 見つかった要素
+ * @throws 要素が存在しない場合
+ */
+function required<T extends Element>(selector: string): T {
+    const el = document.querySelector<T>(selector);
+    if (!el) throw new Error(`Element not found. selector: ${selector}`);
+    return el;
+}
 
-// ドラッグした時の変化
+// type="module" のスクリプトは defer 相当で DOM 構築後に実行されるため，
+// ここで要素を取得してよい
+const form = required<HTMLFormElement>("form");
+const facultySelect = required<HTMLSelectElement>("#faculty");
+const fileInput = required<HTMLInputElement>("#file");
+const dropArea = required<HTMLDivElement>("#drop-area");
+const fileList = required<HTMLUListElement>("#makelist");
+const message = required<HTMLParagraphElement>("#message");
+const submitButton = required<HTMLButtonElement>("#uploadbtn");
+const statusText = required<HTMLParagraphElement>("#thank");
+
+/** 学部一覧を取得して select に反映する */
+async function loadFaculties(): Promise<void> {
+    try {
+        for (const faculty of await fetchFaculties()) {
+            facultySelect.add(new Option(faculty.name, faculty.id));
+        }
+    } catch (e) {
+        console.error("学部一覧の取得に失敗", e);
+        statusText.textContent = "学部一覧の取得に失敗しました";
+    }
+}
+
+/** 選択中のファイル一覧を画面に描画する */
+function renderFileList(files: FileList): void {
+    // 選択のたびに作り直し，ドロップと選択の二重表示を防ぐ
+    fileList.replaceChildren();
+    for (const file of files) {
+        const li = document.createElement("li");
+        li.textContent = file.name;
+        fileList.appendChild(li);
+    }
+    // ファイルがあれば案内文を隠す
+    message.hidden = files.length > 0;
+}
+
+/**
+ * フォームからメタデータを組み立てる
+ * @throws faculty が未選択の場合
+ * @remarks
+ * TODO: 現状フォームは faculty しか持たないため部分的な値を返す．
+ */
+function buildMetadata(): DocumentMetadata {
+    const faculty = new FormData(form).get("faculty");
+    if (typeof faculty !== "string" || faculty === "") {
+        throw new Error("学部が選択されていません");
+    }
+    return { faculty } as DocumentMetadata;
+}
+
+/** ドラッグ中はデフォルト動作を抑止し，ドロップを許可する */
 dropArea.addEventListener("dragover", (event) => {
     event.preventDefault();
 });
-// ドラッグした時の処理
+
+/** ドロップされたファイルを input に反映して一覧表示する */
 dropArea.addEventListener("drop", (event) => {
     event.preventDefault();
-    // ドラッグしたファイルをfilesに格納する
-    const files = event.dataTransfer?.files ?? null;
-    if (!files) return;
+    const files = event.dataTransfer?.files;
+    if (!files || files.length === 0) return;
 
-    file.files = files; //送信ボタン押したときに処理するための代入//
-    const makelist = document.getElementById("makelist") as HTMLElement;
-    const message = document.getElementById("message") as HTMLElement;
-    for (const file of files) {
-        // 無事できたかコンソールに表示
-        console.log(file.name);
-        // ファイルをアップロードした時の文字関連
-        message.style.display = "none";
-        const li = document.createElement("li");
-        li.textContent = `${file.name}`;
-        makelist.appendChild(li);
-    }
+    // 送信時に読み出せるよう input へ代入する
+    fileInput.files = files;
+    renderFileList(files);
 });
 
-// ファイルを選択して選んだ場合に処理する
-function showFiles(files: FileList) {
-    const makelist = document.getElementById("makelist") as HTMLUListElement;
-
-    for (const file of files) {
-        // 無事できたかコンソールに表示
-        console.log(file.name);
-        // 箇条書きにしている
-        const li = document.createElement("li");
-        li.textContent = file.name;
-        makelist.appendChild(li);
-    }
-    // ファイルアップロード時の文字関連
-    const message = document.getElementById("message") as HTMLElement;
-    message.style.display = "none";
-}
-// ファイルに入力された内容をshowFiles関数で表示処理する
-const fileInput = document.getElementById("file") as HTMLInputElement;
+/** ファイル選択ダイアログでの変更を一覧に反映する */
 fileInput.addEventListener("change", () => {
-    if (!fileInput.files) return;
-    showFiles(fileInput.files);
+    if (fileInput.files) renderFileList(fileInput.files);
 });
 
+/** 送信ボタン(type="submit")によるフォーム送信を処理する */
+form.addEventListener("submit", async (event) => {
+    // 既定のページ再読み込みを防ぐ
+    event.preventDefault();
 
+    const files = fileInput.files;
+    if (!files || files.length === 0) return;
 
-
-// 送信ボタンを押した後にユーザが入力したデータをformDataに内容を保存して得られたすべての情報を送信する
-const file = document.getElementById("file") as HTMLInputElement;
-const uploadbtn = document.getElementById("uploadbtn") as HTMLButtonElement;
-
-uploadbtn?.addEventListener("click", async () => {
-    // ファイルに直接入力の場合
-    const alldata = file.files;
-    if (!alldata || alldata.length === 0) return;
-
-    const formData = new FormData();
-    // 送信中に送信中を表示
-    uploadbtn.disabled = true;
-    uploadbtn.textContent = "送信中...";
-
-    for (const filedata of alldata) {
-        formData.append("file", filedata)
-    }
-    // DocumentMetadata.append("metaData", JSON.stringify(metadata)); //すなくんに任せる場所
+    submitButton.disabled = true;
+    submitButton.textContent = "送信中...";
     try {
-        const res = await fetch(`${API_BASE}/docs`, {
-            headers: DEV_HEADERS,
-            method: "POST",
-            body: formData
-        });
+        await postDocuments([...files], buildMetadata());
 
-        if (!res.ok) {
-            throw new Error(`送信失敗: ${res.status}`);
-        }
-
-        console.log("アップロード成功");
-    } catch (error) {
-        console.error(error);
+        // 成功時はフォームを初期化して謝辞を表示する
+        fileInput.value = "";
+        fileList.replaceChildren();
+        statusText.textContent = "送信完了！！協力ありがとうございました";
+        submitButton.hidden = true;
+        fileInput.hidden = true;
+    } catch (e) {
+        console.error("アップロードに失敗", e);
+        statusText.textContent = "送信に失敗しました．時間をおいて再試行してください";
+        submitButton.disabled = false;
+        submitButton.textContent = "送信";
     }
-
-    // ユーザ通知として画面に表示する＋送信ボタンなどを画面から削除，ほぼ初期化されている
-    file.value = ""
-    const makelist = document.getElementById("makelist") as HTMLElement;
-    makelist.textContent = "";
-    const thank = document.getElementById("thank") as HTMLParagraphElement;
-    thank.textContent = "送信完了！！協力ありがとうございました";
-    uploadbtn.style.display = "none"
-    file.style.display = "none"
 });
+
+await loadFaculties();
