@@ -60,7 +60,7 @@ function generate(): void {
     }
 
     // CIで引っかからないように整形
-    const { stderr, success } = Bun.spawnSync([
+    const { stderr, success } = spawnSync([
         "bunx",
         "prettier",
         "--write",
