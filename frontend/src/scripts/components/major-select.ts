@@ -94,14 +94,20 @@ export class MajorSelect extends LitElement {
             .find((f) => f.id === this.selectedFacultyId)
             ?.majors.map((m) => html`<option value=${m.id}>${m.name}</option>`);
 
-        return html`<select .value=${this.selectedFacultyId} @change=${this.onFacultyChange}>
-                <option value="">--学部--</option>
-                ${facluty_options}
-            </select>
-            <select .value=${this.selectedMajorId} @change=${this.onMajorChange}>
-                <option value="">--系/コース/専攻--</option>
-                ${major_options}
-            </select>`;
+        return html` <label>
+                学部
+                <select .value=${this.selectedFacultyId} @change=${this.onFacultyChange}>
+                    <option value="">--学部--</option>
+                    ${facluty_options}
+                </select>
+            </label>
+            <label>
+                系/コース/専攻
+                <select .value=${this.selectedMajorId} @change=${this.onMajorChange}>
+                    <option value="">--系/コース/専攻--</option>
+                    ${major_options}
+                </select></label
+            >`;
     }
 
     private onFacultyChange(e: Event) {
