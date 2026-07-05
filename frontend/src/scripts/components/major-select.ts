@@ -62,12 +62,22 @@ export class MajorSelect extends LitElement {
         this.syncFormValue();
     }
 
-    /** formが使える情報を設定する．updatedで呼び出される  */
+    /** formが使える情報と妥当性を設定する．updatedで呼び出される  */
     private syncFormValue() {
         const data = new FormData();
         data.set("faculty", this.selectedFacultyId);
         data.set("major", this.selectedMajorId);
         this.#internals.setFormValue(data);
+
+        // 未選択があれば無効とする
+        if (this.selectedFacultyId === "" || this.selectedMajorId === "") {
+            this.#internals.setValidity(
+                { valueMissing: true },
+                "学部と系/コース/専攻を選択してください",
+            );
+        } else {
+            this.#internals.setValidity({});
+        }
     }
 
     private async loadFaclties() {

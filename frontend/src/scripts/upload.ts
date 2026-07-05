@@ -83,10 +83,20 @@ form.addEventListener("submit", async (event) => {
     const files = fileInput.files;
     if (!files || files.length === 0) return;
 
+    // 検証は送信前に済ませ，入力不備と通信失敗でメッセージを分ける
+    let metadata: DocumentMetadata;
+    try {
+        metadata = buildMetadata();
+    } catch (e) {
+        console.error("入力内容が不正", e);
+        statusText.textContent = e instanceof Error ? e.message : "入力内容を確認してください";
+        return;
+    }
+
     submitButton.disabled = true;
     submitButton.textContent = "送信中...";
     try {
-        await postDocuments([...files], buildMetadata());
+        await postDocuments([...files], metadata);
 
         // 成功時はフォームを初期化して謝辞を表示する
         fileInput.value = "";
