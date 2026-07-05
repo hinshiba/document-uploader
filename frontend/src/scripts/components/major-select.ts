@@ -1,4 +1,4 @@
-import { html, LitElement } from "lit";
+import { html, LitElement, type PropertyValues } from "lit";
 
 import { customElement, state } from "lit/decorators.js";
 import { fetchFaculties, type Faculty } from "../api/client";
@@ -9,8 +9,33 @@ enum Status {
     Error,
 }
 
+export interface SelectionChangeDetail {
+    facultyId: string;
+    majorId: string;
+}
+
+/* Eventに型を設ける */
+declare global {
+    interface HTMLElementEventMap {
+        "selection-change": CustomEvent<SelectionChangeDetail>;
+    }
+}
+
 @customElement("major-select")
 export class MajorSelect extends LitElement {
+    // formのネイティブ要素としてふるまうために必要
+    static formAssociated = true;
+    #internals: ElementInternals;
+
+    constructor() {
+        super();
+        this.#internals = this.attachInternals();
+    }
+
+    protected override createRenderRoot() {
+        return this; // lightDom化
+    }
+
     /** コンポーネント状態 */
     @state()
     private status: Status = Status.Loading;
@@ -30,6 +55,19 @@ export class MajorSelect extends LitElement {
     override connectedCallback(): void {
         super.connectedCallback();
         void this.loadFaclties();
+    }
+
+    protected override updated(changedProperties: PropertyValues): void {
+        super.updated(changedProperties);
+        this.syncFormValue();
+    }
+
+    /** formが使える情報を設定する．updatedで呼び出される  */
+    private syncFormValue() {
+        const data = new FormData();
+        data.set("faculty", this.selectedFacultyId);
+        data.set("major", this.selectedMajorId);
+        this.#internals.setFormValue(data);
     }
 
     private async loadFaclties() {
@@ -69,13 +107,20 @@ export class MajorSelect extends LitElement {
     private onFacultyChange(e: Event) {
         this.selectedFacultyId = (e.target as HTMLSelectElement).value;
         this.selectedMajorId = ""; // 学部が変更時に専攻をリセット
+        this.emitChange();
     }
 
     private onMajorChange(e: Event) {
         this.selectedMajorId = (e.target as HTMLSelectElement).value;
+        this.emitChange();
     }
 
-    protected override createRenderRoot() {
-        return this; // lightDom化
+    private emitChange() {
+        this.dispatchEvent(
+            new CustomEvent("selection-change", {
+                detail: { facultyId: this.selectedFacultyId, majorId: this.selectedMajorId },
+                bubbles: true,
+            }),
+        );
     }
 }

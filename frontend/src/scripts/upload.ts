@@ -1,5 +1,5 @@
-import { fetchFaculties, postDocuments, type DocumentMetadata } from "./api/client";
-
+import { postDocuments, type DocumentMetadata } from "./api/client";
+import "./components/major-select.ts";
 /**
  * 要素を型付きで取得するヘルパ
  * @param selector セレクタ
@@ -15,25 +15,12 @@ function required<T extends Element>(selector: string): T {
 // type="module" のスクリプトは defer 相当で DOM 構築後に実行されるため，
 // ここで要素を取得してよい
 const form = required<HTMLFormElement>("form");
-const facultySelect = required<HTMLSelectElement>("#faculty");
 const fileInput = required<HTMLInputElement>("#file");
 const dropArea = required<HTMLDivElement>("#drop-area");
 const fileList = required<HTMLUListElement>("#makelist");
 const message = required<HTMLParagraphElement>("#message");
 const submitButton = required<HTMLButtonElement>("#uploadbtn");
 const statusText = required<HTMLParagraphElement>("#thank");
-
-/** 学部一覧を取得して select に反映する */
-async function loadFaculties(): Promise<void> {
-    try {
-        for (const faculty of await fetchFaculties()) {
-            facultySelect.add(new Option(faculty.name, faculty.id));
-        }
-    } catch (e) {
-        console.error("学部一覧の取得に失敗", e);
-        statusText.textContent = "学部一覧の取得に失敗しました";
-    }
-}
 
 /** 選択中のファイル一覧を画面に描画する */
 function renderFileList(files: FileList): void {
@@ -50,16 +37,21 @@ function renderFileList(files: FileList): void {
 
 /**
  * フォームからメタデータを組み立てる
- * @throws faculty が未選択の場合
+ * @throws faculty, major が未選択の場合
  * @remarks
- * TODO: 現状フォームは faculty しか持たないため部分的な値を返す．
+ * TODO: 現状フォームは faculty, major しか持たないため部分的な値を返す．
  */
 function buildMetadata(): DocumentMetadata {
-    const faculty = new FormData(form).get("faculty");
+    const formdata = new FormData(form);
+    const faculty = formdata.get("faculty");
+    const major = formdata.get("major");
     if (typeof faculty !== "string" || faculty === "") {
         throw new Error("学部が選択されていません");
     }
-    return { faculty } as DocumentMetadata;
+    if (typeof major !== "string" || major === "") {
+        throw new Error("専攻が選択されていません");
+    }
+    return { faculty, major } as DocumentMetadata;
 }
 
 /** ドラッグ中はデフォルト動作を抑止し，ドロップを許可する */
@@ -109,5 +101,3 @@ form.addEventListener("submit", async (event) => {
         submitButton.textContent = "送信";
     }
 });
-
-await loadFaculties();
