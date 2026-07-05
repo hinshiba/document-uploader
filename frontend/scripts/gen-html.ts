@@ -1,4 +1,5 @@
 import { Glob, spawnSync } from "bun";
+import { watch } from "node:fs";
 import path from "node:path";
 
 /** exitcodeの定義 */
@@ -17,6 +18,9 @@ const OUTPUT_DIR = "src/temp";
 /** 参照元を含む完全なテンプレートパス */
 const TEMPLATES_DIR = "src/templates";
 
+/** 連続変更をまとめる待ち時間（ms） */
+const DEBOUNCE_MS = 100;
+
 // tera-cliがあるか確認
 if (!spawnSync(["tera", "--help"]).success) {
     console.error(
@@ -25,39 +29,65 @@ if (!spawnSync(["tera", "--help"]).success) {
     process.exit(GenHtmlExitCode.TeraNotFound);
 }
 
-// 全テンプレートページから生成
-for (const page_template of pattern.scanSync()) {
-    const out_path = path.join(OUTPUT_DIR, path.basename(page_template));
-    const { stderr, success } = spawnSync([
-        "tera",
-        "-t",
-        page_template,
-        "--include",
-        "--include-path",
-        TEMPLATES_DIR,
-        "--escape",
-        "--env-only",
-        "-o",
-        out_path,
+/** 全テンプレートページからHTMLを生成し，整形する */
+function generate(): void {
+    // 全テンプレートページから生成
+    for (const page_template of pattern.scanSync()) {
+        const out_path = path.join(OUTPUT_DIR, path.basename(page_template));
+        const { stderr, success } = spawnSync([
+            "tera",
+            "-t",
+            page_template,
+            "--include",
+            "--include-path",
+            TEMPLATES_DIR,
+            "--escape",
+            "--env-only",
+            "-o",
+            out_path,
+        ]);
+        if (!success) {
+            console.error(`tera -t ${page_template} failed.`);
+            console.error(stderr);
+            // watch中は落とさず次の変更を待つ
+            if (isWatch) return;
+            process.exit(GenHtmlExitCode.TeraError);
+        }
+    }
+
+    // CIで引っかからないように整形
+    const { stderr, success } = Bun.spawnSync([
+        "bunx",
+        "prettier",
+        "--write",
+        "--ignore-path",
+        ".prettierignore",
+        OUTPUT_DIR,
     ]);
     if (!success) {
-        console.error(`tera -t ${page_template} failed.`);
+        console.error(`prettier failed.`);
         console.error(stderr);
-        process.exit(GenHtmlExitCode.TeraError);
+        if (isWatch) return;
+        process.exit(GenHtmlExitCode.FormatError);
     }
 }
 
-// CIで引っかからないように整形
-const { stderr, success } = Bun.spawnSync([
-    "bunx",
-    "prettier",
-    "--write",
-    "--ignore-path",
-    ".prettierignore",
-    OUTPUT_DIR,
-]);
-if (!success) {
-    console.error(`prettier failed.`);
-    console.error(stderr);
-    process.exit(GenHtmlExitCode.FormatError);
+const isWatch = process.argv.includes("--watch");
+
+// 初回生成
+generate();
+
+// --watch時はテンプレートの変更を監視して再生成
+if (isWatch) {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    watch(TEMPLATES_DIR, { recursive: true }, (_event, filename) => {
+        // 出力側のみの変更は無視（原理上ここには来ないが念のため）
+        if (filename === null) return;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            console.log(`template changed: ${filename}. regenerating...`);
+            generate();
+        }, DEBOUNCE_MS);
+    });
+    console.log(`watching ${TEMPLATES_DIR} for changes...`);
 }

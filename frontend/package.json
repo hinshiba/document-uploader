@@ -18,6 +18,7 @@
     "scripts": {
         "dev": "bun run --parallel 'dev:*'",
         "dev:serve": "bun run gen && bun --hot src/temp/*.html",
+        "dev:html": "bun run scripts/gen-html.ts --watch",
         "dev:css": "bun run scripts/gen-css.ts --watch",
         "build": "bun run gen && bun build src/temp/*.html --outdir=out",
         "gen": "bun run gen:api && bun run gen:html && bun run gen:css",
