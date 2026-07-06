@@ -1,0 +1,6 @@
+@use "../var" as *;
+
+header {
+    border-bottom: 1px solid $border-color;
+    padding: 0 2%;
+}

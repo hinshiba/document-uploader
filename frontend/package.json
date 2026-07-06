@@ -1,37 +1,46 @@
 {
-  "name": "frontend",
-  "module": "src/scripts/main.ts",
-  "devDependencies": {
-    "@awmottaz/prettier-plugin-void-html": "^2.1.0",
-    "@stoplight/prism-cli": "^5.15.11",
-    "@types/bun": "latest",
-    "openapi-typescript": "^7.13.0",
-    "oxfmt": "0.57.0",
-    "oxlint": "^1.72.0",
-    "prettier": "~3.8.5",
-    "stylelint": "^17.14.0",
-    "stylelint-config-standard-scss": "^17.0.0",
-    "typescript": "5"
-  },
-  "private": true,
-  "scripts": {
-    "dev": "bun run gen && bun --hot src/pages/*.html",
-    "build": "bun run gen && bun build src/pages/*.html --outdir=out",
-    "gen": "bun run gen:api",
-    "gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/scripts/api/types.ts",
-    "lint": "bun run lint:ts && bun run lint:css && bun run lint:html",
-    "lint:ts": "oxlint src",
-    "lint:css": "stylelint \"src/**/*.{css,scss}\"",
-    "lint:html": "bun run build && superhtml check out",
-    "format": "oxfmt src && prettier --write \"src/**/*.{html,css,scss}\"",
-    "format:check": "oxfmt --check src && prettier --check \"src/**/*.{html,css,scss}\"",
-    "typecheck": "tsc --noEmit",
-    "check": "bun run lint && bun run format:check && bun run typecheck",
-    "mock": "prism mock ../docs/api/openapi.yaml --port 4010",
-    "mock:dynamic": "prism mock ../docs/api/openapi.yaml --port 4010 -d"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "type": "module"
+    "name": "frontend",
+    "module": "src/scripts/main.ts",
+    "devDependencies": {
+        "@awmottaz/prettier-plugin-void-html": "^2.1.0",
+        "@stoplight/prism-cli": "^5.15.11",
+        "@types/bun": "latest",
+        "openapi-typescript": "^7.13.0",
+        "oxfmt": "0.57.0",
+        "oxlint": "^1.72.0",
+        "prettier": "~3.8.5",
+        "stylelint": "^17.14.0",
+        "stylelint-config-standard-scss": "^17.0.0",
+        "typescript": "5",
+        "sass": "^1.101.0"
+    },
+    "private": true,
+    "scripts": {
+        "dev": "bun run --parallel 'dev:*'",
+        "dev:serve": "bun run gen && bun --hot src/temp/*.html",
+        "dev:html": "bun run scripts/gen-html.ts --watch",
+        "dev:css": "bun run scripts/gen-css.ts --watch",
+        "build": "bun run gen && bun build src/temp/*.html --outdir=out",
+        "gen": "bun run gen:api && bun run gen:html && bun run gen:css",
+        "gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/scripts/api/types.ts",
+        "gen:html": "bun run scripts/gen-html.ts",
+        "gen:css": "bun run scripts/gen-css.ts --style=compressed",
+        "lint": "bun run lint:ts && bun run lint:css && bun run lint:html",
+        "lint:ts": "oxlint src",
+        "lint:css": "stylelint \"src/styles/**/*.scss\"",
+        "lint:html": "bun run build && superhtml check out",
+        "format": "oxfmt src && prettier --write \"src/**/*.{html,css,scss}\"",
+        "format:check": "oxfmt --check src && prettier --check \"src/**/*.{html,css,scss}\"",
+        "typecheck": "tsc --noEmit",
+        "check": "bun run lint && bun run format:check && bun run typecheck",
+        "mock": "prism mock ../docs/api/openapi.yaml --port 4010",
+        "mock:dynamic": "prism mock ../docs/api/openapi.yaml --port 4010 -d"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "type": "module",
+    "dependencies": {
+        "lit": "^3.3.3"
+    }
 }

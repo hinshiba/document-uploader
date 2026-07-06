@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block styles %}<link
+    rel="stylesheet"
+    href="upload.css"
+>{% endblock %} {% block content %}
+
+<main>
+    <h2>アップロード</h2>
+    <p>貢献に感謝します</p>
+
+    <form>
+        <p>アップロードしたい教科を選んでください．</p>
+
+        <major-select></major-select>
+
+        <label for="file">ファイルを選択してください</label>
+        <input type="file" id="file" multiple>
+
+        <div class="drop-area" id="drop-area">
+            <p id="message">ここにファイルをドラッグしてください</p>
+            <ul id="makelist"></ul>
+        </div>
+
+        <button id="uploadbtn" type="submit">送信</button>
+        <p id="thank"></p>
+    </form>
+</main>
+
+{% endblock content %} {% block scripts %}
+<script type="module" src="../scripts/upload.ts"></script>
+{% endblock %}

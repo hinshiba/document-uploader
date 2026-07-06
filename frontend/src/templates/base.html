@@ -4,15 +4,26 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document Uploader</title>
-        <link rel="stylesheet" href="../styles/main.css">
-        <link rel="stylesheet" href="../styles/upload.css">
+        <link rel="stylesheet" href="style.css">
+        {% block styles %}{% endblock %}
     </head>
 
     <body>
         <header>
-            <nav></nav>
+            <nav>
+                <a href="/">Document Uploader</a>
+                <ul>
+                    <li>
+                        <a href="/upload">upload</a>
+                    </li>
+                    <li>
+                        <a href="/download">download</a>
+                    </li>
+                </ul>
+            </nav>
         </header>
-        <!-- 共通でないコンテンツ -->
-        <footer>フッター</footer>
+        {% block content %}{% endblock %}
+        <footer>Developed by HacKinGS (Hinshiba, Glabyl, Kobi, Sunakun)</footer>
+        {% block scripts %}{% endblock %}
     </body>
 </html>
