@@ -2,6 +2,8 @@ import type { components } from "./types";
 
 export type Faculty = components["schemas"]["Faculty"];
 export type Major = components["schemas"]["Major"];
+// サブジェクトを追加
+export type Subject = components["schemas"]["Subject"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
 // 実バックエンドテスト
@@ -40,6 +42,14 @@ export async function fetchFaculties(): Promise<Faculty[]> {
     const res = await fetchWithTimeout(`${API_BASE}/faculties`, { headers: DEV_HEADERS });
     if (!res.ok) throw new Error(`GET /faculties -> ${res.status}`);
     return (await res.json()) as Faculty[];
+}
+// サブジェクト一覧を取得するはず
+// /subjects GET に対応
+export async function fetchSubjects(facultyId: string, majorId: string): Promise<Subject[]> {
+    const res = await fetchWithTimeout(`${API_BASE}/subjects`, { headers: DEV_HEADERS });
+    if (!res.ok)
+        throw new Error(`GET /faculties/${facultyId}/majors/${majorId}/subjects -> ${res.status}`);
+    return (await res.json()) as Subject[];
 }
 
 /**
