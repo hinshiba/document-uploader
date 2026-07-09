@@ -58,6 +58,10 @@ impl<I: DocumentRepository> StoreDocumentUseCase<I> {
 /// FIXME: ファイルの保存はUseCaseで行うべきではない
 #[tracing::instrument(ret(level="debug"), err)]
 async fn save_file(filename: String, filetype: DocumentFileType, content: Vec<u8>, save_dir: &std::path::Path) -> anyhow::Result<DocumentFile> {
+    if !save_dir.exists() {
+        tokio::fs::create_dir_all(&save_dir).await?;
+    }
+
     let file_path = save_dir.join(filename);
 
     let mut buffer = tokio::io::BufWriter::new(
