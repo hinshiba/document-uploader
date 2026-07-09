@@ -10,9 +10,9 @@ use crate::usecase::repository::DocumentRepository;
 
 #[derive(Debug, Clone, Hash)]
 pub struct StoreDocumentInputFile {
-    file_name: String,
-    file_type: DocumentFileType,
-    content: Vec<u8>,
+    pub file_name: String,
+    pub file_type: DocumentFileType,
+    pub content: Vec<u8>,
 }
 
 #[derive(Debug, Clone, Hash)]
