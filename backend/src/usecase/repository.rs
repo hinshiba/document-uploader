@@ -1,11 +1,19 @@
 use crate::domain::{
-    document::Document,
+    document::{
+        Document,
+        DocumentFile,
+        DocumentFileType,
+    },
     faculty::Faculty,
     subject::Subject,
 };
 
 pub trait DocumentRepository: Send + Sync {
     fn store_document(&self, document: Document) -> impl Future<Output=anyhow::Result<()>> + Send;
+}
+
+pub trait DocumentFileRepository: Send + Sync {
+    fn store_document_file(&self, content: Vec<u8>, file_type: DocumentFileType) -> impl Future<Output=anyhow::Result<DocumentFile>> + Send;
 }
 
 pub trait FacultyRepository: Send + Sync {
