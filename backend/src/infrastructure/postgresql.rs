@@ -3,8 +3,10 @@ use std::collections::HashMap;
 use sqlx::PgPool;
 
 use crate::{
-    domain::{Grade, Id, Term, faculty::Faculty, major::Major, subject::Subject},
-    usecase::repository::{FacultyRepository, SubjectRepository},
+    domain::{
+        Grade, Id, Term, document::Document, faculty::Faculty, major::Major, subject::Subject,
+    },
+    usecase::repository::{DocumentRepository, FacultyRepository, SubjectRepository},
 };
 
 #[derive(Debug)]
@@ -90,5 +92,12 @@ impl FacultyRepository for PostgresRepository {
                 )
             })
             .collect())
+    }
+}
+
+impl DocumentRepository for PostgresRepository {
+    #[tracing::instrument(skip(self), err(Debug))]
+    async fn store_document(&self, document: Document) -> anyhow::Result<()> {
+        todo!()
     }
 }
