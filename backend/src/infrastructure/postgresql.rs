@@ -124,7 +124,7 @@ impl DocumentRepository for PostgresRepository {
         )
         .fetch_optional(&mut *transaction)
         .await?
-        .ok_or_else(|| anyhow::anyhow!("Subject not found."))?;
+        .ok_or_else(|| anyhow::anyhow!("No subject matching the specified criteria was found."))?;
 
         // メタデータの格納
         let document_id = Uuid::new_v4();
