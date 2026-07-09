@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use sqlx::PgPool;
+use sqlx::{PgPool, query};
+use uuid::Uuid;
 
 use crate::{
     domain::{
@@ -98,6 +99,73 @@ impl FacultyRepository for PostgresRepository {
 impl DocumentRepository for PostgresRepository {
     #[tracing::instrument(skip(self), err(Debug))]
     async fn store_document(&self, document: Document) -> anyhow::Result<()> {
-        todo!()
+        let mut transaction = self.pool.begin().await?;
+
+        let meta = document.metadata();
+
+        // 存在しない学部等idではないか確認
+        let _ = sqlx::query!(
+            r#"
+            SELECT s.id
+            FROM subjects AS s
+            INNER JOIN majors AS m On m.id = s.major_id
+            WHERE
+                s.id = $1 AND
+                m.faculty_id = $2 AND
+                s.major_id = $3 AND
+                s.grade = $4 AND
+                s.term = $5
+        "#,
+            meta.subject_id().id(),
+            meta.faculty_id().id(),
+            meta.major_id().id(),
+            meta.grade().grade(),
+            meta.term().term()
+        )
+        .fetch_optional(&mut *transaction)
+        .await?
+        .ok_or_else(|| anyhow::anyhow!("Subject not found."))?;
+
+        // メタデータの格納
+        let document_id = Uuid::new_v4();
+        let _ = sqlx::query!(
+            r#"
+            INSERT INTO documents
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+        "#,
+            document_id,
+            meta.subject_id().id(),
+            meta.year().year(),
+            meta.teacher(),
+            meta.exam_type().to_int(),
+            meta.is_answer(),
+            meta.num().num(),
+        )
+        .execute(&mut *transaction)
+        .await?;
+
+        // ファイル情報の格納
+        for file in document.files() {
+            let path = file
+                .path()
+                .to_str()
+                .ok_or_else(|| anyhow::anyhow!("File path is not valid UTF-8."))?;
+
+            let _ = sqlx::query!(
+                r#"
+                INSERT INTO document_files (document_id, file_type, path)
+                    VALUES ($1, $2, $3)
+            "#,
+                document_id,
+                file.ty().to_string(),
+                path,
+            )
+            .execute(&mut *transaction)
+            .await?;
+        }
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
