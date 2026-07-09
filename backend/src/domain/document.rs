@@ -186,6 +186,24 @@ impl std::str::FromStr for DocumentFileType {
     }
 }
 
+impl std::fmt::Display for DocumentFileType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            DocumentFileType::Jpeg => "jpeg",
+            DocumentFileType::Webp => "webp",
+            DocumentFileType::Png => "png",
+            DocumentFileType::Doc => "doc",
+            DocumentFileType::Docx => "docx",
+            DocumentFileType::Pdf => "pdf",
+            DocumentFileType::Txt => "txt",
+            DocumentFileType::Markdown => "md",
+            DocumentFileType::Typst => "typ",
+            DocumentFileType::Tex => "tex",
+        };
+        write!(f, "{s}")
+    }
+}
+
 #[derive(Debug, Hash)]
 pub struct DocumentFile {
     ty: DocumentFileType,
