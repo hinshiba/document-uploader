@@ -130,7 +130,7 @@ impl DocumentRepository for PostgresRepository {
         let document_id = Uuid::new_v4();
         let _ = sqlx::query!(
             r#"
-            INSERT INTO documents
+            INSERT INTO documents (id, subject_id, year, teacher, exam_type, is_answer, num)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
         "#,
             document_id,
