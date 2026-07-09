@@ -45,13 +45,55 @@ function buildMetadata(): DocumentMetadata {
     const formdata = new FormData(form);
     const faculty = formdata.get("faculty");
     const major = formdata.get("major");
+    const year = Number(formdata.get("year"));
+    const term = Number(formdata.get("term"));
+    const grade = Number(formdata.get("grade"));
+    const subject = formdata.get("subject");
+    const teacher = formdata.get("teacher");
+    const examtype = formdata.get("examtype");
+    const isanswer = formdata.has("isanswer");
+    const num = Number(formdata.get("num"));
+
     if (typeof faculty !== "string" || faculty === "") {
         throw new Error("学部が選択されていません");
     }
     if (typeof major !== "string" || major === "") {
         throw new Error("専攻が選択されていません");
     }
-    return { faculty, major } as DocumentMetadata;
+    if (typeof year !== "string" || year === "") {
+        throw new Error("年度が選択されていません");
+    }
+    if (Number(year) < 1949) {
+        throw new Error("年度は1949年以降の整数で入力してください");
+    }
+    if (typeof term !== "string" || term === "") {
+        throw new Error("学期が選択されていません");
+    }
+    if (typeof grade !== "string" || grade === "") {
+        throw new Error("学年が選択されていません");
+    }
+    if (typeof subject !== "string" || subject === "") {
+        throw new Error("科目名が入力されていません");
+    }
+    if (typeof teacher !== "string" || teacher === "") {
+        throw new Error("担当教員名が入力されていません");
+    }
+    if (typeof examtype !== "string" || examtype === "") {
+        throw new Error("試験種別が選択されていません");
+    }
+
+    return {
+        faculty,
+        major,
+        year,
+        term,
+        grade,
+        subject: formdata.get("subject") as string,
+        teacher: formdata.get("teacher") as string,
+        examtype: formdata.get("examtype") as "quiz" | "midterm" | "final" | "other",
+        isanswer,
+        num,
+    };
 }
 
 /** ドラッグ中はデフォルト動作を抑止し，ドロップを許可する */
