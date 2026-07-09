@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT s.id\n            FROM subjects AS s\n            INNER JOIN majors AS m On m.id = s.major_id\n            WHERE\n                s.id = $1 AND\n                m.faculty_id = $2 AND\n                s.major_id = $3 AND\n                s.grade = $4 AND\n                s.term = $5\n        ",
+  "query": "\n            SELECT s.id\n            FROM subjects AS s\n            INNER JOIN majors AS m ON m.id = s.major_id\n            WHERE\n                s.id = $1 AND\n                m.faculty_id = $2 AND\n                s.major_id = $3 AND\n                s.grade = $4 AND\n                s.term = $5\n        ",
   "describe": {
     "columns": [
       {
@@ -28,5 +28,5 @@
       false
     ]
   },
-  "hash": "cd9e1ec78e1272ffaff0114de548c29fdb7e1de2563028abd69eb4408717fbc1"
+  "hash": "9db6583ed31978c2b15874208e65c7bd068f4142c47e8df9714f38359dbd7f26"
 }
