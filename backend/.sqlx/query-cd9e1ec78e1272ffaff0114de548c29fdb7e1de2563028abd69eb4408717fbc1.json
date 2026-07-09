@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT s.id\n            FROM subjects AS s\n            INNER JOIN majors AS m On m.id = s.major_id\n            WHERE\n                s.id = $1 AND\n                m.faculty_id = $2 AND\n                s.major_id = $3 AND\n                s.grade = $4 AND\n                s.term = $5\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "cd9e1ec78e1272ffaff0114de548c29fdb7e1de2563028abd69eb4408717fbc1"
+}
