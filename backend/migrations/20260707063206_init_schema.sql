@@ -34,3 +34,8 @@ CREATE TABLE document_files (
     file_type TEXT NOT NULL,
     path TEXT NOT NULL
 );
+
+CREATE INDEX idx_majors_faculty_id ON majors(faculty_id);
+CREATE INDEX idx_subjects_major_id ON subjects(major_id);
+CREATE INDEX idx_documents_subject_id ON documents(subject_id);
+CREATE INDEX idx_document_files_document_id ON document_files(document_id);
