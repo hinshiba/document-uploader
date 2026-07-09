@@ -108,7 +108,7 @@ impl DocumentRepository for PostgresRepository {
             r#"
             SELECT s.id
             FROM subjects AS s
-            INNER JOIN majors AS m On m.id = s.major_id
+            INNER JOIN majors AS m ON m.id = s.major_id
             WHERE
                 s.id = $1 AND
                 m.faculty_id = $2 AND
