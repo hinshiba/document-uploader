@@ -95,6 +95,7 @@ form.addEventListener("submit", async (event) => {
 
     submitButton.disabled = true;
     submitButton.textContent = "送信中...";
+    console.log("送信開始", files, metadata);
     try {
         await postDocuments([...files], metadata);
 
