@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use sqlx::{PgPool, query};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
