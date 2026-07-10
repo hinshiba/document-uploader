@@ -22,7 +22,7 @@ impl PostgresRepository {
 }
 
 impl SubjectRepository for PostgresRepository {
-    #[tracing::instrument(skip(self), err(Debug))]
+    #[tracing::instrument(skip(self), ret, err(Display))]
     async fn list_subjects(&self) -> anyhow::Result<Vec<Subject>> {
         // subjects, majorsから必要な情報を取得
         sqlx::query!(
@@ -50,7 +50,7 @@ impl SubjectRepository for PostgresRepository {
 }
 
 impl FacultyRepository for PostgresRepository {
-    #[tracing::instrument(skip(self), err(Debug))]
+    #[tracing::instrument(skip(self), ret, err(Display))]
     async fn list_faculties(&self) -> anyhow::Result<Vec<Faculty>> {
         // 学部一覧を取得
         let faculties = sqlx::query!(
@@ -97,7 +97,7 @@ impl FacultyRepository for PostgresRepository {
 }
 
 impl DocumentRepository for PostgresRepository {
-    #[tracing::instrument(skip(self), err(Debug))]
+    #[tracing::instrument(skip(self), err(Display))]
     async fn store_document(&self, document: Document) -> anyhow::Result<()> {
         let mut transaction = self.pool.begin().await?;
 
