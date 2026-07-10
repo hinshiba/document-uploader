@@ -86,11 +86,11 @@ export class SubjectSelect extends LitElement {
 
         return html` <label>
             <select @change=${this.selectedSubjectId}>
-                @change=${this.onSubjectChange}>
+            <select @change=${this.onSubjectChange}>
                 <option value="">教科を選択してください</option>
-                ${subject_options}</select
-            ><label></label
-        ></label>`;
+                ${subject_options}
+            </select></label
+        >`;
     }
 
     private onSubjectChange(e: Event) {

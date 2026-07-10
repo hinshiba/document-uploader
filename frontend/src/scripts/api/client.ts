@@ -45,10 +45,9 @@ export async function fetchFaculties(): Promise<Faculty[]> {
 }
 // サブジェクト一覧を取得するはず
 // /subjects GET に対応
-export async function fetchSubjects(facultyId: string, majorId: string): Promise<Subject[]> {
+export async function fetchSubjects(): Promise<Subject[]> {
     const res = await fetchWithTimeout(`${API_BASE}/subjects`, { headers: DEV_HEADERS });
-    if (!res.ok)
-        throw new Error(`GET /faculties/${facultyId}/majors/${majorId}/subjects -> ${res.status}`);
+    if (!res.ok) throw new Error(`GET /subjects -> ${res.status}`);
     return (await res.json()) as Subject[];
 }
 
