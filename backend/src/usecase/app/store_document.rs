@@ -1,8 +1,5 @@
-use tokio::io::AsyncWriteExt;
-
 use crate::domain::document::{
     Document,
-    DocumentFile,
     DocumentFileType,
     DocumentMetadata,
 };
@@ -49,24 +46,4 @@ impl<I: DocumentRepository + DocumentFileRepository> StoreDocumentUseCase<I> {
 
         self.repository.store_document(document).await
     }
-}
-
-// 以下 helper functions
-
-/// FIXME: ファイルの保存はUseCaseで行うべきではない
-#[tracing::instrument(ret(level="debug"), err)]
-async fn save_file(filename: String, filetype: DocumentFileType, content: Vec<u8>, save_dir: &std::path::Path) -> anyhow::Result<DocumentFile> {
-    if !save_dir.exists() {
-        tokio::fs::create_dir_all(&save_dir).await?;
-    }
-
-    let file_path = save_dir.join(filename);
-
-    let mut buffer = tokio::io::BufWriter::new(
-        tokio::fs::File::create_new(&file_path).await?
-    );
-    buffer.write_all(&content).await?;
-    buffer.flush().await?;
-
-    Ok(DocumentFile::new(filetype, file_path))
 }
