@@ -43,11 +43,38 @@ export async function fetchFaculties(): Promise<Faculty[]> {
     if (!res.ok) throw new Error(`GET /faculties -> ${res.status}`);
     return (await res.json()) as Faculty[];
 }
-// サブジェクト一覧を取得するはず
-// /subjects GET に対応
-export async function fetchSubjects(): Promise<Subject[]> {
-    const res = await fetchWithTimeout(`${API_BASE}/subjects`, { headers: DEV_HEADERS });
-    if (!res.ok) throw new Error(`GET /subjects -> ${res.status}`);
+
+export async function fetchSubjects(
+    faculty: string,
+    major?: string,
+    grade?: string,
+    term?: string,
+): Promise<Subject[]> {
+    // console.log("faculty:", faculty);
+    const params = new URLSearchParams();
+    // faculty必須
+    params.set("faculty", faculty);
+
+    if (major) {
+        params.set("major", major);
+    }
+
+    if (grade) {
+        params.set("grade", grade);
+    }
+
+    if (term) {
+        params.set("term", term);
+    }
+
+    const res = await fetchWithTimeout(`${API_BASE}/subjects?${params.toString()}`, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /subjects -> ${res.status}`);
+    }
+
     return (await res.json()) as Subject[];
 }
 

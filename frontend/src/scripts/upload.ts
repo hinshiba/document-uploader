@@ -112,3 +112,14 @@ form.addEventListener("submit", async (event) => {
         submitButton.textContent = "送信";
     }
 });
+
+const majorSelect = document.querySelector("major-select");
+const subjectSelect = document.querySelector("subject-select");
+
+majorSelect?.addEventListener("selection-change", (e) => {
+    const event = e as CustomEvent<SelectionChangeDetail>;
+
+    if (subjectSelect) {
+        subjectSelect.facultyId = event.detail.facultyId;
+    }
+});

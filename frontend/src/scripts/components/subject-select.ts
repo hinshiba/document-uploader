@@ -46,6 +46,7 @@ export class SubjectSelect extends LitElement {
     }
 
     protected override updated(changedProperties: PropertyValues) {
+        // console.log(changedProperties);
         if (changedProperties.has("facultyId")) {
             this.selectedSubjectId = "";
             void this.loadSubjects();
@@ -53,10 +54,16 @@ export class SubjectSelect extends LitElement {
     }
 
     private async loadSubjects() {
+        // 学部が選択されていない場合はAPIを呼ばない
+        if (!this.facultyId) {
+            this.subjects = [];
+            return;
+        }
+
         try {
             this.status = Status.Loading;
 
-            this.subjects = await fetchSubjects();
+            this.subjects = await fetchSubjects(this.facultyId);
 
             this.status = Status.Ready;
 
@@ -76,6 +83,7 @@ export class SubjectSelect extends LitElement {
     }
 
     override render() {
+        console.log(this.subjects);
         const subject_options = this.subjects.map(
             (s) => html`
                 <option value=${s.id} ?selected=${s.id === this.selectedSubjectId}>
