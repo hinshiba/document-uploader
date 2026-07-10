@@ -6,19 +6,19 @@ use crate::domain::document::{
     DocumentFileType,
     DocumentMetadata,
 };
-use crate::usecase::repository::DocumentRepository;
+use crate::usecase::repository::{
+    DocumentRepository,
+    DocumentFileRepository,
+};
 
 #[derive(Debug, Clone, Hash)]
 pub struct StoreDocumentInputFile {
-    pub file_name: String,
     pub file_type: DocumentFileType,
     pub content: Vec<u8>,
 }
 
 #[derive(Debug, Clone, Hash)]
 pub struct StoreDocumentInput {
-    /// FIXME: `save_dir`が漏れるのはおかしい
-    pub save_dir: std::path::PathBuf,
     pub metadata: DocumentMetadata,
     pub files: Vec<StoreDocumentInputFile>,
 }
@@ -33,17 +33,15 @@ impl<I> StoreDocumentUseCase<I> {
     }
 }
 
-impl<I: DocumentRepository> StoreDocumentUseCase<I> {
+impl<I: DocumentRepository + DocumentFileRepository> StoreDocumentUseCase<I> {
     #[tracing::instrument(skip(self), ret(level="debug"), err)]
     pub async fn execute(&self, input: StoreDocumentInput) -> anyhow::Result<()> {
         let mut files = Vec::with_capacity(input.files.len());
         for file in input.files {
             files.push(
-                save_file(
-                    file.file_name,
-                    file.file_type,
+                self.repository.store_document_file(
                     file.content,
-                    &input.save_dir
+                    file.file_type,
                 ).await?
             );
         }
