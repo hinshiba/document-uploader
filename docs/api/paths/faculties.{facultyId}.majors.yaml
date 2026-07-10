@@ -1,0 +1,45 @@
+parameters:
+  - name: facultyId
+    in: path
+    required: true
+    description: 学部のUUID
+    schema:
+      type: string
+      format: uuid
+
+post:
+  tags: [faculties]
+  summary: 専攻の作成
+  description: |
+    指定した学部に属する専攻を作成する
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Major"
+        example:
+          name: "情電数理系/情報工学コース"
+  responses:
+    "201":
+      description: 作成された専攻
+      headers:
+        Location:
+          description: 作成された専攻のURL
+          schema:
+            type: string
+            format: uri-reference
+          example: "/faculties/f47ac10b-58cc-4372-a567-0e02b2c3d479/majors/550e8400-e29b-41d4-a716-446655440000"
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Major"
+          example:
+            id: "550e8400-e29b-41d4-a716-446655440000"
+            name: "情電数理系/情報工学コース"
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"

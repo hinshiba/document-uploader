@@ -1,0 +1,51 @@
+parameters:
+  - name: facultyId
+    in: path
+    required: true
+    description: 学部のUUID
+    schema:
+      type: string
+      format: uuid
+
+put:
+  tags: [faculties]
+  summary: 学部の更新
+  description: |
+    指定した学部名を更新する
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Faculty"
+        example:
+          name: "工学部"
+  responses:
+    "200":
+      description: 更新後の学部
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Faculty"
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"
+
+delete:
+  tags: [faculties]
+  summary: 学部の削除
+  description: |
+    指定した学部を削除する
+    専攻や科目から参照されている場合は削除できない
+  responses:
+    "204":
+      description: 削除成功
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"
+    "409":
+      $ref: "../openapi.yaml#/components/responses/Conflict"

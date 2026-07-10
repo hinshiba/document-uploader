@@ -28,8 +28,16 @@ paths:
     $ref: "./paths/alive.yaml"
   /faculties:
     $ref: "./paths/faculties.yaml"
+  /faculties/{facultyId}:
+    $ref: "./paths/faculties.{facultyId}.yaml"
+  /faculties/{facultyId}/majors:
+    $ref: "./paths/faculties.{facultyId}.majors.yaml"
+  /faculties/{facultyId}/majors/{majorId}:
+    $ref: "./paths/faculties.{facultyId}.majors.{majorId}.yaml"
   /subjects:
     $ref: "./paths/subjects.yaml"
+  /subjects/{subjectId}:
+    $ref: "./paths/subjects.{subjectId}.yaml"
   /docs:
     $ref: "./paths/docs.yaml"
 
@@ -61,6 +69,25 @@ components:
             $ref: "#/components/schemas/Error"
           example:
             message: "missing or invalid Cf-Access-Jwt-Assertion"
+    NotFound:
+      description: 指定したリソースが存在しない
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: "faculty does not exist"
+            details: "id: f47ac10b-58cc-4372-a567-0e02b2c3d479"
+    Conflict:
+      description: |
+        他リソースからの参照や一意制約により，要求した変更を適用できない
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: "faculty is still referenced by majors or subjects"
+            details: "reassign or delete them before deleting this faculty"
 
   schemas:
     Faculty:
@@ -72,13 +99,17 @@ components:
           type: string
           format: uuid
           description: 学部のUUID
+          readOnly: true
         name:
           type: string
           description: 学部名
           examples: [工学部]
         majors:
           type: array
-          description: この学部に属する専攻の一覧
+          description: |
+            この学部に属する専攻の一覧
+            専攻は /faculties/{facultyId}/majors 配下で個別に操作する
+          readOnly: true
           items:
             $ref: "#/components/schemas/Major"
       example:
@@ -99,6 +130,7 @@ components:
           type: string
           format: uuid
           description: 専攻のUUID
+          readOnly: true
         name:
           type: string
           description: 専攻名
@@ -118,6 +150,7 @@ components:
           type: string
           format: uuid
           description: 科目のUUID
+          readOnly: true
         name:
           type: string
           description: 科目名

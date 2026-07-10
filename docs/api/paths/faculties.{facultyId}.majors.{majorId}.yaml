@@ -1,0 +1,58 @@
+parameters:
+  - name: facultyId
+    in: path
+    required: true
+    description: 学部のUUID
+    schema:
+      type: string
+      format: uuid
+  - name: majorId
+    in: path
+    required: true
+    description: 専攻のUUID
+    schema:
+      type: string
+      format: uuid
+
+put:
+  tags: [faculties]
+  summary: 専攻の更新
+  description: |
+    指定した学部に属する専攻名を変更する
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Major"
+        example:
+          name: "情電数理系/ネットワーク工学コース"
+  responses:
+    "200":
+      description: 更新後の専攻
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Major"
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"
+
+delete:
+  tags: [faculties]
+  summary: 専攻の削除
+  description: |
+    指定した学部に属する専攻を削除する
+    科目から参照されている場合は削除できない
+  responses:
+    "204":
+      description: 削除成功
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"
+    "409":
+      $ref: "../openapi.yaml#/components/responses/Conflict"
