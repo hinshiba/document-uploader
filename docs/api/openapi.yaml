@@ -292,6 +292,67 @@ components:
         isanswer: false
         num: 1
 
+    FileType:
+      type: string
+      description: 保存されているファイルの種別(拡張子)
+      enum:
+        - jpeg
+        - webp
+        - png
+        - doc
+        - docx
+        - pdf
+        - txt
+        - md
+        - typ
+        - tex
+
+    DocumentFile:
+      type: object
+      description: 文書を構成する個々のファイル
+      required: [id, type]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ファイルのUUID(`GET /docs/{id}`でのダウンロードに使う)
+        type:
+          $ref: "#/components/schemas/FileType"
+      example:
+        id: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+        type: "pdf"
+
+    Document:
+      type: object
+      description: メタデータと，それに紐づく1つ以上のファイル
+      required: [metadata, files]
+      properties:
+        metadata:
+          $ref: "#/components/schemas/DocumentMetadata"
+        files:
+          type: array
+          description: この文書を構成するファイルの一覧
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/DocumentFile"
+      example:
+        metadata:
+          faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+          major: "550e8400-e29b-41d4-a716-446655440000"
+          year: 2025
+          term: 2
+          grade: 2
+          subject: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
+          teacher: "岡山 聖彦"
+          examtype: "final"
+          isanswer: false
+          num: 1
+        files:
+          - id: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+            type: "pdf"
+          - id: "b3f1a2c4-5d6e-4a7b-8c9d-0e1f2a3b4c5d"
+            type: "jpeg"
+
     Error:
       type: object
       required: [message]
