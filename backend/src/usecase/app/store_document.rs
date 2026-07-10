@@ -32,7 +32,7 @@ impl<I> StoreDocumentUseCase<I> {
 }
 
 impl<I: DocumentRepository + DocumentFileRepository> StoreDocumentUseCase<I> {
-    #[tracing::instrument(skip(self), ret(level="debug"), err)]
+    #[tracing::instrument(skip_all, ret(level="debug"), err)]
     pub async fn execute(&self, input: StoreDocumentInput) -> anyhow::Result<()> {
         let mut files = Vec::with_capacity(input.files.len());
         for file in input.files {
