@@ -1,6 +1,7 @@
 use crate::domain::subject::Subject;
 use crate::usecase::repository::SubjectRepository;
 
+#[derive(Debug)]
 pub struct GetSubjectsUseCase<I> {
     repository: I
 }

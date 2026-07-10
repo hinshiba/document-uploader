@@ -20,6 +20,7 @@ pub struct StoreDocumentInput {
     pub files: Vec<StoreDocumentInputFile>,
 }
 
+#[derive(Debug)]
 pub struct StoreDocumentUseCase<I> {
     repository: I
 }

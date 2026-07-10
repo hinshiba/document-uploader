@@ -1,6 +1,7 @@
 use crate::domain::faculty::Faculty;
 use crate::usecase::repository::FacultyRepository;
 
+#[derive(Debug)]
 pub struct GetFacultiesUseCase<I> {
     repository: I
 }
