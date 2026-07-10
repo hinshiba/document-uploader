@@ -15,8 +15,8 @@ export interface SelectionChangeDetail {
 
 @customElement("subject-select")
 export class SubjectSelect extends LitElement {
+    //formのネイティブ要素としてふるまうために必要
     static formAssociated = true;
-
     #internals: ElementInternals;
 
     constructor() {
@@ -25,26 +25,26 @@ export class SubjectSelect extends LitElement {
     }
 
     protected override createRenderRoot() {
-        return this;
+        return this; // lightDom化
     }
-
+    // コンポーネント状態
     @state()
     private status: Status = Status.Loading;
-
+    // 取得した教科，未収得時は空配列
     @state()
     private subjects: Subject[] = [];
-
+    // 洗濯した教科Id
     @state()
     private selectedSubjectId = "";
-
+    // 初期値を設定
     @property()
     facultyId = "";
-
+    // 更新時にloadgacultiesを呼ぶ
     override connectedCallback(): void {
         super.connectedCallback();
         void this.loadSubjects();
     }
-
+    // 更新時の処理
     protected override updated(changedProperties: PropertyValues) {
         // console.log(changedProperties);
         if (changedProperties.has("facultyId")) {
@@ -52,7 +52,7 @@ export class SubjectSelect extends LitElement {
             void this.loadSubjects();
         }
     }
-
+    // updatedで呼び出される，form関連の処理を行う関数
     private async loadSubjects() {
         // 学部が選択されていない場合はAPIを呼ばない
         if (!this.facultyId) {
@@ -71,7 +71,7 @@ export class SubjectSelect extends LitElement {
             data.set("faculty", this.facultyId);
             data.set("subject", this.selectedSubjectId);
             this.#internals.setFormValue(data);
-
+            // 未選択時に無効とする
             if (this.facultyId === "" || this.selectedSubjectId === "") {
                 this.#internals.setValidity({ valueMissing: true }, "学部と教科を選択してください");
             } else {
@@ -81,9 +81,8 @@ export class SubjectSelect extends LitElement {
             this.status = Status.Error;
         }
     }
-
+    // 画面表示設定HTML
     override render() {
-        console.log(this.subjects);
         const subject_options = this.subjects.map(
             (s) => html`
                 <option value=${s.id} ?selected=${s.id === this.selectedSubjectId}>
@@ -101,7 +100,7 @@ export class SubjectSelect extends LitElement {
             </label>
         `;
     }
-
+    // 教科変更時に呼び出される
     private onSubjectChange(e: Event) {
         this.selectedSubjectId = (e.target as HTMLSelectElement).value;
 
