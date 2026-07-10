@@ -1,0 +1,33 @@
+get:
+  tags: [docs]
+  summary: ファイルのダウンロード
+  description: |
+    指定したUUIDのファイルの内容を返す
+
+    `Content-Disposition` にアップロード時の拡張子を含むファイル名を付与する
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: ファイルのUUID
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "200":
+      description: ファイルの内容
+      headers:
+        Content-Disposition:
+          description: ダウンロード時のファイル名
+          schema:
+            type: string
+            examples: ['attachment; filename="線形代数_2025_final_1.pdf"']
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"

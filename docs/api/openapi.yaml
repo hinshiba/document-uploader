@@ -40,6 +40,8 @@ paths:
     $ref: "./paths/subjects.{subjectId}.yaml"
   /docs:
     $ref: "./paths/docs.yaml"
+  /docs/{id}:
+    $ref: "./paths/docs_id.yaml"
 
 components:
   securitySchemes:
