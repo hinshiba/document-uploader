@@ -154,7 +154,7 @@ impl DocumentRepository for ExampleRepository {
 }
 
 impl DocumentFileRepository for ExampleRepository {
-    #[tracing::instrument(skip(self), ret(level="info"), err)]
+    #[tracing::instrument(skip_all, ret(level="info"), err)]
     async fn store_document_file(&self, content: Vec<u8>, file_type: DocumentFileType) -> anyhow::Result<DocumentFile> {
         let file_name = uuid::Uuid::new_v4().to_string();
         let file_path = self.save_dir.join(file_name);
