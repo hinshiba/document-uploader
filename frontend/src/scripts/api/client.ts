@@ -49,7 +49,7 @@ export async function fetchGrades(): Promise<Faculty[]> {
     return (await res.json()) as Faculty[];
 }
 
-export async function fetchTeems(): Promise<Faculty[]> {
+export async function fetchTerms(): Promise<Faculty[]> {
     const res = await fetchWithTimeout(`${API_BASE}/terms`, { headers: DEV_HEADERS });
     if (!res.ok) throw new Error(`GET /terms -> ${res.status}`);
     return (await res.json()) as Faculty[];

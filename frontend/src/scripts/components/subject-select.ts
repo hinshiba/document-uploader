@@ -9,13 +9,6 @@ enum Status {
     Error,
 }
 
-export interface SelectionChangeDetail {
-    facultyId: string;
-    subjectId: string;
-    gradeId: string;
-    termId: string;
-}
-
 @customElement("subject-select")
 export class SubjectSelect extends LitElement {
     // formのネイティブ要素としてふるまうために必要
