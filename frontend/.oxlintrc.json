@@ -1,11 +1,11 @@
 {
-    "$schema": "./node_modules/oxlint/configuration_schema.json",
-    "categories": {
-        "correctness": "error",
-        "suspicious": "warn"
-    },
-    "env": {
-        "browser": true
-    },
-    "ignorePatterns": ["src/scripts/api/types.ts"]
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "env": {
+    "browser": true
+  },
+  "ignorePatterns": ["src/scripts/api/types.ts"]
 }
