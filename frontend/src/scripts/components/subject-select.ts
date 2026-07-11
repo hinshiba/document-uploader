@@ -123,7 +123,7 @@ export class SubjectSelect extends LitElement {
 
     private emitChange() {
         this.dispatchEvent(
-            new CustomEvent<SelectionChangeDetail>("selection-change", {
+            new CustomEvent("selection-change", {
                 detail: {
                     facultyId: this.facultyId,
                     subjectId: this.selectedSubjectId,

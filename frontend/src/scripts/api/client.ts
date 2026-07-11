@@ -3,6 +3,9 @@ import type { components } from "./types";
 export type Faculty = components["schemas"]["Faculty"];
 export type Major = components["schemas"]["Major"];
 export type Subject = components["schemas"]["Subject"];
+
+export type Grade = components["schemas"]["Grade"];
+export type Term = components["schemas"]["Term"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
 // 実バックエンドテスト
