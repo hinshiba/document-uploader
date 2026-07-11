@@ -35,23 +35,27 @@ export class SubjectSelect extends LitElement {
     @state()
     private selectedSubjectId = "";
 
-    /** 選択した学年Id */
+    /** 選択した学年 */
     @state()
-    private selectedGradeId = "";
+    private selectedGrade: number | undefined = undefined;
 
-    /** 選択した学期Id */
+    /** 選択した学期 */
     @state()
-    private selectedTermId = "";
+    private selectedTerm: number | undefined = undefined;
 
     /** 外部（upload.ts）から受け取る現在選択中の学部ID
      * @property にすることで外部から値を設定でき、変更時には updated() が実行される */
     @property()
-    facultyId = "";
+    facultyId: string = "";
+
+    /** facultyIdと同様に選択中の専攻Id */
+    @property()
+    majorId: string = "";
 
     /** 更新時にfetchSubjectsByFacultyIdを呼ぶ */
     override connectedCallback(): void {
         super.connectedCallback();
-        void this.fetchSubjectsByFacultyId();
+        void this.loadSubject();
     }
 
     /** 更新時の処理 */
@@ -59,15 +63,13 @@ export class SubjectSelect extends LitElement {
         // console.log(changedProperties);
         if (changedProperties.has("facultyId")) {
             this.selectedSubjectId = "";
-            this.selectedGradeId = "";
-            this.selectedTermId = "";
-            void this.fetchSubjectsByFacultyId();
+            void this.loadSubject();
             void this.updateFormState();
         }
     }
 
     /** APIを所得し，選択された学部IDに対応する教科一覧を取得する */
-    private async fetchSubjectsByFacultyId() {
+    private async loadSubject() {
         // 学部が選択されていない場合はAPIを呼ばない
         if (!this.facultyId) {
             this.subjects = [];
@@ -76,7 +78,12 @@ export class SubjectSelect extends LitElement {
 
         this.status = Status.Loading;
         try {
-            this.subjects = await fetchSubjects(this.facultyId);
+            this.subjects = await fetchSubjects(
+                this.facultyId,
+                this.majorId,
+                this.selectedGrade,
+                this.selectedTerm,
+            );
             this.status = Status.Ready;
         } catch (e) {
             console.error("教科一覧の取得に失敗", e);
@@ -89,16 +96,16 @@ export class SubjectSelect extends LitElement {
         const data = new FormData();
         data.set("faculty", this.facultyId);
         data.set("subject", this.selectedSubjectId);
-        data.set("grade", this.selectedGradeId);
-        data.set("term", this.selectedTermId);
+        data.set("grade", String(this.selectedGrade));
+        data.set("term", String(this.selectedTerm));
 
         this.#internals.setFormValue(data);
 
         if (
             !this.facultyId ||
             !this.selectedSubjectId ||
-            !this.selectedGradeId ||
-            !this.selectedTermId
+            !this.selectedGrade ||
+            !this.selectedTerm
         ) {
             this.#internals.setValidity(
                 { valueMissing: true },
@@ -117,8 +124,8 @@ export class SubjectSelect extends LitElement {
                 detail: {
                     facultyId: this.facultyId,
                     subjectId: this.selectedSubjectId,
-                    gradeId: this.selectedGradeId,
-                    termId: this.selectedTermId,
+                    gradeId: this.selectedGrade,
+                    termId: this.selectedTerm,
                 },
                 bubbles: true,
                 composed: true,
@@ -132,19 +139,12 @@ export class SubjectSelect extends LitElement {
         const terms = ["1学期", "2学期", "3学期", "4学期"];
 
         const subject_options = this.subjects.map(
-            (s) => html`
-                <option value=${s.id} ?selected=${s.id === this.selectedSubjectId}>
-                    ${s.name}
-                </option>
-            `,
+            (s) => html`<option value=${s.id}>${s.name}</option>`,
         );
 
-        const grade_options = grades.map(
-            (g) => html` <option value=${g} ?selected=${g === this.selectedGradeId}>${g}</option> `,
-        );
-        const term_options = terms.map(
-            (t) => html` <option value=${t} ?selected=${t === this.selectedTermId}>${t}</option> `,
-        );
+        const grade_options = grades.map((g, n) => html`<option value=${n + 1}>${g}</option>`);
+
+        const term_options = terms.map((t, n) => html`<option value=${n + 1}>${t}</option>`);
 
         // HTMLに教科選択，学年選択，学期選択のoptionを生成する。学部が選択されていない場合は空の配列となる。
         // @changeごとに変更される
@@ -158,14 +158,14 @@ export class SubjectSelect extends LitElement {
             </label>
             <label>
                 学年
-                <select .value=${this.selectedGradeId} @change=${this.onGradeChange}>
+                <select .value=${this.selectedGrade} @change=${this.onGradeChange}>
                     <option value="">--学年--</option>
                     ${grade_options}
                 </select>
             </label>
             <label>
                 学期
-                <select .value=${this.selectedTermId} @change=${this.onTermChange}>
+                <select .value=${this.selectedTerm} @change=${this.onTermChange}>
                     <option value="">--学期--</option>
                     ${term_options}
                 </select>
@@ -181,13 +181,13 @@ export class SubjectSelect extends LitElement {
 
     /** 学年変更時に呼び出される updateFormState でformDataに保存する*/
     private onGradeChange(e: Event) {
-        this.selectedGradeId = (e.target as HTMLSelectElement).value;
+        this.selectedGrade = Number((e.target as HTMLSelectElement).value);
         this.updateFormState();
     }
 
     /** 学期変更時に呼び出される updateFormState でformDataに保存する*/
     private onTermChange(e: Event) {
-        this.selectedTermId = (e.target as HTMLSelectElement).value;
+        this.selectedTerm = Number((e.target as HTMLSelectElement).value);
         this.updateFormState();
     }
 }

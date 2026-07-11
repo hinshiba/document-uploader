@@ -3,7 +3,6 @@ import type { components } from "./types";
 export type Faculty = components["schemas"]["Faculty"];
 export type Major = components["schemas"]["Major"];
 export type Subject = components["schemas"]["Subject"];
-
 export type Grade = components["schemas"]["Subject"]["grade"];
 export type Term = components["schemas"]["Subject"]["term"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
@@ -47,25 +46,25 @@ export async function fetchFaculties(): Promise<Faculty[]> {
 }
 
 export async function fetchSubjects(
-    faculty: string,
-    major?: string,
-    grade?: string,
-    term?: string,
+    facultyId: string,
+    majorId?: string,
+    grade?: Grade,
+    term?: Term,
 ): Promise<Subject[]> {
     const params = new URLSearchParams();
     // faculty必須
-    params.set("faculty", faculty);
+    params.set("faculty", facultyId);
 
-    if (major) {
-        params.set("major", major);
+    if (majorId) {
+        params.set("major", majorId);
     }
 
     if (grade) {
-        params.set("grade", grade);
+        params.set("grade", String(grade));
     }
 
     if (term) {
-        params.set("term", term);
+        params.set("term", String(term));
     }
 
     const res = await fetchWithTimeout(`${API_BASE}/subjects?${params.toString()}`, {

@@ -1,5 +1,6 @@
 import { postDocuments, type DocumentMetadata } from "./api/client";
 import "./components/major-select.ts";
+import "./components/subject-select.ts";
 import { SubjectSelect } from "./components/subject-select";
 import type { SelectionChangeDetail } from "./components/major-select";
 /**
