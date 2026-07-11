@@ -1,8 +1,7 @@
 import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { fetchSubjects, type Subject } from "../api/client";
-import { fetchGrades, type Grade } from "../api/client";
-import { fetchTerms, type Term } from "../api/client";
+
 enum Status {
     Loading,
     Ready,
@@ -15,11 +14,6 @@ export class SubjectSelect extends LitElement {
     static formAssociated = true;
     #internals: ElementInternals;
 
-    // 配列で書くならば
-    // 学年と学期のHTML上のoptionのため，gradesとtermsを追加
-    // grades = ["1回生", "2回生", "3回生", "4回生"];
-    // terms = ["1学期", "2学期", "3学期", "4学期"];
-
     constructor() {
         super();
         this.#internals = this.attachInternals();
@@ -28,31 +22,29 @@ export class SubjectSelect extends LitElement {
     protected override createRenderRoot() {
         return this; // lightDom化
     }
+
     /** コンポーネント状態 */
     @state()
     private status: Status = Status.Loading;
+
     /** 取得した教科，未収得時は空配列 */
     @state()
     private subjects: Subject[] = [];
 
-    @state()
-    private grades: Grade[] = [];
-
-    @state()
-    private terms: Term[] = [];
-
     /** 選択した教科Id */
     @state()
     private selectedSubjectId = "";
+
     /** 選択した学年Id */
     @state()
     private selectedGradeId = "";
+
     /** 選択した学期Id */
     @state()
     private selectedTermId = "";
 
-    /** 外部（upload.ts）から受け取る現在選択中の学部ID。
-    //  @property にすることで外部から値を設定でき、変更時には updated() が実行される。*/
+    /** 外部（upload.ts）から受け取る現在選択中の学部ID
+     * @property にすることで外部から値を設定でき、変更時には updated() が実行される */
     @property()
     facultyId = "";
 
@@ -85,8 +77,6 @@ export class SubjectSelect extends LitElement {
         this.status = Status.Loading;
         try {
             this.subjects = await fetchSubjects(this.facultyId);
-            this.grades = await fetchGrades();
-            this.terms = await fetchTerms();
             this.status = Status.Ready;
         } catch (e) {
             console.error("教科一覧の取得に失敗", e);
@@ -138,6 +128,9 @@ export class SubjectSelect extends LitElement {
 
     /** 画面表示設定HTMLそれぞれ教科，学年，学期 */
     override render() {
+        const grades = ["1回生", "2回生", "3回生", "4回生", "M1", "M2", "D1", "D2", "D3"];
+        const terms = ["1学期", "2学期", "3学期", "4学期"];
+
         const subject_options = this.subjects.map(
             (s) => html`
                 <option value=${s.id} ?selected=${s.id === this.selectedSubjectId}>
@@ -145,12 +138,14 @@ export class SubjectSelect extends LitElement {
                 </option>
             `,
         );
-        const grade_options = this.grades.map(
+
+        const grade_options = grades.map(
             (g) => html` <option value=${g} ?selected=${g === this.selectedGradeId}>${g}</option> `,
         );
-        const term_options = this.terms.map(
+        const term_options = terms.map(
             (t) => html` <option value=${t} ?selected=${t === this.selectedTermId}>${t}</option> `,
         );
+
         // HTMLに教科選択，学年選択，学期選択のoptionを生成する。学部が選択されていない場合は空の配列となる。
         // @changeごとに変更される
         return html`

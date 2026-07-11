@@ -4,8 +4,8 @@ export type Faculty = components["schemas"]["Faculty"];
 export type Major = components["schemas"]["Major"];
 export type Subject = components["schemas"]["Subject"];
 
-export type Grade = components["schemas"]["Grade"];
-export type Term = components["schemas"]["Term"];
+export type Grade = components["schemas"]["Subject"]["grade"];
+export type Term = components["schemas"]["Subject"]["term"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
 // 実バックエンドテスト
@@ -43,18 +43,6 @@ async function fetchWithTimeout(input: string, init: RequestInit = {}): Promise<
 export async function fetchFaculties(): Promise<Faculty[]> {
     const res = await fetchWithTimeout(`${API_BASE}/faculties`, { headers: DEV_HEADERS });
     if (!res.ok) throw new Error(`GET /faculties -> ${res.status}`);
-    return (await res.json()) as Faculty[];
-}
-
-export async function fetchGrades(): Promise<Faculty[]> {
-    const res = await fetchWithTimeout(`${API_BASE}/grades`, { headers: DEV_HEADERS });
-    if (!res.ok) throw new Error(`GET /grades -> ${res.status}`);
-    return (await res.json()) as Faculty[];
-}
-
-export async function fetchTerms(): Promise<Faculty[]> {
-    const res = await fetchWithTimeout(`${API_BASE}/terms`, { headers: DEV_HEADERS });
-    if (!res.ok) throw new Error(`GET /terms -> ${res.status}`);
     return (await res.json()) as Faculty[];
 }
 
