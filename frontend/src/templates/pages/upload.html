@@ -12,76 +12,41 @@
 
         <major-select></major-select>
 
-        <div class="form-group">
-            <label for="year">年度(西暦)</label>
-            <input type="number" id="year" name="year" required>
-        </div>
-
-        <div class="form-group">
-            <label for="term">学期</label>
-            <select id="term" name="term" required>
-                <option value="">選択してください</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-            </select>
-        </div>
-
-        <div class="form-group">
+        <fieldset>
             <label for="teacher">教員名</label>
             <input type="text" id="teacher" name="teacher" required>
-        </div>
+        </fieldset>
 
-        <div class="form-group">
+        <fieldset>
             <label for="examtype">試験種別</label>
             <select id="examtype" name="examtype" required>
-                <option value="">選択してください</option>
+                <option value="">--試験種別--</option>
                 <option value="quiz">小テスト</option>
                 <option value="midterm">中間</option>
                 <option value="final">期末</option>
                 <option value="other">その他</option>
             </select>
-        </div>
+        </fieldset>
 
-        <div class="form-group">
-            <label for="grade">学年</label>
-            <select id="grade" name="grade" required>
-                <option value="">選択してください</option>
-                <option value="1">B1</option>
-                <option value="2">B2</option>
-                <option value="3">B3</option>
-                <option value="4">B4</option>
-                <option value="4">M1</option>
-                <option value="4">M2</option>
-                <option value="4">D1</option>
-                <option value="4">D2</option>
-                <option value="4">D3</option>
-            </select>
-        </div>
+        <subject-select></subject-select>
 
-        <div class="form-group">
-            <label for="subject">科目名</label>
-            <input type="text" id="subject" name="subject" required>
-        </div>
-
-        <div class="form-group">
-            <label for="num">テストの回数</label>
+        <fieldset>
+            <label for="num">何回目のテストか</label>
             <input type="number" id="num" name="num" required>
-        </div>
+        </fieldset>
 
-        <div class="form-group checkbox-group">
-            <input type="checkbox" id="isanswer" name="isanswer">
+        <fieldset>
             <label for="isanswer">これは解答ですか？</label>
-        </div>
+            <input type="checkbox" id="isanswer" name="isanswer">
+        </fieldset>
 
         <label for="file">ファイルを選択してください</label>
         <input type="file" id="file" multiple>
 
-        <div class="drop-area" id="drop-area">
+        <section class="drop-area" id="drop-area">
             <p id="message">ここにファイルをドラッグしてください</p>
             <ul id="makelist"></ul>
-        </div>
+        </section>
 
         <button id="uploadbtn" type="submit">送信</button>
         <p id="thank"></p>
