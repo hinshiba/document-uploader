@@ -43,6 +43,18 @@ export async function fetchFaculties(): Promise<Faculty[]> {
     return (await res.json()) as Faculty[];
 }
 
+export async function fetchGrades(): Promise<Faculty[]> {
+    const res = await fetchWithTimeout(`${API_BASE}/grades`, { headers: DEV_HEADERS });
+    if (!res.ok) throw new Error(`GET /grades -> ${res.status}`);
+    return (await res.json()) as Faculty[];
+}
+
+export async function fetchTeems(): Promise<Faculty[]> {
+    const res = await fetchWithTimeout(`${API_BASE}/terms`, { headers: DEV_HEADERS });
+    if (!res.ok) throw new Error(`GET /terms -> ${res.status}`);
+    return (await res.json()) as Faculty[];
+}
+
 export async function fetchSubjects(
     faculty: string,
     major?: string,

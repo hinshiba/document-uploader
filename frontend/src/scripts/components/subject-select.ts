@@ -1,7 +1,8 @@
 import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { fetchSubjects, type Subject } from "../api/client";
-
+import { fetchGrades, type Grade } from "../api/client";
+import { fetchTerms, type Term } from "../api/client";
 enum Status {
     Loading,
     Ready,
@@ -20,9 +21,11 @@ export class SubjectSelect extends LitElement {
     // formのネイティブ要素としてふるまうために必要
     static formAssociated = true;
     #internals: ElementInternals;
+
+    // 配列で書くならば
     // 学年と学期のHTML上のoptionのため，gradesとtermsを追加
-    grades = ["1回生", "2回生", "3回生", "4回生"];
-    terms = ["1学期", "2学期", "3学期", "4学期"];
+    // grades = ["1回生", "2回生", "3回生", "4回生"];
+    // terms = ["1学期", "2学期", "3学期", "4学期"];
 
     constructor() {
         super();
@@ -38,6 +41,13 @@ export class SubjectSelect extends LitElement {
     /** 取得した教科，未収得時は空配列 */
     @state()
     private subjects: Subject[] = [];
+
+    @state()
+    private grades: Grade[] = [];
+
+    @state()
+    private terms: Term[] = [];
+
     /** 選択した教科Id */
     @state()
     private selectedSubjectId = "";
@@ -53,10 +63,10 @@ export class SubjectSelect extends LitElement {
     @property()
     facultyId = "";
 
-    /** 更新時にloadfacultiesを呼ぶ */
+    /** 更新時にfetchSubjectsByFacultyIdを呼ぶ */
     override connectedCallback(): void {
         super.connectedCallback();
-        void this.loadSubjects();
+        void this.fetchSubjectsByFacultyId();
     }
 
     /** 更新時の処理 */
@@ -66,13 +76,13 @@ export class SubjectSelect extends LitElement {
             this.selectedSubjectId = "";
             this.selectedGradeId = "";
             this.selectedTermId = "";
-            void this.loadSubjects();
+            void this.fetchSubjectsByFacultyId();
             void this.updateFormState();
         }
     }
 
-    /** facultyIdが変更された際に教科一覧を取得する */
-    private async loadSubjects() {
+    /** APIを所得し，選択された学部IDに対応する教科一覧を取得する */
+    private async fetchSubjectsByFacultyId() {
         // 学部が選択されていない場合はAPIを呼ばない
         if (!this.facultyId) {
             this.subjects = [];
@@ -82,7 +92,8 @@ export class SubjectSelect extends LitElement {
         this.status = Status.Loading;
         try {
             this.subjects = await fetchSubjects(this.facultyId);
-
+            this.grades = await fetchGrades();
+            this.terms = await fetchTerms();
             this.status = Status.Ready;
         } catch (e) {
             console.error("教科一覧の取得に失敗", e);
