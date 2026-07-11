@@ -2,7 +2,6 @@ import type { components } from "./types";
 
 export type Faculty = components["schemas"]["Faculty"];
 export type Major = components["schemas"]["Major"];
-// サブジェクトを追加
 export type Subject = components["schemas"]["Subject"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
@@ -50,7 +49,6 @@ export async function fetchSubjects(
     grade?: string,
     term?: string,
 ): Promise<Subject[]> {
-    // console.log("faculty:", faculty);
     const params = new URLSearchParams();
     // faculty必須
     params.set("faculty", faculty);
