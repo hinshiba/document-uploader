@@ -14,6 +14,9 @@ export class SubjectSelect extends LitElement {
     static formAssociated = true;
     #internals: ElementInternals;
 
+    // 通信の競合状態を防ぐための設定
+    #loadId = 0;
+
     constructor() {
         super();
         this.#internals = this.attachInternals();
@@ -60,8 +63,7 @@ export class SubjectSelect extends LitElement {
 
     /** 更新時の処理 */
     protected override updated(changedProperties: PropertyValues) {
-        // console.log(changedProperties);
-        if (changedProperties.has("facultyId")) {
+        if (changedProperties.has("facultyId") || changedProperties.has("majorId")) {
             this.selectedSubjectId = "";
             void this.loadSubject();
             void this.updateFormState();
@@ -73,19 +75,30 @@ export class SubjectSelect extends LitElement {
         // 学部が選択されていない場合はAPIを呼ばない
         if (!this.facultyId) {
             this.subjects = [];
+            this.status = Status.Ready;
             return;
         }
 
         this.status = Status.Loading;
+
+        // 通信するごと１ずつ増やす増やす
+        const id = ++this.#loadId;
+
         try {
-            this.subjects = await fetchSubjects(
+            const subjects = await fetchSubjects(
                 this.facultyId,
                 this.majorId,
                 this.selectedGrade,
                 this.selectedTerm,
             );
+
+            // 通信時のloadIdが一致した場合のみsubjectsに代入される
+            if (id !== this.#loadId) return; // stale response
+            this.subjects = subjects;
+
             this.status = Status.Ready;
         } catch (e) {
+            if (id !== this.#loadId) return;
             console.error("教科一覧の取得に失敗", e);
             this.status = Status.Error;
         }
@@ -96,8 +109,8 @@ export class SubjectSelect extends LitElement {
         const data = new FormData();
         data.set("faculty", this.facultyId);
         data.set("subject", this.selectedSubjectId);
-        data.set("grade", String(this.selectedGrade));
-        data.set("term", String(this.selectedTerm));
+        data.set("grade", this.selectedGrade != null ? String(this.selectedGrade) : "");
+        data.set("term", this.selectedTerm != null ? String(this.selectedTerm) : "");
 
         this.#internals.setFormValue(data);
 
@@ -135,6 +148,9 @@ export class SubjectSelect extends LitElement {
 
     /** 画面表示設定HTMLそれぞれ教科，学年，学期 */
     override render() {
+        if (this.status === Status.Loading) return html`<p>読み込み中...</p>`;
+        if (this.status === Status.Error) return html`<p>学部一覧の取得に失敗しました</p>`;
+
         const grades = ["1回生", "2回生", "3回生", "4回生", "M1", "M2", "D1", "D2", "D3"];
         const terms = ["1学期", "2学期", "3学期", "4学期"];
 
@@ -181,13 +197,17 @@ export class SubjectSelect extends LitElement {
 
     /** 学年変更時に呼び出される updateFormState でformDataに保存する*/
     private onGradeChange(e: Event) {
-        this.selectedGrade = Number((e.target as HTMLSelectElement).value);
+        const value = (e.target as HTMLSelectElement).value;
+        this.selectedGrade = value ? Number(value) : undefined;
+        void this.loadSubject();
         this.updateFormState();
     }
 
     /** 学期変更時に呼び出される updateFormState でformDataに保存する*/
     private onTermChange(e: Event) {
-        this.selectedTerm = Number((e.target as HTMLSelectElement).value);
+        const value = (e.target as HTMLSelectElement).value;
+        this.selectedTerm = value ? Number(value) : undefined;
+        void this.loadSubject();
         this.updateFormState();
     }
 }

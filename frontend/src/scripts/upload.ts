@@ -100,7 +100,6 @@ form.addEventListener("submit", async (event) => {
 
     submitButton.disabled = true;
     submitButton.textContent = "送信中...";
-    console.log("送信開始", files, metadata);
     try {
         await postDocuments([...files], metadata);
 
@@ -118,11 +117,12 @@ form.addEventListener("submit", async (event) => {
     }
 });
 
-// major-select の facultyId を subject-select の facultyId に反映する
+// major-select の facultyIdとmajorId を subject-select の facultyIdとsubjectId に反映する
 majorSelect?.addEventListener("selection-change", (e) => {
     const event = e as CustomEvent<SelectionChangeDetail>;
 
     if (subjectSelect) {
         subjectSelect.facultyId = event.detail.facultyId;
+        subjectSelect.majorId = event.detail.majorId;
     }
 });
