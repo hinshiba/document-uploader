@@ -55,7 +55,7 @@ export class SubjectSelect extends LitElement {
     @property()
     majorId: string = "";
 
-    /** 更新時にfetchSubjectsByFacultyIdを呼ぶ */
+    /** 読み込み時にloadSubjectを呼ぶ */
     override connectedCallback(): void {
         super.connectedCallback();
         void this.loadSubject();
