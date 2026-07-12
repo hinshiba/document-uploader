@@ -167,7 +167,7 @@ export class SubjectSelect extends LitElement {
         return html`
             <label>
                 教科
-                <select @change=${this.onSubjectChange}>
+                <select .value=${this.selectedSubjectId} @change=${this.onSubjectChange}>
                     <option value="">教科を選択してください</option>
                     ${subject_options}
                 </select>
@@ -199,7 +199,6 @@ export class SubjectSelect extends LitElement {
     private onGradeChange(e: Event) {
         const value = (e.target as HTMLSelectElement).value;
         this.selectedGrade = value ? Number(value) : undefined;
-        void this.loadSubject();
         this.updateFormState();
     }
 
@@ -207,7 +206,6 @@ export class SubjectSelect extends LitElement {
     private onTermChange(e: Event) {
         const value = (e.target as HTMLSelectElement).value;
         this.selectedTerm = value ? Number(value) : undefined;
-        void this.loadSubject();
         this.updateFormState();
     }
 }
