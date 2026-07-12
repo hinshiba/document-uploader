@@ -97,7 +97,7 @@ function buildMetadata(): DocumentMetadata {
         grade,
         subject,
         teacher,
-        examtype: examtype as "quiz" | "midterm" | "final" | "other",
+        examtype,
         isanswer,
         num,
     };
