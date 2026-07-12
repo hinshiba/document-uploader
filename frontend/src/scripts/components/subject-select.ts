@@ -14,7 +14,7 @@ export class SubjectSelect extends LitElement {
     static formAssociated = true;
     #internals: ElementInternals;
 
-    // 通信の競合状態を防ぐための設定
+    /** 通信の競合状態を防ぐための最新のクエリ番号 */
     #loadId = 0;
 
     constructor() {
