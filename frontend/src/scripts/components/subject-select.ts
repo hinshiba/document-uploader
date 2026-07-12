@@ -63,6 +63,7 @@ export class SubjectSelect extends LitElement {
 
     /** 更新時の処理 */
     protected override updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
         if (changedProperties.has("facultyId") || changedProperties.has("majorId")) {
             this.selectedSubjectId = "";
             void this.loadSubject();
