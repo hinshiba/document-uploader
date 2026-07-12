@@ -10,11 +10,11 @@ form {
         margin: 0;
         padding: 0;
         min-inline-size: 0; // ブラウザ既定の幅のクセを消す
+        gap: 0.25rem;
     }
 
     label {
         display: grid;
-        gap: 0.25rem;
     }
 
     input[type="checkbox"] {

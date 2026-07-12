@@ -59,17 +59,11 @@ function buildMetadata(): DocumentMetadata {
     if (typeof major !== "string" || major === "") {
         throw new Error("専攻が選択されていません。");
     }
-    if (isNaN(year)) {
-        throw new Error("年度が選択されていません。");
-    }
     if (year < 1949) {
         throw new Error("年度の値が不正です。年度は1949年以降の整数で入力してください。");
     }
-    if (isNaN(term)) {
-        throw new Error("学期が選択されていません。");
-    }
-    if (isNaN(grade)) {
-        throw new Error("学年が選択されていません。");
+    if (term < 1 || term > 4) {
+        throw new Error("学期の値が不正です。");
     }
     if (grade < 1 || grade > 9) {
         throw new Error("学年の値が不正です。");
