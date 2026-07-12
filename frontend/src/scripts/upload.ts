@@ -38,7 +38,6 @@ function renderFileList(files: FileList): void {
 /**
  * フォームからメタデータを組み立てる
  * @throws 要素が未選択の場合
- * @remarks
  */
 function buildMetadata(): DocumentMetadata {
     const formdata = new FormData(form);
