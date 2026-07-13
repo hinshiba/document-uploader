@@ -12,12 +12,12 @@
 
         <major-select></major-select>
 
-        <fieldset>
+        <div>
             <label for="teacher">教員名</label>
             <input type="text" id="teacher" name="teacher" required>
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <label for="examtype">試験種別</label>
             <select id="examtype" name="examtype" required>
                 <option value="">--試験種別--</option>
@@ -26,17 +26,17 @@
                 <option value="final">期末</option>
                 <option value="other">その他</option>
             </select>
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <label for="num">何回目のテストか</label>
             <input type="number" id="num" name="num" required>
-        </fieldset>
+        </div>
 
-        <fieldset>
+        <div>
             <label for="isanswer">これは解答ですか？</label>
             <input type="checkbox" id="isanswer" name="isanswer">
-        </fieldset>
+        </div>
 
         <label for="file">ファイルを選択してください</label>
         <input type="file" id="file" multiple>
@@ -44,7 +44,7 @@
         <div class="drop-area" id="drop-area">
             <p id="message">ここにファイルをドラッグしてください</p>
             <ul id="makelist"></ul>
-        </section>
+        </div>
 
         <button id="uploadbtn" type="submit">送信</button>
         <p id="thank"></p>
