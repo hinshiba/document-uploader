@@ -148,31 +148,26 @@ export class SubjectSelect extends LitElement {
         return html`
             <label>
                 学年
-                <select
-                    .value=${this.selectedGrade != null ? String(this.selectedGrade) : ""}
-                    @change=${this.onGradeChange}
-                >
+                <select .value=${String(this.selectedGrade ?? "")} @change=${this.onGradeChange}>
                     <option value="">--学年--</option>
                     ${grade_options}
                 </select>
             </label>
             <label>
                 学期
-                <select
-                    .value=${this.selectedTerm != null ? String(this.selectedTerm) : ""}
-                    @change=${this.onTermChange}
-                >
+                <select .value=${String(this.selectedTerm ?? "")} @change=${this.onTermChange}>
                     <option value="">--学期--</option>
                     ${term_options}
                 </select>
             </label>
             <label>
                 教科
-                <select .value=${this.selectedSubjectId ?? ""} @change=${this.onSubjectChange}>
+                <select .value=${this.selectedSubjectId} @change=${this.onSubjectChange}>
                     <option value="">教科を選択してください</option>
                     ${subject_options}
                 </select>
-                ${this.status === Status.Loading ? html`<span>読み込み中...</span>` : ""}
+                ${this.status === Status.Loading ? html`<p>読み込み中...</p>` : ""}
+                ${this.status === Status.Error ? html`<p>教科一覧の取得に失敗しました</p>` : ""}
             </label>
         `;
     }
@@ -180,6 +175,7 @@ export class SubjectSelect extends LitElement {
     /** 教科変更時に呼び出される updateFormState でformDataに保存する*/
     private onSubjectChange(e: Event) {
         this.selectedSubjectId = (e.target as HTMLSelectElement).value;
+        this.updateFormState();
     }
 
     /** 学年変更時に呼び出される updateFormState でformDataに保存する*/
