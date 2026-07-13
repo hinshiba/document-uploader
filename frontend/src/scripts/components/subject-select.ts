@@ -132,9 +132,6 @@ export class SubjectSelect extends LitElement {
 
     /** 画面表示設定HTMLそれぞれ教科，学年，学期 */
     override render() {
-        if (this.status === Status.Loading) return html`<p>読み込み中...</p>`;
-        if (this.status === Status.Error) return html`<p>教科一覧の取得に失敗しました</p>`;
-
         const grades = ["1回生", "2回生", "3回生", "4回生", "M1", "M2", "D1", "D2", "D3"];
         const terms = ["1学期", "2学期", "3学期", "4学期"];
 
@@ -175,6 +172,7 @@ export class SubjectSelect extends LitElement {
                     <option value="">教科を選択してください</option>
                     ${subject_options}
                 </select>
+                ${this.status === Status.Loading ? html`<span>読み込み中...</span>` : ""}
             </label>
         `;
     }
@@ -182,7 +180,6 @@ export class SubjectSelect extends LitElement {
     /** 教科変更時に呼び出される updateFormState でformDataに保存する*/
     private onSubjectChange(e: Event) {
         this.selectedSubjectId = (e.target as HTMLSelectElement).value;
-        this.updateFormState();
     }
 
     /** 学年変更時に呼び出される updateFormState でformDataに保存する*/
