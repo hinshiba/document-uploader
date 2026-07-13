@@ -74,6 +74,9 @@ export class SubjectSelect extends LitElement {
 
     /** APIから選択された学部IDに対応する教科一覧を取得する */
     private async loadSubject() {
+        // 通信するごと１ずつ増やす
+        const id = ++this.#loadId;
+
         // 学部が選択されていない場合はAPIを呼ばない
         if (!this.facultyId) {
             this.subjects = [];
@@ -82,9 +85,6 @@ export class SubjectSelect extends LitElement {
         }
 
         this.status = Status.Loading;
-
-        // 通信するごと１ずつ増やす
-        const id = ++this.#loadId;
 
         try {
             const subjects = await fetchSubjects(
