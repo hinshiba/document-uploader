@@ -71,7 +71,7 @@ export class SubjectSelect extends LitElement {
         }
     }
 
-    /** APIを所得し，選択された学部IDに対応する教科一覧を取得する */
+    /** APIをから選択された学部IDに対応する教科一覧を取得する */
     private async loadSubject() {
         // 学部が選択されていない場合はAPIを呼ばない
         if (!this.facultyId) {
