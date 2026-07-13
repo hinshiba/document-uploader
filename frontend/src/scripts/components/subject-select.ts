@@ -63,15 +63,16 @@ export class SubjectSelect extends LitElement {
 
     /** 更新時の処理 */
     protected override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
-        if (changedProperties.has("facultyId") || changedProperties.has("majorId")) {
+        super.updated(changedProperties);
+        const filterKeys = ["facultyId", "majorId", "selectedGrade", "selectedTerm"];
+        if (filterKeys.some((key) => changedProperties.has(key))) {
             this.selectedSubjectId = "";
             void this.loadSubject();
-            void this.updateFormState();
+            this.updateFormState();
         }
     }
 
-    /** APIをから選択された学部IDに対応する教科一覧を取得する */
+    /** APIから選択された学部IDに対応する教科一覧を取得する */
     private async loadSubject() {
         // 学部が選択されていない場合はAPIを呼ばない
         if (!this.facultyId) {
@@ -82,7 +83,7 @@ export class SubjectSelect extends LitElement {
 
         this.status = Status.Loading;
 
-        // 通信するごと１ずつ増やす増やす
+        // 通信するごと１ずつ増やす
         const id = ++this.#loadId;
 
         try {
@@ -114,7 +115,6 @@ export class SubjectSelect extends LitElement {
         data.set("term", this.selectedTerm != null ? String(this.selectedTerm) : "");
 
         this.#internals.setFormValue(data);
-
         if (
             !this.facultyId ||
             !this.selectedSubjectId ||
@@ -128,23 +128,6 @@ export class SubjectSelect extends LitElement {
         } else {
             this.#internals.setValidity({});
         }
-
-        this.emitChange();
-    }
-
-    private emitChange() {
-        this.dispatchEvent(
-            new CustomEvent("selection-change", {
-                detail: {
-                    facultyId: this.facultyId,
-                    subjectId: this.selectedSubjectId,
-                    gradeId: this.selectedGrade,
-                    termId: this.selectedTerm,
-                },
-                bubbles: true,
-                composed: true,
-            }),
-        );
     }
 
     /** 画面表示設定HTMLそれぞれ教科，学年，学期 */
@@ -167,24 +150,30 @@ export class SubjectSelect extends LitElement {
         // @changeごとに変更される
         return html`
             <label>
-                教科
-                <select .value=${this.selectedSubjectId} @change=${this.onSubjectChange}>
-                    <option value="">教科を選択してください</option>
-                    ${subject_options}
-                </select>
-            </label>
-            <label>
                 学年
-                <select .value=${this.selectedGrade} @change=${this.onGradeChange}>
+                <select
+                    .value=${this.selectedGrade != null ? String(this.selectedGrade) : ""}
+                    @change=${this.onGradeChange}
+                >
                     <option value="">--学年--</option>
                     ${grade_options}
                 </select>
             </label>
             <label>
                 学期
-                <select .value=${this.selectedTerm} @change=${this.onTermChange}>
+                <select
+                    .value=${this.selectedTerm != null ? String(this.selectedTerm) : ""}
+                    @change=${this.onTermChange}
+                >
                     <option value="">--学期--</option>
                     ${term_options}
+                </select>
+            </label>
+            <label>
+                教科
+                <select .value=${this.selectedSubjectId ?? ""} @change=${this.onSubjectChange}>
+                    <option value="">教科を選択してください</option>
+                    ${subject_options}
                 </select>
             </label>
         `;
@@ -200,13 +189,11 @@ export class SubjectSelect extends LitElement {
     private onGradeChange(e: Event) {
         const value = (e.target as HTMLSelectElement).value;
         this.selectedGrade = value ? Number(value) : undefined;
-        this.updateFormState();
     }
 
     /** 学期変更時に呼び出される updateFormState でformDataに保存する*/
     private onTermChange(e: Event) {
         const value = (e.target as HTMLSelectElement).value;
         this.selectedTerm = value ? Number(value) : undefined;
-        this.updateFormState();
     }
 }
