@@ -12,6 +12,8 @@ post:
   summary: 専攻の作成
   description: |
     指定した学部に属する専攻を作成する
+
+    この操作にはマスタ情報を編集できる追加の権限が必要
   requestBody:
     required: true
     content:
@@ -41,5 +43,7 @@ post:
       $ref: "../openapi.yaml#/components/responses/BadRequest"
     "401":
       $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "403":
+      $ref: "../openapi.yaml#/components/responses/Forbidden"
     "404":
       $ref: "../openapi.yaml#/components/responses/NotFound"

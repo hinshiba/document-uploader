@@ -12,6 +12,8 @@ put:
   summary: 学部の更新
   description: |
     指定した学部名を更新する
+    
+    この操作にはマスタ情報を編集できる追加の権限が必要
   requestBody:
     required: true
     content:
@@ -31,6 +33,8 @@ put:
       $ref: "../openapi.yaml#/components/responses/BadRequest"
     "401":
       $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "403":
+      $ref: "../openapi.yaml#/components/responses/Forbidden"
     "404":
       $ref: "../openapi.yaml#/components/responses/NotFound"
 
@@ -39,12 +43,17 @@ delete:
   summary: 学部の削除
   description: |
     指定した学部を削除する
+
     専攻や科目から参照されている場合は削除できない
+
+    この操作にはマスタ情報を編集できる追加の権限が必要
   responses:
     "204":
       description: 削除成功
     "401":
       $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "403":
+      $ref: "../openapi.yaml#/components/responses/Forbidden"
     "404":
       $ref: "../openapi.yaml#/components/responses/NotFound"
     "409":

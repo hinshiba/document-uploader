@@ -36,6 +36,8 @@ post:
   description: |
     学部を新規に作成する
     専攻は設定されない
+
+    この操作にはマスタ情報を編集できる追加の権限が必要
   requestBody:
     required: true
     content:
@@ -66,3 +68,5 @@ post:
       $ref: "../openapi.yaml#/components/responses/BadRequest"
     "401":
       $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "403":
+      $ref: "../openapi.yaml#/components/responses/Forbidden"
