@@ -37,4 +37,14 @@ form {
             opacity: 0.5;
         }
     }
+
+    input[type="checkbox"] {
+        transform: scale(1.5);
+    }
+
+    input[type="text"],
+    input[type="number"] {
+        padding: 0.5rem;
+        border: 1px solid $border-color;
+    }
 }
