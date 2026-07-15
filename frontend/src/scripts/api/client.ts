@@ -2,6 +2,9 @@ import type { components } from "./types";
 
 export type Faculty = components["schemas"]["Faculty"];
 export type Major = components["schemas"]["Major"];
+export type Subject = components["schemas"]["Subject"];
+export type Grade = components["schemas"]["Subject"]["grade"];
+export type Term = components["schemas"]["Subject"]["term"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
 // 実バックエンドテスト
@@ -40,6 +43,39 @@ export async function fetchFaculties(): Promise<Faculty[]> {
     const res = await fetchWithTimeout(`${API_BASE}/faculties`, { headers: DEV_HEADERS });
     if (!res.ok) throw new Error(`GET /faculties -> ${res.status}`);
     return (await res.json()) as Faculty[];
+}
+
+export async function fetchSubjects(
+    facultyId: string,
+    majorId?: string,
+    grade?: Grade,
+    term?: Term,
+): Promise<Subject[]> {
+    const params = new URLSearchParams();
+    // faculty必須
+    params.set("faculty", facultyId);
+
+    if (majorId) {
+        params.set("major", majorId);
+    }
+
+    if (grade) {
+        params.set("grade", String(grade));
+    }
+
+    if (term) {
+        params.set("term", String(term));
+    }
+
+    const res = await fetchWithTimeout(`${API_BASE}/subjects?${params.toString()}`, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /subjects -> ${res.status}`);
+    }
+
+    return (await res.json()) as Subject[];
 }
 
 /**
