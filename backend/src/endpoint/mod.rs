@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 pub mod alive;
+pub mod dto;
 
 #[derive(Debug, Clone, Hash, Serialize)]
 pub struct EndpointError {
