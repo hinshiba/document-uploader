@@ -7,9 +7,9 @@ export type Grade = components["schemas"]["Subject"]["grade"];
 export type Term = components["schemas"]["Subject"]["term"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
-// 実バックエンドテスト
-// "http://localhost:3000/api/v1"
-const API_BASE = "http://127.0.0.1:4010";
+// Prismモック(開発時のフォールバック)
+// "http://127.0.0.1:4010"
+const API_BASE = "http://localhost:3000/api/v1";
 
 // Cloudflare Accessが自動付与するヘッダのダミー
 // モックは検証しないので何でもよい
