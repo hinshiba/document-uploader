@@ -22,6 +22,10 @@ use crate::usecase::repository::{
 };
 
 /// 現行のOpenAPIドキュメントの`example`に従うRepository
+///
+/// 現在はweb層ではsqliteベースの`SqliteRepository`を使用しているため未使用だが，
+/// 参照実装として残している．
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct ExampleRepository {
     documents: std::sync::Mutex<Vec<Document>>,
@@ -30,6 +34,7 @@ pub struct ExampleRepository {
     save_dir: std::path::PathBuf,
 }
 
+#[allow(dead_code)]
 impl ExampleRepository {
     pub fn new(save_dir: std::path::PathBuf) -> std::io::Result<Self> {
         if !save_dir.exists() {
