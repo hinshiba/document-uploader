@@ -321,4 +321,32 @@ mod tests {
         dbg!(&document_metadata);
         assert!(document_metadata.is_ok());
     }
+
+    #[test]
+    fn parse_file_type() {
+        use DocumentFileType::*;
+
+        let testcase = vec![
+            ("jpg", Jpeg),
+            ("doc", Doc),
+            ("png", Png),
+            ("md", Markdown),
+        ];
+
+        for ty in testcase {
+            let file_name = format!("files.{}", ty.0);
+            let file_type = file_name.rsplit_terminator('.').next();
+
+            assert!(file_type.is_some());
+            let file_type = file_type.unwrap();
+
+            let file_type = file_type.parse::<DocumentFileType>();
+            
+            dbg!(&file_type);
+            assert!(file_type.is_ok());
+            let file_type = file_type.unwrap();
+
+            assert_eq!(file_type, ty.1);
+        }
+    }
 }
