@@ -85,7 +85,7 @@ impl DocumentMetadataInput {
 }
 
 #[tracing::instrument(skip_all, ret(level="info"))]
-pub async fn put_documents<I: DocumentFileRepository + DocumentRepository>(
+pub async fn post_document<I: DocumentFileRepository + DocumentRepository>(
     State(repo): State<I>,
     mut multipart: Multipart,
 ) -> EndpointResult<()> {
