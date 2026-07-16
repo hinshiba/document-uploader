@@ -1,6 +1,6 @@
 use axum::{
     extract::{
-        Json,
+        Query,
         State,
     },
     http::StatusCode,
@@ -45,7 +45,7 @@ impl Input {
 #[tracing::instrument(skip(repo), ret(level="info"))]
 pub async fn get_subjects<I: SubjectRepository>(
     State(repo): State<I>,
-    Json(input): Json<Input>,
+    Query(input): Query<Input>,
 ) -> EndpointResult<Vec<SubjectDto>> {
     let option = input.to_get_subjects_option();
 
