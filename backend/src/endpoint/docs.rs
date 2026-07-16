@@ -184,14 +184,14 @@ pub async fn post_document<I: DocumentFileRepository + DocumentRepository>(
 
     match StoreDocumentUseCase::new(repo).execute(
         StoreDocumentInput {
-            metadata: metadata,
+            metadata,
             files: files.into_iter()
                     .map(|(ty, c)| {
                         StoreDocumentInputFile {
                             file_type: ty,
                             content: c,
                         }
-                    }).collect()
+                    }).collect(),
         },
     ).await {
         Ok(()) => {
