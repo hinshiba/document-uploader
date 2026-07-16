@@ -2,6 +2,7 @@ use serde::Serialize;
 
 pub mod alive;
 pub mod dto;
+pub mod docs;
 pub mod faculties;
 pub mod subjects;
 
