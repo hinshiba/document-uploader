@@ -255,7 +255,7 @@ async fn get_file<'a>(field: Field<'a>) -> Result<(DocumentFileType, Vec<u8>), E
     };
 
     // ファイル名に拡張子が含まれていると仮定し、そこからファイルタイプを取得
-    let Some(file_type) = file_name.split_terminator('.').last()
+    let Some(file_type) = file_name.rsplit_terminator('.').next()
     else {
         return Err(EndpointError {
             message: "multi part error".to_owned(),
