@@ -286,3 +286,39 @@ async fn get_file<'a>(field: Field<'a>) -> Result<(DocumentFileType, Vec<u8>), E
     
     Ok((file_type, content))
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn serde_document_metadata_input() {
+        let document_metadata_input = serde_json::from_str::<DocumentMetadataInput>(
+            r#"
+            {
+                "faculty": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                "major": "550e8400-e29b-41d4-a716-446655440000",
+                "year": 2025,
+                "term": 2,
+                "grade": 2,
+                "subject": "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c",
+                "teacher": "岡山 聖彦",
+                "examtype": "final",
+                "isanswer": false,
+                "num": 1
+            }
+            "#
+        );
+
+        dbg!(&document_metadata_input);
+        assert!(document_metadata_input.is_ok());
+
+        let document_metadata_input = document_metadata_input.unwrap();
+
+        let document_metadata = document_metadata_input.to_document_metadata();
+        
+        dbg!(&document_metadata);
+        assert!(document_metadata.is_ok());
+    }
+}
