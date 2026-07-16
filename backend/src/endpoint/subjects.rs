@@ -1,6 +1,9 @@
-use axum::extract::{
-    Json,
-    State,
+use axum::{
+    extract::{
+        Json,
+        State,
+    },
+    http::StatusCode,
 };
 use serde::{
     Deserialize,
@@ -51,16 +54,22 @@ pub async fn get_subjects<I: SubjectRepository>(
         Err(err) => {
             tracing::error!("{}", err);
 
-            return Err(EndpointError {
-                message: "unexpected error occured".to_owned(),
-                details: None,
-            });
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Err(EndpointError {
+                    message: "unexpected error occured".to_owned(),
+                    details: None,
+                })
+            );
         }
     };
 
-    return Ok(
-        subjects.into_iter()
-            .map(|s| SubjectDto::from_domain(&s))
-            .collect()
+    return (
+        StatusCode::OK,
+        Ok(
+            subjects.into_iter()
+                .map(|s| SubjectDto::from_domain(&s))
+                .collect()
+        )
     )
 }

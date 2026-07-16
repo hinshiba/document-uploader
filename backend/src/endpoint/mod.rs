@@ -11,4 +11,4 @@ pub struct EndpointError {
     pub details: Option<String>,
 }
 
-pub type EndpointResult<T> = Result<T, EndpointError>;
+pub type EndpointResult<T> = (axum::http::StatusCode, Result<T, EndpointError>);
