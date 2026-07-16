@@ -64,7 +64,7 @@ pub async fn get_subjects<I: SubjectRepository>(
         }
     };
 
-    return (
+    (
         StatusCode::OK,
         Ok(
             subjects.into_iter()
