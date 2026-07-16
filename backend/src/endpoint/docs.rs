@@ -6,7 +6,8 @@ use axum::{
         State,
         multipart::Field,
     },
-    http::StatusCode
+    http::StatusCode,
+    response::IntoResponse,
 };
 use serde::Deserialize;
 
@@ -88,7 +89,7 @@ impl DocumentMetadataInput {
 pub async fn post_document<I: DocumentFileRepository + DocumentRepository>(
     State(repo): State<I>,
     mut multipart: Multipart,
-) -> EndpointResult<()> {
+) -> EndpointResult<impl IntoResponse> {
     let mut files: Vec<(DocumentFileType, Vec<u8>)> = Vec::new();
     let metadata: OnceCell<DocumentMetadataInput> = OnceCell::new();
 

@@ -4,6 +4,10 @@ use axum::{
         State,
     },
     http::StatusCode,
+    response::{
+        IntoResponse,
+        Json,
+    },
 };
 use serde::{
     Deserialize,
@@ -46,7 +50,7 @@ impl Input {
 pub async fn get_subjects<I: SubjectRepository>(
     State(repo): State<I>,
     Query(input): Query<Input>,
-) -> EndpointResult<Vec<SubjectDto>> {
+) -> EndpointResult<impl IntoResponse> {
     let option = input.to_get_subjects_option();
 
     let subjects = match GetSubjectsUseCase::new(repo).execute(option).await {
@@ -66,10 +70,10 @@ pub async fn get_subjects<I: SubjectRepository>(
 
     (
         StatusCode::OK,
-        Ok(
+        Ok(Json(
             subjects.into_iter()
                 .map(|s| SubjectDto::from_domain(&s))
-                .collect()
-        )
+                .collect::<Vec<_>>()
+        ))
     )
 }
