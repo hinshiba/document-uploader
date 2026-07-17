@@ -163,6 +163,16 @@ pub async fn post_document<I: DocumentFileRepository + DocumentRepository>(
     }
 
     let files = files;
+    
+    // filesが空だった場合はエラーを投げる
+    if files.len() < 1 {
+        return error_with_400(
+            EndpointError {
+                message: "missing required field".to_owned(),
+                details: Some("'files' is required".to_owned()),
+            }
+        )
+    }
 
     // metadataが見つからなかったらエラーを投げる
     let Some(metadata) = metadata.into_inner()
