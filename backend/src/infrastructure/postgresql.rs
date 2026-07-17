@@ -169,3 +169,73 @@ impl DocumentRepository for PostgresRepository {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 空のDBがあるか確認
+    #[sqlx::test]
+    async fn migrations_run(pool: PgPool) {
+        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM faculties")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(count, Some(0));
+    }
+
+    // list_facultiesについて
+    /// 専攻が0の要素の列挙可能性を確認
+    #[sqlx::test]
+    async fn list_faculties_groups_majors(pool: PgPool) {
+        // 初期値の生成
+        let eng_id = Uuid::new_v4();
+        let sci_id = Uuid::new_v4();
+        sqlx::query!(
+            r#"
+        INSERT INTO faculties (id, name)
+            VALUES ($1, $2), ($3, $4)
+        "#,
+            eng_id,
+            "工学部",
+            sci_id,
+            "理学部"
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        sqlx::query!(
+            "INSERT INTO majors (id, name, faculty_id) VALUES ($1, $2, $3), ($4, $5, $6)",
+            Uuid::new_v4(),
+            "情報工学コース",
+            eng_id,
+            Uuid::new_v4(),
+            "ネットワーク工学コース",
+            eng_id
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        // 実行
+        let repo = PostgresRepository::new(pool);
+        let faculties = repo.list_faculties().await.unwrap();
+
+        assert_eq!(faculties.len(), 2);
+
+        let eng_faculty = faculties
+            .iter()
+            .find(|f| f.id().id() == &eng_id)
+            .expect("工学部なし");
+        let mut major_names: Vec<_> = eng_faculty.majors().iter().map(|m| m.name()).collect();
+        major_names.sort();
+        assert_eq!(major_names, ["ネットワーク工学コース", "情報工学コース"]);
+
+        let sci_faculty = faculties
+            .iter()
+            .find(|f| f.id().id() == &sci_id)
+            .expect("理学部なし");
+        assert!(sci_faculty.majors().is_empty());
+    }
+}
