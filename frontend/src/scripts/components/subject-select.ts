@@ -109,7 +109,6 @@ export class SubjectSelect extends LitElement {
     /** formの状態を更新する */
     private updateFormState() {
         const data = new FormData();
-        data.set("faculty", this.facultyId);
         data.set("subject", this.selectedSubjectId);
         data.set("grade", this.selectedGrade != null ? String(this.selectedGrade) : "");
         data.set("term", this.selectedTerm != null ? String(this.selectedTerm) : "");
