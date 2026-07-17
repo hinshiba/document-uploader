@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT s.id, s.name, m.faculty_id, s.major_id, s.grade, s.term\n            FROM subjects AS s\n            INNER JOIN majors AS m ON m.id = s.major_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "faculty_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "majors",
+            "name": "faculty_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "major_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "major_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "grade",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "grade"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "term",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "term"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bf4640fb5c9a039d76b19d88334f328a9343d69cbdf039fcffe3edf45b4ba36f"
+}
