@@ -55,11 +55,6 @@ export class SubjectSelect extends LitElement {
     @property()
     majorId: string = "";
 
-    /** 読み込み時にloadSubjectを呼ぶ */
-    override connectedCallback(): void {
-        super.connectedCallback();
-        void this.loadSubject();
-    }
 
     /** 更新時の処理 */
     protected override updated(changedProperties: PropertyValues) {
