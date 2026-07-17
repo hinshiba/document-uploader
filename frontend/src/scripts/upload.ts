@@ -37,21 +37,69 @@ function renderFileList(files: FileList): void {
 
 /**
  * フォームからメタデータを組み立てる
- * @throws faculty, major が未選択の場合
- * @remarks
- * TODO: 現状フォームは faculty, major しか持たないため部分的な値を返す．
+ * @throws 要素が未選択の場合
  */
 function buildMetadata(): DocumentMetadata {
     const formdata = new FormData(form);
     const faculty = formdata.get("faculty");
     const major = formdata.get("major");
+    const year = Number(formdata.get("year"));
+    const term = Number(formdata.get("term"));
+    const grade = Number(formdata.get("grade"));
+    const subject = formdata.get("subject");
+    const teacher = formdata.get("teacher");
+    const examtype = formdata.get("examtype");
+    const isanswer = formdata.has("isanswer");
+    const num = Number(formdata.get("num"));
+
     if (typeof faculty !== "string" || faculty === "") {
-        throw new Error("学部が選択されていません");
+        throw new Error("学部が選択されていません。");
     }
     if (typeof major !== "string" || major === "") {
-        throw new Error("専攻が選択されていません");
+        throw new Error("専攻が選択されていません。");
     }
-    return { faculty, major } as DocumentMetadata;
+    if (Number.isInteger(year) === false || year < 1949) {
+        throw new Error("年度の値が不正です。年度は1949年以降の整数で入力してください。");
+    }
+    if (Number.isInteger(term) === false || term < 1 || term > 4) {
+        throw new Error("学期の値が不正です。学期は1～4の整数で選択してください。");
+    }
+    if (Number.isInteger(grade) === false || grade < 1 || grade > 9) {
+        throw new Error("学年の値が不正です。学年は1～9の整数で選択してください。");
+    }
+    if (typeof subject !== "string" || subject === "") {
+        throw new Error("科目が選択されていません。");
+    }
+    if (typeof teacher !== "string" || teacher === "") {
+        throw new Error("担当教員名が入力されていません。");
+    }
+    if (typeof examtype !== "string" || examtype === "") {
+        throw new Error("試験種別が選択されていません。");
+    }
+    if (
+        examtype !== "quiz" &&
+        examtype !== "midterm" &&
+        examtype !== "final" &&
+        examtype !== "other"
+    ) {
+        throw new Error("無効な試験種別が選択されています。");
+    }
+    if (Number.isInteger(num) === false || num < 1) {
+        throw new Error("テストの回数は1以上の整数で入力してください。");
+    }
+
+    return {
+        faculty,
+        major,
+        year,
+        term,
+        grade,
+        subject,
+        teacher,
+        examtype,
+        isanswer,
+        num,
+    };
 }
 
 /** ドラッグ中はデフォルト動作を抑止し，ドロップを許可する */

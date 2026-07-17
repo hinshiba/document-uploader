@@ -13,7 +13,9 @@ form {
     }
 
     select,
-    input[type="file"] {
+    input[type="file"],
+    input[type="text"],
+    input[type="number"] {
         padding: 0.5rem;
         border: 1px solid $border-color;
     }
@@ -36,5 +38,9 @@ form {
             cursor: default;
             opacity: 0.5;
         }
+    }
+
+    input[type="checkbox"] {
+        transform: scale(1.5);
     }
 }
