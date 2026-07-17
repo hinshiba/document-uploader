@@ -1,8 +1,14 @@
+use tokio::io::AsyncWriteExt;
+
 use crate::domain::{
     Grade,
     Id,
     Term,
-    document::Document,
+    document::{
+        Document,
+        DocumentFile,
+        DocumentFileType,
+    },
     faculty::Faculty,
     subject::Subject,
     major::Major,
@@ -10,6 +16,7 @@ use crate::domain::{
 
 use crate::usecase::repository::{
     DocumentRepository,
+    DocumentFileRepository,
     FacultyRepository,
     SubjectRepository,
 };
@@ -20,15 +27,21 @@ pub struct ExampleRepository {
     documents: std::sync::Mutex<Vec<Document>>,
     faculties: Vec<Faculty>,
     subjects: Vec<Subject>,
+    save_dir: std::path::PathBuf,
 }
 
 impl ExampleRepository {
-    pub fn new() -> Self {
-        Self {
+    pub fn new(save_dir: std::path::PathBuf) -> std::io::Result<Self> {
+        if !save_dir.exists() {
+            std::fs::create_dir_all(&save_dir)?;
+        }
+
+        Ok( Self {
             documents: std::sync::Mutex::new(Vec::new()),
             faculties: Self::example_faculties(),
             subjects: Self::example_subjects(),
-        }
+            save_dir,
+        } )
     }
 
     // 以下helper functions
@@ -137,6 +150,25 @@ impl DocumentRepository for ExampleRepository {
         tracing::info!("document is successfully stored.");
 
         Ok(())
+    }
+}
+
+impl DocumentFileRepository for ExampleRepository {
+    #[tracing::instrument(skip_all, ret(level="info"), err)]
+    async fn store_document_file(&self, content: Vec<u8>, file_type: DocumentFileType) -> anyhow::Result<DocumentFile> {
+        let file_name = uuid::Uuid::new_v4().to_string();
+        let file_path = self.save_dir.join(file_name);
+
+        let mut buffer = tokio::io::BufWriter::new(
+            tokio::fs::File::create_new(&file_path).await?
+        );
+        buffer.write_all(&content).await?;
+        buffer.flush().await?;
+
+        Ok(DocumentFile::new(
+            file_type,
+            file_path
+        ))
     }
 }
 
