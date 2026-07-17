@@ -16,7 +16,7 @@ function required<T extends Element>(selector: string): T {
 // ここで要素を取得してよい
 const form = required<HTMLFormElement>("form");
 const fileInput = required<HTMLInputElement>("#file");
-const dropArea = required<HTMLElement>("#drop-area");
+const dropArea = required<HTMLDivElement>("#drop-area");
 const fileList = required<HTMLUListElement>("#makelist");
 const message = required<HTMLParagraphElement>("#message");
 const submitButton = required<HTMLButtonElement>("#uploadbtn");
