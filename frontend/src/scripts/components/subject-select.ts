@@ -166,8 +166,8 @@ export class SubjectSelect extends LitElement {
                     <option value="">教科を選択してください</option>
                     ${subject_options}
                 </select>
-                ${this.status === Status.Loading ? html`<p>読み込み中...</p>` : ""}
-                ${this.status === Status.Error ? html`<p>教科一覧の取得に失敗しました</p>` : ""}
+                ${this.status === Status.Loading ? html`読み込み中...` : ""}
+                ${this.status === Status.Error ? html`教科一覧の取得に失敗しました` : ""}
             </label>
         `;
     }
