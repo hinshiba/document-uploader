@@ -1,5 +1,8 @@
 import { postDocuments, type DocumentMetadata } from "./api/client";
 import "./components/major-select.ts";
+import "./components/subject-select.ts";
+import { SubjectSelect } from "./components/subject-select";
+import type { SelectionChangeDetail } from "./components/major-select";
 /**
  * 要素を型付きで取得するヘルパ
  * @param selector セレクタ
@@ -21,6 +24,8 @@ const fileList = required<HTMLUListElement>("#makelist");
 const message = required<HTMLParagraphElement>("#message");
 const submitButton = required<HTMLButtonElement>("#uploadbtn");
 const statusText = required<HTMLParagraphElement>("#thank");
+const majorSelect = document.querySelector("major-select");
+const subjectSelect = document.querySelector("subject-select") as SubjectSelect | null;
 
 /** 選択中のファイル一覧を画面に描画する */
 function renderFileList(files: FileList): void {
@@ -157,5 +162,15 @@ form.addEventListener("submit", async (event) => {
         statusText.textContent = "送信に失敗しました．時間をおいて再試行してください";
         submitButton.disabled = false;
         submitButton.textContent = "送信";
+    }
+});
+
+// major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
+majorSelect?.addEventListener("selection-change", (e) => {
+    const event = e as CustomEvent<SelectionChangeDetail>;
+
+    if (subjectSelect) {
+        subjectSelect.facultyId = event.detail.facultyId;
+        subjectSelect.majorId = event.detail.majorId;
     }
 });
