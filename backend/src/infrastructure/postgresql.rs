@@ -206,7 +206,8 @@ mod tests {
         .unwrap();
 
         sqlx::query!(
-            "INSERT INTO majors (id, name, faculty_id) VALUES ($1, $2, $3), ($4, $5, $6)",
+            "INSERT INTO majors (id, name, faculty_id) 
+                VALUES ($1, $2, $3), ($4, $5, $6)",
             Uuid::new_v4(),
             "情報工学コース",
             eng_id,
@@ -237,5 +238,67 @@ mod tests {
             .find(|f| f.id().id() == &sci_id)
             .expect("理学部なし");
         assert!(sci_faculty.majors().is_empty());
+    }
+
+    // list_subjectsについて
+    ///
+    #[sqlx::test]
+    async fn list_subjects_resolves_faculty_via_major(pool: PgPool) {
+        // 初期値の生成
+        let eng_id = Uuid::new_v4();
+        let sci_id = Uuid::new_v4();
+        sqlx::query!(
+            "INSERT INTO faculties (id, name) 
+                VALUES ($1, $2), ($3, $4)",
+            eng_id,
+            "工学部",
+            sci_id,
+            "理学部"
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        let eng_major = Uuid::new_v4();
+        sqlx::query!(
+            "INSERT INTO majors (id, name, faculty_id) 
+                VALUES ($1, $2, $3), ($4, $5, $6)",
+            eng_major,
+            "情報工学コース",
+            eng_id,
+            Uuid::new_v4(),
+            "数学科",
+            sci_id
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        let subject_id = Uuid::new_v4();
+        sqlx::query!(
+            "INSERT INTO subjects (id, name, major_id, grade, term) 
+                VALUES ($1, $2, $3, $4, $5)",
+            subject_id,
+            "線形代数",
+            eng_major,
+            1i64,
+            2i64
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        // 実行
+        let repo = PostgresRepository::new(pool);
+        let subjects = repo.list_subjects().await.unwrap();
+
+        assert_eq!(subjects.len(), 1);
+        let subject = &subjects[0];
+        assert_eq!(subject.id().id(), &subject_id);
+        assert_eq!(subject.name(), "線形代数");
+        assert_eq!(subject.major_id().id(), &eng_major);
+        assert_eq!(subject.faculty_id().id(), &eng_id);
+        assert_eq!(subject.grade().grade(), &1);
+        assert_eq!(subject.term().term(), &2);
     }
 }
