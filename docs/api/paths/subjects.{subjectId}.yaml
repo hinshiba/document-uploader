@@ -1,0 +1,71 @@
+parameters:
+  - name: subjectId
+    in: path
+    required: true
+    description: 科目のUUID
+    schema:
+      type: string
+      format: uuid
+
+put:
+  tags: [subjects]
+  summary: 科目の更新
+  description: |
+    指定した科目を置換する
+
+    course_code を変更する場合，同一の course_code を持つ別科目が存在すると更新できない
+  
+    major は指定した faculty に属している必要がある
+
+    この操作にはマスタ情報を編集できる追加の権限が必要
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/Subject"
+        example:
+          name: "線形代数"
+          course_code: "090002"
+          faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+          major: "550e8400-e29b-41d4-a716-446655440000"
+          grade: 1
+          term: 1
+  responses:
+    "200":
+      description: 更新後の科目
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Subject"
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "403":
+      $ref: "../openapi.yaml#/components/responses/Forbidden"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"
+    "409":
+      $ref: "../openapi.yaml#/components/responses/Conflict"
+
+delete:
+  tags: [subjects]
+  summary: 科目の削除
+  description: |
+    指定した科目を削除する
+
+    ドキュメントから参照されている場合は削除できない
+    
+    この操作にはマスタ情報を編集できる追加の権限が必要
+  responses:
+    "204":
+      description: 削除成功
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "403":
+      $ref: "../openapi.yaml#/components/responses/Forbidden"
+    "404":
+      $ref: "../openapi.yaml#/components/responses/NotFound"
+    "409":
+      $ref: "../openapi.yaml#/components/responses/Conflict"

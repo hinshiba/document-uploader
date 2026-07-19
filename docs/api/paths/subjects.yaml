@@ -46,12 +46,14 @@ get:
           example:
             - id: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
               name: "線形代数"
+              course_code: "090002"
               faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
               major: "550e8400-e29b-41d4-a716-446655440000"
               grade: 1
               term: 1
             - id: "a1b2c3d4-e5f6-4a5b-9c8d-7e6f5a4b3c2d"
               name: "アルゴリズムと計算量"
+              course_code: "090010"
               faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
               major: "550e8400-e29b-41d4-a716-446655440000"
               grade: 2
@@ -60,3 +62,46 @@ get:
       $ref: "../openapi.yaml#/components/responses/BadRequest"
     "401":
       $ref: "../openapi.yaml#/components/responses/Unauthorized"
+
+post:
+  tags: [subjects]
+  summary: 科目の作成
+  description: |
+    科目を新規に作成する
+
+    course_code が同一の科目は作成できない
+
+    major は指定した faculty に属している必要がある
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/SubjectCreate"
+        example:
+          name: "線形代数"
+          course_code: "090002"
+          faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+          major: "550e8400-e29b-41d4-a716-446655440000"
+          grade: 1
+          term: 1
+  responses:
+    "201":
+      description: 作成された科目
+      headers:
+        Location:
+          description: 作成された科目のURL
+          schema:
+            type: string
+            format: uri-reference
+          example: "/subjects/9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/Subject"
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+    "409":
+      $ref: "../openapi.yaml#/components/responses/Conflict"
