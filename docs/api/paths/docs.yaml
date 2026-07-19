@@ -2,9 +2,7 @@ get:
   tags: [docs]
   summary: ファイルの一覧・絞り込み
   description: |
-    指定した科目の文書を返す
-
-    各文書のファイルには`id`が付与されており，`GET /docs/{id}`でダウンロードできる
+    指定した科目の文書一覧を返す
   parameters:
     - name: subject
       in: query
@@ -48,7 +46,8 @@ get:
             items:
               $ref: "../openapi.yaml#/components/schemas/Document"
           example:
-            - metadata:
+            - id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+              metadata:
                 faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
                 major: "550e8400-e29b-41d4-a716-446655440000"
                 year: 2025
@@ -59,11 +58,6 @@ get:
                 examtype: "final"
                 isanswer: false
                 num: 1
-              files:
-                - id: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
-                  type: "pdf"
-                - id: "b3f1a2c4-5d6e-4a7b-8c9d-0e1f2a3b4c5d"
-                  type: "jpeg"
     "400":
       $ref: "../openapi.yaml#/components/responses/BadRequest"
     "401":
@@ -110,7 +104,7 @@ post:
     "401":
       $ref: "../openapi.yaml#/components/responses/Unauthorized"
     "413":
-      description: ファイルサイズが上限を超過
+      description: 上限を超過するファイルが含まれる
       content:
         application/json:
           schema:
@@ -119,7 +113,7 @@ post:
             message: "file size exceeds the limit of 100MB per file"
             details: "uploaded file size: {}MB. must <= 100MB"
     "415":
-      description: 許可されていないファイル種別
+      description: 許可されていないファイル種別が含まれる
       content:
         application/json:
           schema:

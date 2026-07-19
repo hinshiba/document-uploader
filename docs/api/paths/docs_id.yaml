@@ -1,29 +1,29 @@
 get:
   tags: [docs]
-  summary: ファイルのダウンロード
+  summary: ドキュメントのダウンロード
   description: |
-    指定したUUIDのファイルの内容を返す
+    指定したUUIDのドキュメントを構成する全ファイルをzipでまとめて返す
 
-    `Content-Disposition` にアップロード時の拡張子を含むファイル名を付与する
+    `Content-Disposition`にzipのファイル名を付与する
   parameters:
     - name: id
       in: path
       required: true
-      description: ファイルのUUID
+      description: ドキュメントのUUID
       schema:
         type: string
         format: uuid
   responses:
     "200":
-      description: ファイルの内容
+      description: ドキュメントの全ファイルを含むzip
       headers:
         Content-Disposition:
           description: ダウンロード時のファイル名
           schema:
             type: string
-            examples: ["attachment; filename*=UTF-8''%E7%B7%9A%E5%BD%A2%E4%BB%A3%E6%95%B0_2025_final_1.pdf"]
+            examples: ["attachment; filename*=UTF-8''%E7%B7%9A%E5%BD%A2%E4%BB%A3%E6%95%B0_2025_final.zip"]
       content:
-        application/octet-stream:
+        application/zip:
           schema:
             type: string
             format: binary

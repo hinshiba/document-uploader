@@ -18,7 +18,7 @@ tags:
   - name: subjects
     description: 科目のマスタ情報
   - name: docs
-    description: ファイルの操作
+    description: ドキュメントの操作
 
 security:
   - cloudflareAccess: []
@@ -310,23 +310,23 @@ components:
     DocumentFile:
       type: object
       description: 文書を構成する個々のファイル
-      required: [id, type]
+      required: [type]
       properties:
-        id:
-          type: string
-          format: uuid
-          description: ファイルのUUID(`GET /docs/{id}`でのダウンロードに使う)
         type:
           $ref: "#/components/schemas/FileType"
       example:
-        id: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
         type: "pdf"
 
     Document:
       type: object
       description: メタデータと，それに紐づく1つ以上のファイル
-      required: [metadata, files]
+      required: [id, metadata, files]
       properties:
+        id:
+          type: string
+          format: uuid
+          description: ドキュメントのUUID(`GET /docs/{id}`で全ファイルをzipダウンロードする)
+          readOnly: true
         metadata:
           $ref: "#/components/schemas/DocumentMetadata"
         files:
@@ -336,6 +336,7 @@ components:
           items:
             $ref: "#/components/schemas/DocumentFile"
       example:
+        id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
         metadata:
           faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
           major: "550e8400-e29b-41d4-a716-446655440000"
@@ -347,11 +348,6 @@ components:
           examtype: "final"
           isanswer: false
           num: 1
-        files:
-          - id: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
-            type: "pdf"
-          - id: "b3f1a2c4-5d6e-4a7b-8c9d-0e1f2a3b4c5d"
-            type: "jpeg"
 
     Error:
       type: object
