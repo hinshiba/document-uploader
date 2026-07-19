@@ -292,35 +292,10 @@ components:
         isanswer: false
         num: 1
 
-    FileType:
-      type: string
-      description: 保存されているファイルの種別(拡張子)
-      enum:
-        - jpeg
-        - webp
-        - png
-        - doc
-        - docx
-        - pdf
-        - txt
-        - md
-        - typ
-        - tex
-
-    DocumentFile:
-      type: object
-      description: 文書を構成する個々のファイル
-      required: [type]
-      properties:
-        type:
-          $ref: "#/components/schemas/FileType"
-      example:
-        type: "pdf"
-
     Document:
       type: object
       description: メタデータと，それに紐づく1つ以上のファイル
-      required: [id, metadata, files]
+      required: [id, metadata]
       properties:
         id:
           type: string
@@ -329,12 +304,6 @@ components:
           readOnly: true
         metadata:
           $ref: "#/components/schemas/DocumentMetadata"
-        files:
-          type: array
-          description: この文書を構成するファイルの一覧
-          minItems: 1
-          items:
-            $ref: "#/components/schemas/DocumentFile"
       example:
         id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
         metadata:

@@ -1,6 +1,6 @@
 get:
   tags: [docs]
-  summary: ファイルの一覧・絞り込み
+  summary: ドキュメントの一覧・絞り込み
   description: |
     指定した科目の文書一覧を返す
   parameters:
