@@ -10,7 +10,7 @@ use infrastructure::repository::ExampleRepository;
 async fn main() -> anyhow::Result<()> {
     init_tracing_subscriber();
 
-    let repo = Arc::new(ExampleRepository::new("./test".into())?);
+    let repo = Arc::new(init_example_repository()?);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
 
@@ -39,6 +39,13 @@ fn init_tracing_subscriber() {
         .with_env_filter(env_filter)
         .with_timer(tracing_subscriber::fmt::time::LocalTime::rfc_3339())
         .init();
+}
+
+fn init_example_repository() -> anyhow::Result<ExampleRepository> {
+    let save_dir = std::env::var("FILE_DIR")?;
+    let save_dir = std::path::PathBuf::from(save_dir);
+
+    Ok(ExampleRepository::new(save_dir)?)
 }
 
 use usecase::repository::*;
