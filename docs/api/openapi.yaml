@@ -28,8 +28,16 @@ paths:
     $ref: "./paths/alive.yaml"
   /faculties:
     $ref: "./paths/faculties.yaml"
+  /faculties/{facultyId}:
+    $ref: "./paths/faculties.{facultyId}.yaml"
+  /faculties/{facultyId}/majors:
+    $ref: "./paths/faculties.{facultyId}.majors.yaml"
+  /faculties/{facultyId}/majors/{majorId}:
+    $ref: "./paths/faculties.{facultyId}.majors.{majorId}.yaml"
   /subjects:
     $ref: "./paths/subjects.yaml"
+  /subjects/{subjectId}:
+    $ref: "./paths/subjects.{subjectId}.yaml"
   /docs:
     $ref: "./paths/docs.yaml"
 
@@ -61,6 +69,37 @@ components:
             $ref: "#/components/schemas/Error"
           example:
             message: "missing or invalid Cf-Access-Jwt-Assertion"
+    Forbidden:
+      description: |
+        認証は有効だが，この操作に必要な追加の権限を持っていない
+
+        学部・専攻の作成や，マスタ情報の更新・削除は，編集権限を持つ利用者のみが行える
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: "account is not allowed to edit master data"
+            details: "ask an administrator to grant edit permission"
+    NotFound:
+      description: 指定したリソースが存在しない
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: "faculty does not exist"
+            details: "id: f47ac10b-58cc-4372-a567-0e02b2c3d479"
+    Conflict:
+      description: |
+        他リソースからの参照や一意制約により，要求した変更を適用できない
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: "faculty is still referenced by majors or subjects"
+            details: "reassign or delete them before deleting this faculty"
 
   schemas:
     Faculty:
@@ -72,13 +111,17 @@ components:
           type: string
           format: uuid
           description: 学部のUUID
+          readOnly: true
         name:
           type: string
           description: 学部名
           examples: [工学部]
         majors:
           type: array
-          description: この学部に属する専攻の一覧
+          description: |
+            この学部に属する専攻の一覧
+            専攻は /faculties/{facultyId}/majors 配下で個別に操作する
+          readOnly: true
           items:
             $ref: "#/components/schemas/Major"
       example:
@@ -99,6 +142,7 @@ components:
           type: string
           format: uuid
           description: 専攻のUUID
+          readOnly: true
         name:
           type: string
           description: 専攻名
@@ -111,13 +155,13 @@ components:
       type: object
       description: |
         科目が持つべき情報
-        同名でも faculty / major / grade / term が異なれば別科目
       required: [id, name, faculty, major, grade, term]
       properties:
         id:
           type: string
           format: uuid
           description: 科目のUUID
+          readOnly: true
         name:
           type: string
           description: 科目名
@@ -145,10 +189,23 @@ components:
       example:
         id: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
         name: "線形代数"
+        course_code: "090002"
         faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
         major: "550e8400-e29b-41d4-a716-446655440000"
         grade: 1
         term: 1
+
+    SubjectCreate:
+      description: |
+        科目の作成で受け取る情報
+        誰でも作成できるため，重複登録を防ぐ course_code を必須にする
+      allOf:
+        - $ref: "#/components/schemas/Subject"
+        - type: object
+          required: [course_code]
+          properties:
+            course_code:
+              type: string
 
     ExamType:
       type: string
