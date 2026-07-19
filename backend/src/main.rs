@@ -1,4 +1,5 @@
 mod domain;
+mod endpoint;
 mod infrastructure;
 mod usecase;
 
