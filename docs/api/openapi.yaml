@@ -18,7 +18,7 @@ tags:
   - name: subjects
     description: 科目のマスタ情報
   - name: docs
-    description: ファイルの操作
+    description: ドキュメントの操作
 
 security:
   - cloudflareAccess: []
@@ -40,6 +40,8 @@ paths:
     $ref: "./paths/subjects.{subjectId}.yaml"
   /docs:
     $ref: "./paths/docs.yaml"
+  /docs/{id}:
+    $ref: "./paths/docs_id.yaml"
 
 components:
   securitySchemes:
@@ -289,6 +291,32 @@ components:
         examtype: "final"
         isanswer: false
         num: 1
+
+    Document:
+      type: object
+      description: メタデータと，それに紐づく1つ以上のファイル
+      required: [id, metadata]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ドキュメントのUUID(`GET /docs/{id}`で全ファイルをzipダウンロードする)
+          readOnly: true
+        metadata:
+          $ref: "#/components/schemas/DocumentMetadata"
+      example:
+        id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        metadata:
+          faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+          major: "550e8400-e29b-41d4-a716-446655440000"
+          year: 2025
+          term: 2
+          grade: 2
+          subject: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
+          teacher: "岡山 聖彦"
+          examtype: "final"
+          isanswer: false
+          num: 1
 
     Error:
       type: object

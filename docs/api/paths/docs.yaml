@@ -1,3 +1,68 @@
+get:
+  tags: [docs]
+  summary: ドキュメントの一覧・絞り込み
+  description: |
+    指定した科目の文書一覧を返す
+  parameters:
+    - name: subject
+      in: query
+      required: true
+      description: 科目のUUID
+      schema:
+        type: string
+        format: uuid
+    - name: year
+      in: query
+      required: false
+      description: 西暦
+      schema:
+        type: integer
+        minimum: 1949
+    - name: teacher
+      in: query
+      required: false
+      description: 教員名
+      schema:
+        type: string
+    - name: examtype
+      in: query
+      required: false
+      description: 試験種別
+      schema:
+        $ref: "../openapi.yaml#/components/schemas/ExamType"
+    - name: isanswer
+      in: query
+      required: false
+      description: 解答かどうか
+      schema:
+        type: boolean
+  responses:
+    "200":
+      description: 条件に合致する文書の一覧
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../openapi.yaml#/components/schemas/Document"
+          example:
+            - id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+              metadata:
+                faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                major: "550e8400-e29b-41d4-a716-446655440000"
+                year: 2025
+                term: 2
+                grade: 2
+                subject: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
+                teacher: "岡山 聖彦"
+                examtype: "final"
+                isanswer: false
+                num: 1
+    "400":
+      $ref: "../openapi.yaml#/components/responses/BadRequest"
+    "401":
+      $ref: "../openapi.yaml#/components/responses/Unauthorized"
+
 post:
   tags: [docs]
   summary: ファイルとメタデータのアップロード
@@ -39,7 +104,7 @@ post:
     "401":
       $ref: "../openapi.yaml#/components/responses/Unauthorized"
     "413":
-      description: ファイルサイズが上限を超過
+      description: 上限を超過するファイルが含まれる
       content:
         application/json:
           schema:
@@ -48,7 +113,7 @@ post:
             message: "file size exceeds the limit of 100MB per file"
             details: "uploaded file size: {}MB. must <= 100MB"
     "415":
-      description: 許可されていないファイル種別
+      description: 許可されていないファイル種別が含まれる
       content:
         application/json:
           schema:
