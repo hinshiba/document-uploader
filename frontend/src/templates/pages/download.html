@@ -1,0 +1,14 @@
+{% extends "base.html" %} {% block styles %}{% endblock %} {% block content %}
+
+<main>
+    <major-select></major-select>
+    <button type="button" id="search">検索</button>
+
+    <ul id="result-list"></ul>
+
+    <button type="button" id="download">ダウンロード</button>
+</main>
+
+{% endblock content %} {% block scripts %}
+<script type="module" src="../scripts/download.ts"></script>
+{% endblock %}
