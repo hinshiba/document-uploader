@@ -104,19 +104,20 @@ export async function postDocuments(
 export interface DownloadDocument {
     id: string;
     filename: string;
+    metadata: DocumentMetadata;
 }
 
 export async function searchDocuments(
-    facultyId: string,
-    majorId: string,
+    faculty: string,
+    major: string,
     grade?: Grade,
     term?: Term,
-    subjectId?: string,
+    subject?: string,
 ): Promise<DownloadDocument[]> {
     const params = new URLSearchParams();
 
-    params.set("faculty", facultyId);
-    params.set("major", majorId);
+    params.set("faculty", faculty);
+    params.set("major", major);
 
     if (grade != null) {
         params.set("grade", String(grade));
@@ -126,8 +127,8 @@ export async function searchDocuments(
         params.set("term", String(term));
     }
 
-    if (subjectId) {
-        params.set("subject", subjectId);
+    if (subject) {
+        params.set("subject", subject);
     }
 
     const res = await fetchWithTimeout(`${API_BASE}/docs?${params.toString()}`, {
@@ -138,7 +139,7 @@ export async function searchDocuments(
         throw new Error(`GET /docs -> ${res.status}`);
     }
 
-    return (await res.json()) as DownloadDocument[];
+    return await res.json();
 }
 
 export async function downloadDocument(id: string): Promise<Blob> {
