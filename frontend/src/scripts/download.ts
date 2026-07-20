@@ -1,162 +1,71 @@
-import {
-    fetchFaculties,
-    fetchSubjects,
-    searchDocuments,
-    downloadDocument,
-    type DownloadDocument,
-} from "./api/client";
+import "./components/major-select";
+import "./components/subject-select";
 
-// HTML要素を取得
-const facultySelect = document.querySelector<HTMLSelectElement>("#faculty")!;
-const majorSelect = document.querySelector<HTMLSelectElement>("#major")!;
-const gradeSelect = document.querySelector<HTMLSelectElement>("#grade")!;
-const termSelect = document.querySelector<HTMLSelectElement>("#term")!;
-const subjectSelect = document.querySelector<HTMLSelectElement>("#subject")!;
+import { searchDocuments, downloadDocument } from "./api/client";
+import type { SelectionChangeDetail } from "./components/major-select";
+import type { SubjectSelect } from "./components/subject-select";
 
-const searchButton = document.querySelector<HTMLButtonElement>("#search")!;
-const resultList = document.querySelector<HTMLUListElement>("#result")!;
+const form = document.querySelector<HTMLFormElement>("#search-form");
+const majorSelect = document.querySelector("major-select");
+const subjectSelect = document.querySelector<SubjectSelect>("subject-select");
+const resultList = document.querySelector<HTMLUListElement>("#result-list");
 
-/**
- * 学部一覧を読み込む
- */
-async function loadFaculties(): Promise<void> {
-    const faculties = await fetchFaculties();
-
-    facultySelect.replaceChildren();
-
-    for (const faculty of faculties) {
-        const option = document.createElement("option");
-        option.value = faculty.id;
-        option.textContent = faculty.name;
-        facultySelect.append(option);
-    }
+if (!form || !majorSelect || !subjectSelect || !resultList) {
+    throw new Error("必要なHTML要素が見つかりません");
 }
 
 /**
- * 専攻一覧を更新する
+ * 学部・専攻が変更されたらsubject-selectへ通知
  */
-async function loadMajors(): Promise<void> {
-    const faculties = await fetchFaculties();
+majorSelect.addEventListener("selection-change", (event) => {
+    const detail = (event as CustomEvent<SelectionChangeDetail>).detail;
 
-    const majors = faculties.find((f) => f.id === facultySelect.value)?.majors ?? [];
-
-    majorSelect.replaceChildren();
-
-    for (const major of majors) {
-        const option = document.createElement("option");
-        option.value = major.id;
-        option.textContent = major.name;
-        majorSelect.append(option);
-    }
-}
-
+    subjectSelect.facultyId = detail.facultyId;
+    subjectSelect.majorId = detail.majorId;
+});
 /**
- * 科目一覧を更新する
+ * 検索ボタン
  */
-async function loadSubjects(): Promise<void> {
-    const subjects = await fetchSubjects(
-        facultySelect.value,
-        majorSelect.value,
-        Number(gradeSelect.value),
-        Number(termSelect.value),
-    );
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-    subjectSelect.replaceChildren();
+    const formData = new FormData(form);
 
-    for (const subject of subjects) {
-        const option = document.createElement("option");
-        option.value = subject.id;
-        option.textContent = subject.name;
-        subjectSelect.append(option);
-    }
-}
+    const faculty = formData.get("faculty") as string;
+    const major = formData.get("major") as string;
+    const grade = Number(formData.get("grade"));
+    const term = Number(formData.get("term"));
+    const subject = formData.get("subject") as string;
 
-/**
- * 検索
- */
-async function search(): Promise<void> {
-    const documents = await searchDocuments(
-        facultySelect.value,
-        majorSelect.value,
-        Number(gradeSelect.value),
-        Number(termSelect.value),
-        subjectSelect.value,
-    );
-
-    renderDocuments(documents);
-}
-
-/**
- * 検索結果を表示
- */
-function renderDocuments(documents: DownloadDocument[]): void {
     resultList.replaceChildren();
 
-    for (const doc of documents) {
+    try {
+        const documents = await searchDocuments(faculty, major, grade, term, subject);
+
+        if (documents.length === 0) {
+            const li = document.createElement("li");
+            li.textContent = "検索結果はありません";
+            resultList.append(li);
+            return;
+        }
+
+        for (const doc of documents) {
+            const li = document.createElement("li");
+
+            li.textContent = doc.filename;
+            li.style.cursor = "pointer";
+
+            li.addEventListener("click", () => {
+                downloadDocument(doc.id);
+            });
+
+            resultList.append(li);
+        }
+    } catch (error) {
+        console.error(error);
+
         const li = document.createElement("li");
-
-        li.textContent = doc.filename;
-
-        li.addEventListener("click", () => {
-            void download(doc.id);
-        });
-
+        li.textContent = "検索に失敗しました";
         resultList.append(li);
     }
-}
-
-/**
- * ファイルをダウンロード
- */
-async function download(id: string): Promise<void> {
-    const blob = await downloadDocument(id);
-
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "";
-
-    a.click();
-
-    URL.revokeObjectURL(url);
-}
-
-/**
- * イベント登録
- */
-function registerEvents(): void {
-    facultySelect.addEventListener("change", async () => {
-        await loadMajors();
-        await loadSubjects();
-    });
-
-    majorSelect.addEventListener("change", () => {
-        void loadSubjects();
-    });
-
-    gradeSelect.addEventListener("change", () => {
-        void loadSubjects();
-    });
-
-    termSelect.addEventListener("change", () => {
-        void loadSubjects();
-    });
-
-    searchButton.addEventListener("click", () => {
-        void search();
-    });
-}
-
-/**
- * 初期化
- */
-async function init(): Promise<void> {
-    await loadFaculties();
-    await loadMajors();
-    await loadSubjects();
-
-    registerEvents();
-}
-
-void init();
+});
