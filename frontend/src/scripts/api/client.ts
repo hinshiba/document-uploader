@@ -100,3 +100,55 @@ export async function postDocuments(
     });
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
 }
+
+export interface DownloadDocument {
+    id: string;
+    filename: string;
+}
+
+export async function searchDocuments(
+    facultyId: string,
+    majorId: string,
+    grade?: Grade,
+    term?: Term,
+    subjectId?: string,
+): Promise<DownloadDocument[]> {
+    const params = new URLSearchParams();
+
+    params.set("faculty", facultyId);
+    params.set("major", majorId);
+
+    if (grade != null) {
+        params.set("grade", String(grade));
+    }
+
+    if (term != null) {
+        params.set("term", String(term));
+    }
+
+    if (subjectId) {
+        params.set("subject", subjectId);
+    }
+
+    const res = await fetchWithTimeout(`${API_BASE}/docs?${params.toString()}`, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /docs -> ${res.status}`);
+    }
+
+    return (await res.json()) as DownloadDocument[];
+}
+
+export async function downloadDocument(id: string): Promise<Blob> {
+    const res = await fetchWithTimeout(`${API_BASE}/docs/${id}`, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /docs/${id} -> ${res.status}`);
+    }
+
+    return await res.blob();
+}
