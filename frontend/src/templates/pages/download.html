@@ -1,12 +1,17 @@
 {% extends "base.html" %} {% block styles %}{% endblock %} {% block content %}
 
 <main>
-    <major-select></major-select>
-    <button type="button" id="search">検索</button>
+    <form id="search-form">
+        <major-select></major-select>
+
+        <subject-select></subject-select>
+
+        <button type="submit">検索</button>
+    </form>
+
+    <hr>
 
     <ul id="result-list"></ul>
-
-    <button type="button" id="download">ダウンロード</button>
 </main>
 
 {% endblock content %} {% block scripts %}
