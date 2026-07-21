@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block styles %}{% endblock %} {% block content %}
+
+<main>
+    <h2>教科の登録</h2>
+    <p>貢献に感謝します</p>
+
+    <form>
+        <p>登録する教科</p>
+
+        <major-select></major-select>
+        <label>
+            学年
+            <select required>
+                <option value="">--学年--</option>
+                <option value="1">1回生</option>
+                <option value="2">2回生</option>
+                <option value="3">3回生</option>
+                <option value="4">4回生</option>
+                <option value="5">M1</option>
+                <option value="6">M2</option>
+                <option value="7">D1</option>
+                <option value="8">D2</option>
+                <option value="9">D3</option>
+            </select>
+        </label>
+        <label>
+            学期
+            <select required>
+                <option value="">--学期--</option>
+                <option value="1">1学期</option>
+                <option value="2">2学期</option>
+                <option value="3">3学期</option>
+                <option value="4">4学期</option>
+            </select>
+        </label>
+        <label>
+            教科
+            <input type="text" required>
+        </label>
+        <button id="submit_btn" type="submit">送信</button>
+        <p id="thank"></p>
+    </form>
+</main>
+
+{% endblock content %} {% block scripts %}
+<script type="module" src="../scripts/subject.ts"></script>
+{% endblock %}
