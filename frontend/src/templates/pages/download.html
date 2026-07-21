@@ -1,12 +1,19 @@
-{% extends "base.html" %} {% block styles %}{% endblock %} {% block content %}
+{% extends "base.html" %} {% block styles %}<link
+    rel="stylesheet"
+    href="download.css"
+>{% endblock %} {% block content %}
 
 <main>
+    <h2>ダウンロード</h2>
     <form id="search-form">
-        <major-select></major-select>
+        <p>ダウンロードしたい教科を選んでください．</p>
+        <div class="section-content">
+            <major-select></major-select>
 
-        <subject-select></subject-select>
+            <subject-select></subject-select>
 
-        <button type="submit">検索</button>
+            <button type="submit">検索</button>
+        </div>
     </form>
 
     <hr>
