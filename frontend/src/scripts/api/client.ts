@@ -55,15 +55,15 @@ export async function fetchSubjects(
     // faculty必須
     params.set("faculty", facultyId);
 
-    if (majorId) {
+    if (majorId != null) {
         params.set("major", majorId);
     }
 
-    if (grade) {
+    if (grade != null) {
         params.set("grade", String(grade));
     }
 
-    if (term) {
+    if (term != null) {
         params.set("term", String(term));
     }
 

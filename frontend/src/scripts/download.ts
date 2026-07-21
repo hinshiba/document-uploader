@@ -63,9 +63,18 @@ form.addEventListener("submit", async (event) => {
             // マウスカーソルをホバーする時用
             li.style.cursor = "pointer";
 
-            li.addEventListener("click", () => {
-                // idでAPIから情報を所得する予定らしいのでidにしている
-                downloadDocument(doc.id);
+            li.addEventListener("click", async () => {
+                // クリックするとダウンロードされるようにする
+                const blob = await downloadDocument(doc.id);
+
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = doc.filename;
+                a.click();
+
+                URL.revokeObjectURL(url);
             });
 
             resultList.append(li);
