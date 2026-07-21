@@ -32,3 +32,11 @@ form {
         @extend %content-width;
     }
 }
+
+.search-area {
+    @extend %content-width;
+
+    padding: 2rem;
+    border: 2px solid;
+    text-align: center;
+}
