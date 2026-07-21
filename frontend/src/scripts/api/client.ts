@@ -127,11 +127,12 @@ export async function searchDocuments(
         params.set("term", String(term));
     }
 
-    if (subject) {
+    if (subject != null) {
         params.set("subject", subject);
     }
 
     const res = await fetchWithTimeout(`${API_BASE}/docs?${params.toString()}`, {
+        method: "GET",
         headers: DEV_HEADERS,
     });
 
