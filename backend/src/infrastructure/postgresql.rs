@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::{
     domain::{
@@ -127,7 +126,7 @@ impl DocumentRepository for PostgresRepository {
         .ok_or_else(|| anyhow::anyhow!("No subject matching the specified criteria was found."))?;
 
         // メタデータの格納
-        let document_id = Uuid::new_v4();
+        let document_id = document.id().id();
         let _ = sqlx::query!(
             r#"
             INSERT INTO documents (id, subject_id, year, teacher, exam_type, is_answer, num)
@@ -173,6 +172,7 @@ impl DocumentRepository for PostgresRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use uuid::Uuid;
 
     /// 空のDBがあるか確認
     #[sqlx::test]
