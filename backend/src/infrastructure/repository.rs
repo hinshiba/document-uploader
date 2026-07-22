@@ -170,6 +170,13 @@ impl DocumentFileRepository for ExampleRepository {
             file_path
         ))
     }
+
+    #[tracing::instrument(skip(self), err)]
+    async fn get_document_file_content(&self, document_file: &DocumentFile) -> anyhow::Result<Vec<u8>> {
+        let file_path = document_file.path();
+        let content = tokio::fs::read(file_path).await?;
+        Ok(content)
+    }
 }
 
 impl FacultyRepository for ExampleRepository {
