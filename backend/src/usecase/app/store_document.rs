@@ -1,7 +1,10 @@
-use crate::domain::document::{
-    Document,
-    DocumentFileType,
-    DocumentMetadata,
+use crate::domain::{
+    Id,
+    document::{
+        Document,
+        DocumentFileType,
+        DocumentMetadata,
+    },
 };
 use crate::usecase::repository::{
     DocumentRepository,
@@ -34,6 +37,8 @@ impl<I> StoreDocumentUseCase<I> {
 impl<I: DocumentRepository + DocumentFileRepository> StoreDocumentUseCase<I> {
     #[tracing::instrument(skip_all, ret(level="debug"), err)]
     pub async fn execute(&self, input: StoreDocumentInput) -> anyhow::Result<()> {
+        let document_id: Id<Document> = Id::new(uuid::Uuid::new_v4());
+
         let mut files = Vec::with_capacity(input.files.len());
         for file in input.files {
             files.push(
@@ -43,7 +48,7 @@ impl<I: DocumentRepository + DocumentFileRepository> StoreDocumentUseCase<I> {
                 ).await?
             );
         }
-        let document = Document::new(input.metadata, files)?;
+        let document = Document::new(document_id, input.metadata, files)?;
 
         self.repository.store_document(document).await
     }
