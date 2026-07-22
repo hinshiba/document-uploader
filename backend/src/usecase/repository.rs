@@ -14,6 +14,7 @@ pub trait DocumentRepository: Send + Sync {
 
 pub trait DocumentFileRepository: Send + Sync {
     fn store_document_file(&self, content: Vec<u8>, file_type: DocumentFileType) -> impl Future<Output=anyhow::Result<DocumentFile>> + Send;
+    fn get_document_file_content(&self, document_file: &DocumentFile) -> impl Future<Output=anyhow::Result<Vec<u8>>> + Send;
 }
 
 pub trait FacultyRepository: Send + Sync {
