@@ -114,6 +114,20 @@ impl ExampleRepository {
         majors.iter().map(Self::clone_major).collect()
     }
 
+    fn clone_document(document: &Document) -> Document {
+        Document::new(
+            document.id().clone(),
+            document.metadata().clone(),
+            document.files().iter().map(Self::clone_document_file).collect(),
+        ).unwrap()
+    }
+    fn clone_document_file(document_file: &DocumentFile) -> DocumentFile {
+        DocumentFile::new(
+            document_file.ty().clone(),
+            document_file.path().to_owned(),
+        )
+    }
+
     fn clone_faculty(faculty: &Faculty) -> Faculty {
         Faculty::new(
             faculty.id().clone(),
@@ -141,6 +155,17 @@ impl ExampleRepository {
 }
 
 impl DocumentRepository for ExampleRepository {
+    #[tracing::instrument(skip(self), ret(level="info"), err)]
+    async fn find_document_by_id(&self, document_id: &Id<Document>) -> anyhow::Result<Option<Document>> {
+        let inner = self.documents.lock().unwrap();
+
+        let document = inner.iter()
+            .find(|&d| d.id() == document_id)
+            .map(Self::clone_document);
+
+        Ok(document)
+    }
+
     #[tracing::instrument(skip(self))]
     async fn store_document(&self, document: Document) -> anyhow::Result<()> {
         let mut inner = self.documents.lock().unwrap();
