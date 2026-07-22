@@ -224,14 +224,15 @@ impl DocumentFile {
 
 #[derive(Debug, Hash)]
 pub struct Document {
+    id: Id<Document>,
     metadata: DocumentMetadata,
     files: Vec<DocumentFile>,
 }
 
 impl Document {
-    pub fn new(metadata: DocumentMetadata, files: Vec<DocumentFile>) -> Result<Self, EmptyDocumentFiles> {
+    pub fn new(id: Id<Document>, metadata: DocumentMetadata, files: Vec<DocumentFile>) -> Result<Self, EmptyDocumentFiles> {
         if files.len() >= 1 {
-            Ok(Self { metadata, files })
+            Ok(Self { id, metadata, files })
         } else {
             Err(EmptyDocumentFiles)
         }
