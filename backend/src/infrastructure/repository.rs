@@ -155,7 +155,7 @@ impl ExampleRepository {
 }
 
 impl DocumentRepository for ExampleRepository {
-    #[tracing::instrument(skip(self), ret(level="info"), err)]
+    #[tracing::instrument(skip(self), err)]
     async fn find_document_by_id(&self, document_id: &Id<Document>) -> anyhow::Result<Option<Document>> {
         let inner = self.documents.lock().unwrap();
 
