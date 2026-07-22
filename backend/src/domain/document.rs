@@ -237,6 +237,9 @@ impl Document {
             Err(EmptyDocumentFiles)
         }
     }
+    pub fn id(&self) -> &Id<Document> {
+        &self.id
+    }
     pub fn metadata(&self) -> &DocumentMetadata {
         &self.metadata
     }
