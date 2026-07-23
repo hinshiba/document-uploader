@@ -111,3 +111,15 @@ fn get_file_name(document_file: &DocumentFile) ->anyhow::Result<String> {
 
     Ok(file_name.to_string())
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn uuid_simple() {
+        let uuid = uuid::Uuid::from_u128(0x1234567890abcdef1234567890abcdef_u128);
+        assert_eq!(&uuid.as_simple().to_string(), &"1234567890abcdef1234567890abcdef");
+    }
+}
