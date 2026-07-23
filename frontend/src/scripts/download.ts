@@ -98,7 +98,6 @@ form.addEventListener("submit", async (event) => {
                     URL.revokeObjectURL(url);
                 } catch (error) {
                     console.error(error);
-                    const li = document.createElement("li");
                     li.textContent = "ダウンロードに失敗しました";
                     resultList.append(li);
                 }
