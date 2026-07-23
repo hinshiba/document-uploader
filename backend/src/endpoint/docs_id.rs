@@ -28,7 +28,7 @@ use super::{
     EndpointResult,
 };
 
-#[tracing::instrument(skip_all, fields(document_id))]
+#[tracing::instrument(skip_all, fields(document_id = %document_id))]
 pub async fn get_document_id<I: DocumentRepository + DocumentFileRepository>(
     State(repo): State<I>,
     Path(document_id): Path<uuid::Uuid>,
