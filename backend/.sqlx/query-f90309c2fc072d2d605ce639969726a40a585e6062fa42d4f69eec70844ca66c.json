@@ -1,0 +1,148 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                d.id,\n                d.year,\n                d.teacher,\n                d.exam_type,\n                d.is_answer,\n                d.num,\n                s.id AS subject_id,\n                s.major_id,\n                s.grade,\n                s.term,\n                m.faculty_id\n            FROM documents AS d\n                INNER JOIN subjects AS s ON s.id = d.subject_id\n                INNER JOIN majors AS m ON m.id = s.major_id\n            WHERE d.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "year",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "year"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "teacher",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "teacher"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "exam_type",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "exam_type"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_answer",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "is_answer"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "num",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "num"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "subject_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "major_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "major_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "grade",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "grade"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "term",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "term"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "faculty_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "majors",
+            "name": "faculty_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f90309c2fc072d2d605ce639969726a40a585e6062fa42d4f69eec70844ca66c"
+}
