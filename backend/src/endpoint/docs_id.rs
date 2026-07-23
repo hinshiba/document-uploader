@@ -75,3 +75,36 @@ pub async fn get_document_id<I: DocumentRepository + DocumentFileRepository>(
         },
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn serde_uuid() {
+        #[derive(Debug, serde::Deserialize)]
+        struct TestStruct {
+            id: uuid::Uuid,
+        }
+
+        let uuid = uuid::Uuid::new_v4();
+        dbg!(uuid);
+
+        dbg!(uuid.hyphenated().to_string());
+        let test_hyphen = serde_json::from_value::<TestStruct>(serde_json::json!(
+            { "id": uuid.hyphenated().to_string()
+            }
+        ));
+
+        dbg!(&test_hyphen);
+        assert!(test_hyphen.is_ok());
+
+        dbg!(uuid.simple().to_string());
+        let test_simple = serde_json::from_value::<TestStruct>(serde_json::json!(
+            { "id": uuid.simple().to_string()
+            }
+        ));
+
+        dbg!(&test_simple);
+        assert!(test_simple.is_ok());
+    }
+}
