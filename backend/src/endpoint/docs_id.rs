@@ -68,7 +68,7 @@ pub async fn get_document_id<I: DocumentRepository + DocumentFileRepository>(
 
             ( StatusCode::INTERNAL_SERVER_ERROR
             , Err(EndpointError {
-                message: "unexpected error occured".to_owned(),
+                message: "unexpected error occurred".to_owned(),
                 details: None,
             })
             )
