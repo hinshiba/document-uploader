@@ -47,11 +47,13 @@ impl<I: DocumentRepository + DocumentFileRepository> GetZipDocumentUseCase<I> {
 
     #[tracing::instrument(skip_all)]
     async fn make_zip_document(&self, document: Document) -> anyhow::Result<Vec<u8>> {
+        const COMPRESSION_LEVEL: u32 = 6;
+
         let mut ret = Vec::new();
 
         let mut buf = tokio::io::BufWriter::new(&mut ret);
         let mut zipper = async_deflate_zip::ZipWriter::new(&mut buf)
-            .with_level(async_deflate_zip::Compression::best());
+            .with_level(async_deflate_zip::Compression::new(COMPRESSION_LEVEL));
 
         for document_file in document.files() {
             let file_name = get_file_name(document_file)?;
