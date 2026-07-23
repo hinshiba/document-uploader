@@ -44,6 +44,7 @@ impl<I: DocumentRepository + DocumentFileRepository> GetZipDocumentUseCase<I> {
             return Ok(None)
         };
 
+        // FIXME: `SubjectRepository`に適当なメソッドが生えたら"教科名+タイムスタンプ.zip"のような名前にする
         let document_name = format!("{}.zip", uuid::Uuid::new_v4().as_simple());
         let document_zip = self.make_zip_document(document).await?;
 
