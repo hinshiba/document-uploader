@@ -146,7 +146,6 @@ export async function searchDocuments(
 }
 
 export interface DownloadDocument {
-    filename: string;
     blob: Blob;
 }
 
@@ -161,19 +160,7 @@ export async function downloadDocument(id: string): Promise<DownloadDocument> {
 
     const blob = await res.blob();
 
-    // Content-dispositionはAPIが作成されていないので名前を適当にした
-    const disposition = res.headers.get("Content-Disposition");
-
-    let filename = "download";
-
-    if (disposition) {
-        const match = disposition.match(/filename="?(.+?)"?$/);
-        if (match) {
-            filename = String(match[1]);
-        }
-    }
     return {
-        filename,
         blob,
     };
 }
