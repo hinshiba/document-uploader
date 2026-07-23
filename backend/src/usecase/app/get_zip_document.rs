@@ -17,6 +17,12 @@ pub struct GetZipDocumentInput {
     pub document_id: Id<Document>,
 }
 
+#[derive(Debug, Clone, Hash)]
+pub struct GetZipDocumentOutput {
+    pub name: String,
+    pub content: Vec<u8>,
+}
+
 #[derive(Debug)]
 pub struct GetZipDocumentUseCase<I> {
     repository: I
@@ -30,7 +36,7 @@ impl<I> GetZipDocumentUseCase<I> {
 
 impl<I: DocumentRepository + DocumentFileRepository> GetZipDocumentUseCase<I> {
     #[tracing::instrument(skip_all, err)]
-    pub async fn execute(&self, input: GetZipDocumentInput) -> anyhow::Result<Option<Vec<u8>>> {
+    pub async fn execute(&self, input: GetZipDocumentInput) -> anyhow::Result<Option<GetZipDocumentOutput>> {
         let document_id = input.document_id;
 
         let Some(document) = self.repository.find_document_by_id(&document_id).await?
@@ -38,9 +44,13 @@ impl<I: DocumentRepository + DocumentFileRepository> GetZipDocumentUseCase<I> {
             return Ok(None)
         };
 
+        let document_name = format!("{}.zip", uuid::Uuid::new_v4().as_simple());
         let document_zip = self.make_zip_document(document).await?;
 
-        Ok(Some(document_zip))
+        Ok(Some(GetZipDocumentOutput {
+            name: document_name,
+            content: document_zip,
+        }))
     }
 
     // 以下helper functions
