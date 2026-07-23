@@ -101,38 +101,33 @@ export async function postDocuments(
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
 }
 
-export interface DownloadDocument {
+export interface DocumentSearchResult {
     id: string;
-    filename: string;
     metadata: DocumentMetadata;
 }
 
 export async function searchDocuments(
-    faculty: string,
-    major: string,
-    grade?: Grade,
-    term?: Term,
-    subject?: string,
-): Promise<DownloadDocument[]> {
+    teacher?: string,
+    examtype?: string,
+    isanswer?: boolean,
+): Promise<DocumentSearchResult[]> {
     const params = new URLSearchParams();
 
-    params.set("faculty", faculty);
-    params.set("major", major);
-
-    if (grade != null) {
-        params.set("grade", String(grade));
+    if (teacher) {
+        params.set("teacher", teacher);
     }
 
-    if (term != null) {
-        params.set("term", String(term));
+    if (examtype) {
+        params.set("examtype", examtype);
     }
 
-    if (subject != null) {
-        params.set("subject", subject);
+    if (isanswer != null) {
+        params.set("isanswer", String(isanswer));
     }
 
-    const res = await fetchWithTimeout(`${API_BASE}/docs?${params.toString()}`, {
-        method: "GET",
+    const url = params.size === 0 ? `${API_BASE}/docs` : `${API_BASE}/docs?${params.toString()}`;
+
+    const res = await fetchWithTimeout(url, {
         headers: DEV_HEADERS,
     });
 
@@ -140,10 +135,15 @@ export async function searchDocuments(
         throw new Error(`GET /docs -> ${res.status}`);
     }
 
-    return await res.json();
+    return (await res.json()) as DocumentSearchResult[];
 }
 
-export async function downloadDocument(id: string): Promise<Blob> {
+export interface DownloadDocument {
+    filename: string;
+    blob: Blob;
+}
+
+export async function downloadDocument(id: string): Promise<DownloadDocument> {
     const res = await fetchWithTimeout(`${API_BASE}/docs/${id}`, {
         headers: DEV_HEADERS,
     });
@@ -152,5 +152,21 @@ export async function downloadDocument(id: string): Promise<Blob> {
         throw new Error(`GET /docs/${id} -> ${res.status}`);
     }
 
-    return await res.blob();
+    const blob = await res.blob();
+
+    // Content-dispositionはAPIが作成されていないので名前を適当にした
+    const disposition = res.headers.get("Content-Disposition");
+
+    let filename = "download";
+
+    if (disposition) {
+        const match = disposition.match(/filename="?(.+?)"?$/);
+        if (match) {
+            filename = String(match[1]);
+        }
+    }
+    return {
+        filename,
+        blob,
+    };
 }
