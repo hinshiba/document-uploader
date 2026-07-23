@@ -28,7 +28,6 @@ majorSelect.addEventListener("selection-change", (event) => {
  * 検索ボタン
  */
 form.addEventListener("submit", async (event) => {
-    console.log("submit");
     // 一時的に動作を止めて通信の安全性を高める
     event.preventDefault();
 
@@ -86,13 +85,12 @@ form.addEventListener("submit", async (event) => {
 
             li.addEventListener("click", async () => {
                 try {
-                    const file = await downloadDocument(result.id);
+                    const { blob } = await downloadDocument(result.id);
 
-                    const url = URL.createObjectURL(file.blob);
+                    const url = URL.createObjectURL(blob);
 
                     const a = document.createElement("a");
                     a.href = url;
-                    a.download = file.filename;
                     a.click();
 
                     URL.revokeObjectURL(url);
