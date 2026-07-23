@@ -107,25 +107,32 @@ export interface DocumentSearchResult {
 }
 
 export async function searchDocuments(
+    subject: string,
+    year?: number,
     teacher?: string,
     examtype?: string,
     isanswer?: boolean,
 ): Promise<DocumentSearchResult[]> {
     const params = new URLSearchParams();
 
-    if (teacher) {
+    params.set("subject", subject);
+
+    if (year != null) {
+        params.set("year", String(year));
+    }
+
+    if (teacher != null) {
         params.set("teacher", teacher);
     }
 
-    if (examtype) {
-        params.set("examtype", examtype);
+    if (examtype != null) {
+        params.set("examtype", String(examtype));
     }
 
     if (isanswer != null) {
         params.set("isanswer", String(isanswer));
     }
-
-    const url = params.size === 0 ? `${API_BASE}/docs` : `${API_BASE}/docs?${params.toString()}`;
+    const url = `${API_BASE}/docs?${params.toString()}`;
 
     const res = await fetchWithTimeout(url, {
         headers: DEV_HEADERS,
