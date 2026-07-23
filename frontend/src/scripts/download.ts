@@ -33,20 +33,21 @@ form.addEventListener("submit", async (event) => {
 
     const formData = new FormData(form);
 
-    const faculty = formData.get("faculty") as string;
-    const major = formData.get("major") as string;
-    const gradeValue = formData.get("grade") as string;
-    const termValue = formData.get("term") as string;
-    const subjectValue = formData.get("subject") as string;
-    const grade = gradeValue === "" ? undefined : Number(gradeValue);
-    const term = termValue === "" ? undefined : Number(termValue);
-    const subject = subjectValue === "" ? undefined : subjectValue;
+    const teacher = formData.get("teacher") as string;
+    const examtype = formData.get("examtype") as string;
+
+    const isanswer =
+        formData.get("isanswer") === null ? undefined : formData.get("isanswer") === "true";
 
     // 検索のたびに前回検索して表示されたものを削除
     resultList.replaceChildren();
 
     try {
-        const documents = await searchDocuments(faculty, major, grade, term, subject);
+        const documents = await searchDocuments(
+            teacher || undefined,
+            examtype || undefined,
+            isanswer,
+        );
 
         if (documents.length === 0) {
             const li = document.createElement("li");
@@ -55,30 +56,27 @@ form.addEventListener("submit", async (event) => {
             return;
         }
 
-        for (const doc of documents) {
+        for (const result of documents) {
             const li = document.createElement("li");
 
-            li.textContent = doc.filename;
+            li.textContent = result.metadata.subject; // 例
 
-            // マウスカーソルをホバーする時用
             li.style.cursor = "pointer";
 
             li.addEventListener("click", async () => {
-                // クリックするとダウンロードされるようにする
-                const blob = await downloadDocument(doc.id);
+                const file = await downloadDocument(result.id);
 
-                const url = URL.createObjectURL(blob);
+                const url = URL.createObjectURL(file.blob);
 
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = doc.filename;
+                a.download = file.filename;
                 a.click();
 
                 URL.revokeObjectURL(url);
             });
 
             resultList.append(li);
-            console.log("検索成功");
         }
     } catch (error) {
         console.error(error);
