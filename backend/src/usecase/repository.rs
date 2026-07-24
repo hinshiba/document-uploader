@@ -1,4 +1,5 @@
 use crate::domain::{
+    Id,
     document::{
         Document,
         DocumentFile,
@@ -9,6 +10,7 @@ use crate::domain::{
 };
 
 pub trait DocumentRepository: Send + Sync {
+    fn find_document_by_id(&self, document_id: &Id<Document>) -> impl Future<Output=anyhow::Result<Option<Document>>> + Send;
     fn store_document(&self, document: Document) -> impl Future<Output=anyhow::Result<()>> + Send;
 }
 
