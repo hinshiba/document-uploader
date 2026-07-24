@@ -218,13 +218,12 @@ impl SubjectRepository for ExampleRepository {
 
     #[tracing::instrument(skip(self), err)]
     async fn create_subject(&self, subject: Subject) -> anyhow::Result<()> {
-        let exists = find_subject_by_id(self, subject.id()).await?;
+        let mut subjects = self.subjects.lock().unwrap();
 
-        if exists.is_some() {
+        if subjects.iter().any(|existing| existing.id() == subject.id()) {
             return Err(anyhow::anyhow!("subject already exists"));
         }
 
-        let mut subjects = self.subjects.lock().unwrap();
         subjects.push(subject);
 
         Ok(())
@@ -261,23 +260,5 @@ impl SubjectRepository for ExampleRepository {
         };
 
         Ok(subjects.remove(pos))
-    }
-}
-
-// 以下helper functions
-
-#[tracing::instrument(skip_all)]
-async fn find_subject_by_id<I: SubjectRepository>(repo: &I, subject_id: &Id<Subject>) -> anyhow::Result<Option<Subject>> {
-    let option = SearchSubjectOption {
-        subject_id: Some(subject_id.clone()),
-        ..Default::default()
-    };
-
-    let res = repo.search_subjects(option).await?;
-
-    match res.len() {
-        0 => Ok(None),
-        1 => Ok(Some(res.into_iter().nth(0).unwrap())),
-        _ => Err(anyhow::anyhow!("subject id must be unique, but it isn't")),
     }
 }
