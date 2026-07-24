@@ -45,6 +45,7 @@ pub trait FacultyRepository: Send + Sync {
 }
 
 pub trait SubjectRepository: Send + Sync {
+    #[deprecated(note = "Use SubjectRepository::search_subjects instead")]
     fn list_subjects(&self) -> impl Future<Output=anyhow::Result<Vec<Subject>>> + Send;
 
     fn search_subjects(&self, option: SearchSubjectOption) -> impl Future<Output=anyhow::Result<Vec<Subject>>> + Send;
