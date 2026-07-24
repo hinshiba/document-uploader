@@ -55,15 +55,15 @@ export async function fetchSubjects(
     // faculty必須
     params.set("faculty", facultyId);
 
-    if (majorId != null) {
+    if (majorId !== undefined && majorId !== "") {
         params.set("major", majorId);
     }
 
-    if (grade != null) {
+    if (grade !== undefined) {
         params.set("grade", String(grade));
     }
 
-    if (term != null) {
+    if (term !== undefined) {
         params.set("term", String(term));
     }
 
@@ -117,19 +117,19 @@ export async function searchDocuments(
 
     params.set("subject", subject);
 
-    if (year != null) {
+    if (year !== undefined) {
         params.set("year", String(year));
     }
 
-    if (teacher != null) {
+    if (teacher !== undefined && teacher !== "") {
         params.set("teacher", teacher);
     }
 
-    if (examtype != null) {
+    if (examtype !== undefined && examtype !== "") {
         params.set("examtype", String(examtype));
     }
 
-    if (isanswer != null) {
+    if (isanswer !== undefined) {
         params.set("isanswer", String(isanswer));
     }
     const url = `${API_BASE}/docs?${params.toString()}`;
