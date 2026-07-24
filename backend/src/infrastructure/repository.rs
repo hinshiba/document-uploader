@@ -234,9 +234,7 @@ impl SubjectRepository for ExampleRepository {
     async fn update_subject(&self, subject_id: Id<Subject>, content: UpdateSubjectContent) -> anyhow::Result<Subject> {
         let mut subjects = self.subjects.lock().unwrap();
 
-        let mut subjects_iter = subjects.iter_mut().take_while(|s| s.id() != &subject_id);
-
-        let Some(subject) = subjects_iter.next()
+        let Some(subject) = subjects.iter_mut().find(|s| s.id() == &subject_id)
         else {
             return Err(anyhow::anyhow!("subject not found"));
         };
