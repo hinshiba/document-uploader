@@ -55,15 +55,15 @@ export async function fetchSubjects(
     // faculty必須
     params.set("faculty", facultyId);
 
-    if (majorId) {
+    if (majorId !== undefined && majorId !== "") {
         params.set("major", majorId);
     }
 
-    if (grade) {
+    if (grade !== undefined) {
         params.set("grade", String(grade));
     }
 
-    if (term) {
+    if (term !== undefined) {
         params.set("term", String(term));
     }
 
@@ -99,4 +99,84 @@ export async function postDocuments(
         body,
     });
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
+}
+
+export interface DocumentSearchResult {
+    id: string;
+    metadata: DocumentMetadata;
+}
+
+export async function searchDocuments(
+    subject: string,
+    year?: number,
+    teacher?: string,
+    examtype?: string,
+    isanswer?: boolean,
+): Promise<DocumentSearchResult[]> {
+    const params = new URLSearchParams();
+
+    params.set("subject", subject);
+
+    if (year !== undefined) {
+        params.set("year", String(year));
+    }
+
+    if (teacher !== undefined && teacher !== "") {
+        params.set("teacher", teacher);
+    }
+
+    if (examtype !== undefined && examtype !== "") {
+        params.set("examtype", String(examtype));
+    }
+
+    if (isanswer !== undefined) {
+        params.set("isanswer", String(isanswer));
+    }
+    const url = `${API_BASE}/docs?${params.toString()}`;
+
+    const res = await fetchWithTimeout(url, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /docs -> ${res.status}`);
+    }
+
+    return (await res.json()) as DocumentSearchResult[];
+}
+
+export interface DownloadDocument {
+    filename: string;
+    blob: Blob;
+}
+
+export async function downloadDocument(id: string): Promise<DownloadDocument> {
+    const res = await fetchWithTimeout(`${API_BASE}/docs/${id}`, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /docs/${id} -> ${res.status}`);
+    }
+
+    // レスポンスのファイルデータをBlobとして取得する
+    const blob = await res.blob();
+
+    // レスポンスヘッダーからダウンロード時のファイル名を取得する
+    const disposition = res.headers.get("Content-Disposition");
+
+    // デフォルトのファイル名を設定;
+    let filename = "download";
+
+    if (disposition) {
+        const match = disposition.match(/filename="?(.+?)"?$/);
+        if (match) {
+            filename = String(match[1]);
+        }
+    }
+
+    return {
+        filename,
+        blob,
+    };
 }

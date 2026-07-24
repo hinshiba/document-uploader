@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block styles %}<link
+    rel="stylesheet"
+    href="download.css"
+>{% endblock %} {% block content %}
+
+<main>
+    <h2>ダウンロード</h2>
+
+    <form id="search-form">
+        <p>ダウンロードしたい教科を選んでください．</p>
+        <p>学部，系/コース/専攻，学年，学期，教科は必ず選択してください</p>
+        <major-select></major-select>
+
+        <subject-select></subject-select>
+        <label>
+            試験種別（任意）
+            <select name="examtype">
+                <option value="">指定なし</option>
+                <option value="quiz">小テスト</option>
+                <option value="midterm">中間試験</option>
+                <option value="final">期末試験</option>
+                <option value="other">その他</option>
+            </select>
+        </label>
+        <label>
+            年度（任意）
+            <input type="number" name="year" min="1949" placeholder="2025">
+        </label>
+
+        <label>
+            教員名（任意）
+            <input type="text" name="teacher" placeholder="岡山 聖彦">
+        </label>
+
+        <label>
+            <input type="checkbox" name="isanswer" value="true">
+            解答のみ表示
+        </label>
+
+        <button type="submit">検索</button>
+    </form>
+
+    <div class="search-area">
+        <p id="status"></p>
+        <ul id="result-list"></ul>
+    </div>
+</main>
+
+{% endblock content %} {% block scripts %}
+<script type="module" src="../scripts/download.ts"></script>
+{% endblock %}
