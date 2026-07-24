@@ -146,6 +146,7 @@ export async function searchDocuments(
 }
 
 export interface DownloadDocument {
+    filename: string;
     blob: Blob;
 }
 
@@ -158,9 +159,24 @@ export async function downloadDocument(id: string): Promise<DownloadDocument> {
         throw new Error(`GET /docs/${id} -> ${res.status}`);
     }
 
+    // レスポンスのファイルデータをBlobとして取得する
     const blob = await res.blob();
 
+    // レスポンスヘッダーからダウンロード時のファイル名を取得する
+    const disposition = res.headers.get("Content-Disposition");
+
+    // デフォルトのファイル名を設定;
+    let filename = "download";
+
+    if (disposition) {
+        const match = disposition.match(/filename="?(.+?)"?$/);
+        if (match) {
+            filename = String(match[1]);
+        }
+    }
+
     return {
+        filename,
         blob,
     };
 }

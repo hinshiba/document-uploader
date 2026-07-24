@@ -85,12 +85,13 @@ form.addEventListener("submit", async (event) => {
 
             li.addEventListener("click", async () => {
                 try {
-                    const { blob } = await downloadDocument(result.id);
+                    const file = await downloadDocument(result.id);
 
-                    const url = URL.createObjectURL(blob);
+                    const url = URL.createObjectURL(file.blob);
 
                     const a = document.createElement("a");
                     a.href = url;
+                    a.download = file.filename;
                     a.click();
 
                     URL.revokeObjectURL(url);
