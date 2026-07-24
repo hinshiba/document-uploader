@@ -66,6 +66,7 @@ function renderFileList(files: FileList): void {
     }
     // ファイルがあれば案内文を隠す
     message.hidden = files.length > 0;
+    clearFileButton.hidden = files.length === 0;
 }
 
 /**
@@ -167,4 +168,24 @@ majorSelect?.addEventListener("selection-change", (e) => {
         subjectSelect.facultyId = event.detail.facultyId;
         subjectSelect.majorId = event.detail.majorId;
     }
+});
+
+const clearFileButton = required<HTMLButtonElement>("#clear-file");
+
+function clearFiles(): void {
+    // inputの選択を解除
+    fileInput.value = "";
+
+    // 一覧を消す
+    fileList.replaceChildren();
+
+    // 「ファイルを選択してください」のような案内を再表示
+    message.hidden = false;
+
+    // ボタンを隠す
+    clearFileButton.hidden = true;
+}
+
+clearFileButton.addEventListener("click", () => {
+    clearFiles();
 });
