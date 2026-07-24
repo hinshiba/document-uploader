@@ -21,7 +21,7 @@ pub struct UpdateSubjectContent {
     pub term: Term<Subject>,
 }
 
-#[derive(Debug, Hash)]
+#[derive(Debug, Hash, Default)]
 pub struct SearchSubjectOption {
     pub subject_id: Option<Id<Subject>>,
     pub name: Option<String>,
@@ -29,19 +29,6 @@ pub struct SearchSubjectOption {
     pub major_id: Option<Id<Major>>,
     pub grade: Option<Grade<Subject>>,
     pub term: Option<Term<Subject>>,
-}
-
-impl Default for SearchSubjectOption {
-    fn default() -> Self {
-        Self {
-            subject_id: None,
-            name: None,
-            faculty_id: None,
-            major_id: None,
-            grade: None,
-            term: None,
-        }
-    }
 }
 
 pub trait DocumentRepository: Send + Sync {
