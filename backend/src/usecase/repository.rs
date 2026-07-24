@@ -31,6 +31,19 @@ pub struct SearchSubjectOption {
     pub term: Option<Term<Subject>>,
 }
 
+impl Default for SearchSubjectOption {
+    fn default() -> Self {
+        Self {
+            subject_id: None,
+            name: None,
+            faculty_id: None,
+            major_id: None,
+            grade: None,
+            term: None,
+        }
+    }
+}
+
 pub trait DocumentRepository: Send + Sync {
     fn store_document(&self, document: Document) -> impl Future<Output=anyhow::Result<()>> + Send;
 }
