@@ -15,6 +15,8 @@ use crate::domain::{
 };
 
 use crate::usecase::repository::{
+    UpdateSubjectContent,
+    SearchSubjectOption,
     DocumentRepository,
     DocumentFileRepository,
     FacultyRepository,
@@ -26,7 +28,7 @@ use crate::usecase::repository::{
 pub struct ExampleRepository {
     documents: std::sync::Mutex<Vec<Document>>,
     faculties: Vec<Faculty>,
-    subjects: Vec<Subject>,
+    subjects: std::sync::Mutex<Vec<Subject>>,
     save_dir: std::path::PathBuf,
 }
 
@@ -39,7 +41,7 @@ impl ExampleRepository {
         Ok( Self {
             documents: std::sync::Mutex::new(Vec::new()),
             faculties: Self::example_faculties(),
-            subjects: Self::example_subjects(),
+            subjects: std::sync::Mutex::new(Self::example_subjects()),
             save_dir,
         } )
     }
@@ -190,7 +192,94 @@ impl FacultyRepository for ExampleRepository {
 impl SubjectRepository for ExampleRepository {
     #[tracing::instrument(skip(self), ret(level="info"))]
     async fn list_subjects(&self) -> anyhow::Result<Vec<Subject>> {
-        let subjects = Self::clone_subjects(&self.subjects);
+        let subjects = self.subjects.lock().unwrap();
+        let subjects = Self::clone_subjects(&subjects);
         Ok(subjects)
+    }
+
+    #[tracing::instrument(skip(self), err)]
+    async fn search_subjects(&self, option: SearchSubjectOption) -> anyhow::Result<Vec<Subject>> {
+        let subjects = self.list_subjects().await?;
+
+        let subjects = subjects
+            .into_iter()
+            .filter(|subject| {
+                   option.subject_id.as_ref().map_or(true, |inner| inner.id() == subject.id().id())
+                && option.name.as_ref().map_or(true, |inner| inner == subject.name())
+                && option.faculty_id.as_ref().map_or(true, |inner| inner.id() == subject.faculty_id().id())
+                && option.major_id.as_ref().map_or(true, |inner| inner.id() == subject.major_id().id())
+                && option.grade.map_or(true, |inner| inner.grade() == subject.grade().grade())
+                && option.term.map_or(true, |inner| inner.term() == subject.term().term())
+            })
+            .collect();
+
+        Ok(subjects)
+    }
+
+    #[tracing::instrument(skip(self), err)]
+    async fn create_subject(&self, subject: Subject) -> anyhow::Result<()> {
+        let exists = find_subject_by_id(self, subject.id()).await?;
+
+        if exists.is_some() {
+            return Err(anyhow::anyhow!("subject already exists"));
+        }
+
+        let mut subjects = self.subjects.lock().unwrap();
+        subjects.push(subject);
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self), err, ret(level="info"))]
+    async fn update_subject(&self, subject_id: Id<Subject>, content: UpdateSubjectContent) -> anyhow::Result<Subject> {
+        let mut subjects = self.subjects.lock().unwrap();
+
+        let mut subjects_iter = subjects.iter_mut().take_while(|s| s.id() != &subject_id);
+
+        let Some(subject) = subjects_iter.next()
+        else {
+            return Err(anyhow::anyhow!("subject not found"));
+        };
+
+        *subject = Subject::new(
+            subject.id().clone(),
+            content.name,
+            content.faculty_id,
+            content.major_id,
+            content.grade,
+            content.term
+        );
+
+        Ok(Self::clone_subject(subject))
+    }
+
+    #[tracing::instrument(skip(self), err, ret(level="info"))]
+    async fn delete_subject(&self, subject_id: Id<Subject>) -> anyhow::Result<Subject> {
+        let mut subjects = self.subjects.lock().unwrap();
+
+        let Some(pos) = subjects.iter().position(|s| s.id() == &subject_id)
+        else {
+            return Err(anyhow::anyhow!("subject does not exist"));
+        };
+
+        Ok(subjects.remove(pos))
+    }
+}
+
+// 以下helper functions
+
+#[tracing::instrument(skip_all)]
+async fn find_subject_by_id<I: SubjectRepository>(repo: &I, subject_id: &Id<Subject>) -> anyhow::Result<Option<Subject>> {
+    let option = SearchSubjectOption {
+        subject_id: Some(subject_id.clone()),
+        ..Default::default()
+    };
+
+    let res = repo.search_subjects(option).await?;
+
+    match res.len() {
+        0 => Ok(None),
+        1 => Ok(Some(res.into_iter().nth(0).unwrap())),
+        _ => Err(anyhow::anyhow!("subject id must be unique, but it isn't")),
     }
 }
