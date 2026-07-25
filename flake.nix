@@ -28,6 +28,12 @@
 				pkgs.sqlx-cli
 				pkgs.bun
 			];
+			shellHook = ''
+				# Run safe-chain bash initialisation script
+				if [ -d "./.local/safe-chain" ]; then
+					source ./.local/safe-chain/scripts/init-posix.sh
+				fi
+			'';
 		};
 	};
 }
