@@ -107,3 +107,20 @@ export async function postDocuments(
     });
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
 }
+
+export async function postSubject(subject: SubjectCreate): Promise<Subject> {
+    const res = await fetchWithTimeout(`${API_BASE}/subjects`, {
+        method: "POST",
+        headers: {
+            ...DEV_HEADERS,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(subject),
+    });
+
+    if (!res.ok) {
+        throw new Error(`POST /subjects -> ${res.status}`);
+    }
+
+    return (await res.json()) as Subject;
+}
