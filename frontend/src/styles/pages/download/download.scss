@@ -1,3 +1,5 @@
+@use "../../tags/nav.scss" as *;
+
 %content-width {
     width: 100%;
     max-width: 800px;
@@ -55,7 +57,6 @@ button {
 }
 
 .download-button {
-    border-color: $border-color;
     width: 70%;
     padding: 0.5rem;
 }

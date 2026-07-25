@@ -27,9 +27,12 @@ majorSelect.addEventListener("selection-change", (event) => {
 /**
  * 検索ボタン
  */
+let activeSearchId = 0;
 form.addEventListener("submit", async (event) => {
     // 一時的に動作を止めて通信の安全性を高める
     event.preventDefault();
+
+    const searchId = ++activeSearchId;
 
     const formData = new FormData(form);
     const status = document.querySelector("#status");
@@ -63,6 +66,10 @@ form.addEventListener("submit", async (event) => {
             isanswer,
         );
 
+        if (searchId !== activeSearchId) {
+            return;
+        }
+
         if (documents.length === 0) {
             status.textContent = "";
             const li = document.createElement("li");
@@ -76,7 +83,7 @@ form.addEventListener("submit", async (event) => {
             const li = document.createElement("li");
             const button = document.createElement("button");
             button.type = "button";
-            button.textContent = `${metadata.year}年度 ${metadata.teacher}`;
+            button.textContent = `「downloadする」${metadata.year}年度 ${metadata.teacher}`;
             button.classList.add("download-button");
 
             li.append(
@@ -109,6 +116,9 @@ form.addEventListener("submit", async (event) => {
             status.textContent = "";
         }
     } catch (error) {
+        if (searchId !== activeSearchId) {
+            return;
+        }
         console.error(error);
 
         const li = document.createElement("li");
