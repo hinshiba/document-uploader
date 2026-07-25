@@ -6,6 +6,7 @@ export type Subject = components["schemas"]["Subject"];
 export type Grade = components["schemas"]["Subject"]["grade"];
 export type Term = components["schemas"]["Subject"]["term"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
+export type SubjectCreate = components["schemas"]["SubjectCreate"];
 
 // 実バックエンドテスト
 // "http://localhost:3000/api/v1"
@@ -99,4 +100,21 @@ export async function postDocuments(
         body,
     });
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
+}
+
+export async function postSubject(subject: SubjectCreate): Promise<Subject> {
+    const res = await fetchWithTimeout(`${API_BASE}/subjects`, {
+        method: "POST",
+        headers: {
+            ...DEV_HEADERS,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(subject),
+    });
+
+    if (!res.ok) {
+        throw new Error(`POST /subjects -> ${res.status}`);
+    }
+
+    return (await res.json()) as Subject;
 }
