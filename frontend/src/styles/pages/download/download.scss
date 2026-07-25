@@ -46,9 +46,16 @@ label {
 }
 
 button {
+    display: block;
     width: 70%;
     max-width: 800px;
     margin: 20px auto;
     padding: 0.5rem;
     box-sizing: border-box;
+}
+
+.download-button {
+    border-color: $border-color;
+    width: 70%;
+    padding: 0.5rem;
 }

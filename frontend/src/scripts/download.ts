@@ -64,6 +64,7 @@ form.addEventListener("submit", async (event) => {
         );
 
         if (documents.length === 0) {
+            status.textContent = "";
             const li = document.createElement("li");
             li.textContent = "検索結果はありません";
             resultList.append(li);
@@ -71,19 +72,21 @@ form.addEventListener("submit", async (event) => {
         }
 
         for (const result of documents) {
-            const li = document.createElement("li");
-
             const metadata = result.metadata;
+            const li = document.createElement("li");
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = `${metadata.year}年度 ${metadata.teacher}`;
+            button.classList.add("download-button");
 
-            li.textContent =
+            li.append(
                 `${metadata.year}年度 ` +
-                `${metadata.teacher} ` +
-                `${metadata.examtype}` +
-                (metadata.isanswer ? "（解答）" : "");
+                    `${metadata.teacher} ` +
+                    `${metadata.examtype}` +
+                    (metadata.isanswer ? "（解答）" : ""),
+            );
 
-            li.style.cursor = "pointer";
-
-            li.addEventListener("click", async () => {
+            button.addEventListener("click", async () => {
                 try {
                     const file = await downloadDocument(result.id);
 
@@ -98,10 +101,10 @@ form.addEventListener("submit", async (event) => {
                 } catch (error) {
                     console.error(error);
                     li.textContent = "ダウンロードに失敗しました";
-                    resultList.append(li);
                 }
             });
 
+            li.append(button);
             resultList.appendChild(li);
             status.textContent = "";
         }
