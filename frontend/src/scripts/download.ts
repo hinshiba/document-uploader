@@ -10,7 +10,7 @@ const majorSelect = document.querySelector("major-select");
 const subjectSelect = document.querySelector<SubjectSelect>("subject-select");
 const resultList = document.querySelector<HTMLUListElement>("#result-list");
 
-/**これ以降のコードの型を絞り込むため*/
+// FIXME: requiredによるエラー処理の統一
 if (!form || !majorSelect || !subjectSelect || !resultList) {
     throw new Error("必要なHTML要素が見つかりません");
 }
@@ -19,20 +19,23 @@ if (!form || !majorSelect || !subjectSelect || !resultList) {
  * major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
  */
 majorSelect.addEventListener("selection-change", (event) => {
+    // major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
     const detail = (event as CustomEvent<SelectionChangeDetail>).detail;
 
     subjectSelect.facultyId = detail.facultyId;
     subjectSelect.majorId = detail.majorId;
 });
+
 /**
- * 検索ボタン
+ * 最新の検索リクエストを識別するID
  */
 let activeSearchId = 0;
+
 form.addEventListener("submit", async (event) => {
-    // 一時的に動作を止めて通信の安全性を高める
+    // スクリプト側で送信するので既定の送信動作を無効化
     event.preventDefault();
 
-    const searchId = ++activeSearchId;
+    const currentSearchId = ++activeSearchId;
 
     const formData = new FormData(form);
     const status = document.querySelector("#status");
@@ -46,9 +49,9 @@ form.addEventListener("submit", async (event) => {
         return;
     }
     const yearValue = formData.get("year");
+    const year = typeof yearValue === "string" && yearValue !== "" ? Number(yearValue) : undefined;
     const teacher = formData.get("teacher") as string;
     const examtype = formData.get("examtype") as string;
-    const year = typeof yearValue === "string" && yearValue !== "" ? Number(yearValue) : undefined;
 
     const isanswer =
         formData.get("isanswer") === null ? undefined : formData.get("isanswer") === "true";
@@ -66,7 +69,7 @@ form.addEventListener("submit", async (event) => {
             isanswer,
         );
 
-        if (searchId !== activeSearchId) {
+        if (currentSearchId !== activeSearchId) {
             return;
         }
 
@@ -83,7 +86,7 @@ form.addEventListener("submit", async (event) => {
             const li = document.createElement("li");
             const button = document.createElement("button");
             button.type = "button";
-            button.textContent = `「downloadする」${metadata.year}年度 ${metadata.teacher}`;
+            button.textContent = `「download」${metadata.year}年度 ${metadata.teacher}`;
             button.classList.add("download-button");
 
             li.append(
@@ -116,7 +119,7 @@ form.addEventListener("submit", async (event) => {
             status.textContent = "";
         }
     } catch (error) {
-        if (searchId !== activeSearchId) {
+        if (currentSearchId !== activeSearchId) {
             return;
         }
         console.error(error);
