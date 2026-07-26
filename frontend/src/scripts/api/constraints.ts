@@ -9,8 +9,6 @@ declare const brand: unique symbol;
 export type Faculty = components["schemas"]["Faculty"];
 export type Major = components["schemas"]["Major"];
 export type Subject = components["schemas"]["Subject"];
-export type SubjectCreate = components["schemas"]["SubjectCreate"];
-export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
 export type Grade = components["schemas"]["Subject"]["grade"] & { readonly [brand]: "Grade" };
 export type Term = components["schemas"]["Subject"]["term"] & { readonly [brand]: "Term" };
@@ -24,6 +22,27 @@ export type FacultyId = components["schemas"]["Faculty"]["id"] & { readonly [bra
 export type MajorId = components["schemas"]["Major"]["id"] & { readonly [brand]: "MajorId" };
 export type SubjectId = components["schemas"]["Subject"]["id"] & { readonly [brand]: "SubjectId" };
 export type ExamType = components["schemas"]["ExamType"];
+
+// 交差型で各フィールドを絞り込み，未検証の`string`や`number`を代入できないようにする
+
+export type SubjectCreate = components["schemas"]["SubjectCreate"] & {
+    readonly id: SubjectId;
+    faculty: FacultyId;
+    major: MajorId;
+    grade: Grade;
+    term: Term;
+};
+
+export type DocumentMetadata = components["schemas"]["DocumentMetadata"] & {
+    faculty: FacultyId;
+    major: MajorId;
+    year: Year;
+    term: Term;
+    grade: Grade;
+    subject: SubjectId;
+    teacher: Teacher;
+    num: Num;
+};
 
 // 共通の検証
 
