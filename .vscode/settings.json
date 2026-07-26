@@ -22,5 +22,13 @@
   ],
   "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix",
   "nixEnvSelector.useFlakes": true,
-  "nixEnvSelector.flakeShell": "default"
+  "nixEnvSelector.flakeShell": "default",
+  "terminal.integrated.profiles.linux": {
+    "nix develop": {
+      "path": "nix",
+      "args": [
+        "develop"
+      ]
+    }
+  }
 }
