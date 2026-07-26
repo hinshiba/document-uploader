@@ -7,5 +7,26 @@
   "env": {
     "browser": true
   },
-  "ignorePatterns": ["src/scripts/api/types.ts"]
+  "ignorePatterns": ["src/scripts/api/types.ts"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/api/types", "**/api/types.ts", "./types", "./types.ts"],
+            "message": "自動生成された型は検証を伴わないため，constraints.ts の型とコンストラクタを使ってください"
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/scripts/api/constraints.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ]
 }
