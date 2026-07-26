@@ -25,8 +25,7 @@ export type ExamType = components["schemas"]["ExamType"];
 
 // 交差型で各フィールドを絞り込み，未検証の`string`や`number`を代入できないようにする
 
-export type SubjectCreate = components["schemas"]["SubjectCreate"] & {
-    readonly id: SubjectId;
+export type SubjectBase = components["schemas"]["SubjectBase"] & {
     faculty: FacultyId;
     major: MajorId;
     grade: Grade;
