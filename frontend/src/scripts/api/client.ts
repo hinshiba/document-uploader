@@ -1,11 +1,12 @@
-import type { components } from "./types";
-
-export type Faculty = components["schemas"]["Faculty"];
-export type Major = components["schemas"]["Major"];
-export type Subject = components["schemas"]["Subject"];
-export type Grade = components["schemas"]["Subject"]["grade"];
-export type Term = components["schemas"]["Subject"]["term"];
-export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
+import type {
+    DocumentMetadata,
+    Faculty,
+    FacultyId,
+    Grade,
+    MajorId,
+    Subject,
+    Term,
+} from "./constraints";
 
 // 実バックエンドテスト
 // "http://localhost:3000/api/v1"
@@ -45,9 +46,15 @@ export async function fetchFaculties(): Promise<Faculty[]> {
     return (await res.json()) as Faculty[];
 }
 
+/**
+ * 科目一覧を取得する
+ * /subjects GET に対応
+ * @returns 条件に一致する科目一覧
+ * @throws
+ */
 export async function fetchSubjects(
-    facultyId: string,
-    majorId?: string,
+    facultyId: FacultyId,
+    majorId?: MajorId,
     grade?: Grade,
     term?: Term,
 ): Promise<Subject[]> {

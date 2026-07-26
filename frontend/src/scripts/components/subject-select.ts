@@ -1,6 +1,19 @@
 import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { fetchSubjects, type Subject } from "../api/client";
+import { fetchSubjects } from "../api/client";
+import {
+    GRADE_MAX,
+    TERM_MAX,
+    toGrade,
+    toSubjectId,
+    toTerm,
+    type FacultyId,
+    type Grade,
+    type MajorId,
+    type Subject,
+    type SubjectId,
+    type Term,
+} from "../api/constraints";
 
 enum Status {
     Loading,
@@ -34,33 +47,34 @@ export class SubjectSelect extends LitElement {
     @state()
     private subjects: Subject[] = [];
 
-    /** 選択した教科Id */
+    /** 選択した教科Id．未選択は`undefined` */
     @state()
-    private selectedSubjectId = "";
+    private selectedSubjectId: SubjectId | undefined = undefined;
 
-    /** 選択した学年 */
+    /** 選択した学年．未選択は`undefined` */
     @state()
-    private selectedGrade: number | undefined = undefined;
+    private selectedGrade: Grade | undefined = undefined;
 
-    /** 選択した学期 */
+    /** 選択した学期．未選択は`undefined` */
     @state()
-    private selectedTerm: number | undefined = undefined;
+    private selectedTerm: Term | undefined = undefined;
 
     /** 外部（upload.ts）から受け取る現在選択中の学部ID
-     * @property にすることで外部から値を設定でき、変更時には updated() が実行される */
-    @property()
-    facultyId: string = "";
+     * @property にすることで外部から値を設定でき、変更時には updated() が実行される
+     * 属性は検証を経ない`string`しか渡せないため`attribute: false`とする */
+    @property({ attribute: false })
+    facultyId: FacultyId | undefined = undefined;
 
     /** facultyIdと同様に選択中の専攻Id */
-    @property()
-    majorId: string = "";
+    @property({ attribute: false })
+    majorId: MajorId | undefined = undefined;
 
     /** 更新時の処理 */
     protected override updated(changedProperties: PropertyValues) {
         super.updated(changedProperties);
         const filterKeys = ["facultyId", "majorId", "selectedGrade", "selectedTerm"];
         if (filterKeys.some((key) => changedProperties.has(key))) {
-            this.selectedSubjectId = "";
+            this.selectedSubjectId = undefined;
             void this.loadSubject();
             this.updateFormState();
         }
@@ -72,7 +86,7 @@ export class SubjectSelect extends LitElement {
         const id = ++this.#loadId;
 
         // 学部が選択されていない場合はAPIを呼ばない
-        if (!this.facultyId) {
+        if (this.facultyId === undefined) {
             this.subjects = [];
             this.status = Status.Ready;
             return;
@@ -103,16 +117,16 @@ export class SubjectSelect extends LitElement {
     /** formの状態を更新する */
     private updateFormState() {
         const data = new FormData();
-        data.set("subject", this.selectedSubjectId);
-        data.set("grade", this.selectedGrade != null ? String(this.selectedGrade) : "");
-        data.set("term", this.selectedTerm != null ? String(this.selectedTerm) : "");
+        data.set("subject", this.selectedSubjectId ?? "");
+        data.set("grade", this.selectedGrade !== undefined ? String(this.selectedGrade) : "");
+        data.set("term", this.selectedTerm !== undefined ? String(this.selectedTerm) : "");
 
         this.#internals.setFormValue(data);
         if (
-            !this.facultyId ||
-            !this.selectedSubjectId ||
-            !this.selectedGrade ||
-            !this.selectedTerm
+            this.facultyId === undefined ||
+            this.selectedSubjectId === undefined ||
+            this.selectedGrade === undefined ||
+            this.selectedTerm === undefined
         ) {
             this.#internals.setValidity(
                 { valueMissing: true },
@@ -125,8 +139,21 @@ export class SubjectSelect extends LitElement {
 
     /** 画面表示設定HTMLそれぞれ教科，学年，学期 */
     override render() {
-        const grades = ["1回生", "2回生", "3回生", "4回生", "M1", "M2", "D1", "D2", "D3"];
-        const terms = ["1学期", "2学期", "3学期", "4学期"];
+        // 添字+1を`option`の値とするため，要素数を上限値と一致させる
+        const grades = [
+            "1回生",
+            "2回生",
+            "3回生",
+            "4回生",
+            "M1",
+            "M2",
+            "D1",
+            "D2",
+            "D3",
+        ] as const satisfies { length: typeof GRADE_MAX };
+        const terms = ["1学期", "2学期", "3学期", "4学期"] as const satisfies {
+            length: typeof TERM_MAX;
+        };
 
         const subject_options = this.subjects.map(
             (s) => html`<option value=${s.id}>${s.name}</option>`,
@@ -155,7 +182,7 @@ export class SubjectSelect extends LitElement {
             </label>
             <label>
                 教科
-                <select .value=${this.selectedSubjectId} @change=${this.onSubjectChange}>
+                <select .value=${this.selectedSubjectId ?? ""} @change=${this.onSubjectChange}>
                     <option value="">教科を選択してください</option>
                     ${subject_options}
                 </select>
@@ -167,19 +194,18 @@ export class SubjectSelect extends LitElement {
 
     /** 教科変更時に呼び出される updateFormState でformDataに保存する*/
     private onSubjectChange(e: Event) {
-        this.selectedSubjectId = (e.target as HTMLSelectElement).value;
+        // 未選択の`option`は空文字なので検証で弾かれる
+        this.selectedSubjectId = toSubjectId((e.target as HTMLSelectElement).value);
         this.updateFormState();
     }
 
     /** 学年変更時に呼び出される updateFormState でformDataに保存する*/
     private onGradeChange(e: Event) {
-        const value = (e.target as HTMLSelectElement).value;
-        this.selectedGrade = value ? Number(value) : undefined;
+        this.selectedGrade = toGrade((e.target as HTMLSelectElement).value);
     }
 
     /** 学期変更時に呼び出される updateFormState でformDataに保存する*/
     private onTermChange(e: Event) {
-        const value = (e.target as HTMLSelectElement).value;
-        this.selectedTerm = value ? Number(value) : undefined;
+        this.selectedTerm = toTerm((e.target as HTMLSelectElement).value);
     }
 }
