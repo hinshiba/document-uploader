@@ -1,5 +1,13 @@
 # frontend
 
+## TS
+
+`types.ts`を`constraints.ts`以外でインポートしないでください．
+oxlintの`no-restricted-imports`で強制しており，`constraints.ts`だけを`overrides`で除外しています．
+
+`constraints.ts`の`toXxx`を通し，検証された型を用いてください．
+
+
 ## フォーマットとリント
 
 | 対象     | リンタ                  | フォーマッタ                                     |

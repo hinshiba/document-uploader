@@ -1,4 +1,22 @@
-import { postDocuments, type DocumentMetadata } from "./api/client";
+import { postDocuments } from "./api/client";
+import {
+    GRADE_MAX,
+    GRADE_MIN,
+    NUM_MIN,
+    TERM_MAX,
+    TERM_MIN,
+    YEAR_MIN,
+    toExamType,
+    toFacultyId,
+    toGrade,
+    toMajorId,
+    toNum,
+    toSubjectId,
+    toTeacher,
+    toTerm,
+    toYear,
+    type DocumentMetadata,
+} from "./api/constraints";
 import "./components/major-select.ts";
 import "./components/subject-select.ts";
 import { SubjectSelect } from "./components/subject-select";
@@ -13,6 +31,16 @@ function required<T extends Element>(selector: string): T {
     const el = document.querySelector<T>(selector);
     if (!el) throw new Error(`Element not found. selector: ${selector}`);
     return el;
+}
+
+/**
+ * 検証済みの値を取り出す
+ * コンストラクタの`undefined`を利用者向けのエラーに変換する
+ * @throws 検証を通らなかった場合
+ */
+function orThrow<T>(value: T | undefined, message: string): T {
+    if (value === undefined) throw new Error(message);
+    return value;
 }
 
 // type="module" のスクリプトは defer 相当で DOM 構築後に実行されるため，
@@ -46,64 +74,30 @@ function renderFileList(files: FileList): void {
  */
 function buildMetadata(): DocumentMetadata {
     const formdata = new FormData(form);
-    const faculty = formdata.get("faculty");
-    const major = formdata.get("major");
-    const year = Number(formdata.get("year"));
-    const term = Number(formdata.get("term"));
-    const grade = Number(formdata.get("grade"));
-    const subject = formdata.get("subject");
-    const teacher = formdata.get("teacher");
-    const examtype = formdata.get("examtype");
-    const isanswer = formdata.has("isanswer");
-    const num = Number(formdata.get("num"));
-
-    if (typeof faculty !== "string" || faculty === "") {
-        throw new Error("学部が選択されていません。");
-    }
-    if (typeof major !== "string" || major === "") {
-        throw new Error("専攻が選択されていません。");
-    }
-    if (Number.isInteger(year) === false || year < 1949) {
-        throw new Error("年度の値が不正です。年度は1949年以降の整数で入力してください。");
-    }
-    if (Number.isInteger(term) === false || term < 1 || term > 4) {
-        throw new Error("学期の値が不正です。学期は1～4の整数で選択してください。");
-    }
-    if (Number.isInteger(grade) === false || grade < 1 || grade > 9) {
-        throw new Error("学年の値が不正です。学年は1～9の整数で選択してください。");
-    }
-    if (typeof subject !== "string" || subject === "") {
-        throw new Error("科目が選択されていません。");
-    }
-    if (typeof teacher !== "string" || teacher === "") {
-        throw new Error("担当教員名が入力されていません。");
-    }
-    if (typeof examtype !== "string" || examtype === "") {
-        throw new Error("試験種別が選択されていません。");
-    }
-    if (
-        examtype !== "quiz" &&
-        examtype !== "midterm" &&
-        examtype !== "final" &&
-        examtype !== "other"
-    ) {
-        throw new Error("無効な試験種別が選択されています。");
-    }
-    if (Number.isInteger(num) === false || num < 1) {
-        throw new Error("テストの回数は1以上の整数で入力してください。");
-    }
 
     return {
-        faculty,
-        major,
-        year,
-        term,
-        grade,
-        subject,
-        teacher,
-        examtype,
-        isanswer,
-        num,
+        faculty: orThrow(toFacultyId(formdata.get("faculty")), "学部が選択されていません。"),
+        major: orThrow(toMajorId(formdata.get("major")), "専攻が選択されていません。"),
+        year: orThrow(
+            toYear(formdata.get("year")),
+            `年度の値が不正です。年度は${YEAR_MIN}年以降の整数で入力してください。`,
+        ),
+        term: orThrow(
+            toTerm(formdata.get("term")),
+            `学期の値が不正です。学期は${TERM_MIN}～${TERM_MAX}の整数で選択してください。`,
+        ),
+        grade: orThrow(
+            toGrade(formdata.get("grade")),
+            `学年の値が不正です。学年は${GRADE_MIN}～${GRADE_MAX}の整数で選択してください。`,
+        ),
+        subject: orThrow(toSubjectId(formdata.get("subject")), "科目が選択されていません。"),
+        teacher: orThrow(toTeacher(formdata.get("teacher")), "担当教員名が入力されていません。"),
+        examtype: orThrow(toExamType(formdata.get("examtype")), "試験種別が選択されていません。"),
+        isanswer: formdata.has("isanswer"),
+        num: orThrow(
+            toNum(formdata.get("num")),
+            `テストの回数は${NUM_MIN}以上の整数で入力してください。`,
+        ),
     };
 }
 
