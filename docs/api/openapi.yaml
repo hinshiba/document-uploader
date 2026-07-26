@@ -157,12 +157,18 @@ components:
       type: object
       description: |
         科目が持つ書き込み可能な情報
-      required: [name, faculty, major, grade, term]
+      required: [name, course_code, faculty, major, grade, term]
       properties:
         name:
           type: string
           description: 科目名
           examples: [線形代数, アルゴリズムと計算量]
+        course_code:
+          type: string
+          description: |
+            科目コード
+            重複登録を防ぐため科目間で一意である必要がある
+          examples: ["090002"]
         faculty:
           type: string
           format: uuid
@@ -200,22 +206,11 @@ components:
       example:
         id: "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c"
         name: "線形代数"
+        course_code: "090002"
         faculty: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
         major: "550e8400-e29b-41d4-a716-446655440000"
         grade: 1
         term: 1
-
-    SubjectCreate:
-      description: |
-        科目の作成で受け取る情報
-        誰でも作成できるため，重複登録を防ぐ course_code を必須にする
-      allOf:
-        - $ref: "#/components/schemas/SubjectBase"
-        - type: object
-          required: [course_code]
-          properties:
-            course_code:
-              type: string
 
     ExamType:
       type: string
