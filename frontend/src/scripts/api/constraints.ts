@@ -13,6 +13,8 @@ export type Grade = components["schemas"]["Subject"]["grade"] & { readonly [bran
 export type Term = components["schemas"]["Subject"]["term"];
 export type DocumentMetadata = components["schemas"]["DocumentMetadata"];
 
+// Grade
+
 export const GRADE_MIN = 1;
 export const GRADE_MAX = 9;
 
