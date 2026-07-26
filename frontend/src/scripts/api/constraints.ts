@@ -16,6 +16,9 @@ export type Grade = components["schemas"]["Subject"]["grade"] & { readonly [bran
 export type Term = components["schemas"]["Subject"]["term"] & { readonly [brand]: "Term" };
 export type Year = components["schemas"]["DocumentMetadata"]["year"] & { readonly [brand]: "Year" };
 export type Num = components["schemas"]["DocumentMetadata"]["num"] & { readonly [brand]: "Num" };
+export type Teacher = components["schemas"]["DocumentMetadata"]["teacher"] & {
+    readonly [brand]: "Teacher";
+};
 
 export type FacultyId = components["schemas"]["Faculty"]["id"] & { readonly [brand]: "FacultyId" };
 export type MajorId = components["schemas"]["Major"]["id"] & { readonly [brand]: "MajorId" };
@@ -102,6 +105,16 @@ export const NUM_MIN = 1;
  */
 export function toNum(data: unknown): Num | undefined {
     return toBoundedInt(data, NUM_MIN) as Num | undefined;
+}
+
+// Teacher
+
+/**
+ * `Teacher`型への検証を含むコンストラクタ
+ * @returns 検証を通らない場合は`undefined`
+ */
+export function toTeacher(data: unknown): Teacher | undefined {
+    return toRequiredString(data) as Teacher | undefined;
 }
 
 // Id
