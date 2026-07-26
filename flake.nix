@@ -27,6 +27,8 @@
 				})
 				pkgs.sqlx-cli
 				pkgs.bun
+				pkgs.tera-cli
+				pkgs.superhtml
 			];
 			shellHook = ''
 				# Run safe-chain bash initialisation script
