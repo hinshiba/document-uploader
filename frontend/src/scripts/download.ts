@@ -9,7 +9,11 @@ const form = document.querySelector<HTMLFormElement>("#search-form");
 const majorSelect = document.querySelector("major-select");
 const subjectSelect = document.querySelector<SubjectSelect>("subject-select");
 const resultList = document.querySelector<HTMLUListElement>("#result-list");
-
+const status = document.querySelector("#status");
+/**
+ * 最新の検索リクエストを識別するID
+ */
+let activeSearchId = 0;
 // FIXME: requiredによるエラー処理の統一
 if (!form || !majorSelect || !subjectSelect || !resultList) {
     throw new Error("必要なHTML要素が見つかりません");
@@ -26,11 +30,6 @@ majorSelect.addEventListener("selection-change", (event) => {
     subjectSelect.majorId = detail.majorId;
 });
 
-/**
- * 最新の検索リクエストを識別するID
- */
-let activeSearchId = 0;
-
 form.addEventListener("submit", async (event) => {
     // スクリプト側で送信するので既定の送信動作を無効化
     event.preventDefault();
@@ -38,7 +37,7 @@ form.addEventListener("submit", async (event) => {
     const currentSearchId = ++activeSearchId;
 
     const formData = new FormData(form);
-    const status = document.querySelector("#status");
+
     if (!status) {
         throw new Error("statusが見つかりません");
     }
@@ -49,25 +48,37 @@ form.addEventListener("submit", async (event) => {
         return;
     }
     const yearValue = formData.get("year");
-    const year = typeof yearValue === "string" && yearValue !== "" ? Number(yearValue) : undefined;
-    const teacher = formData.get("teacher") as string;
-    const examtype = formData.get("examtype") as string;
+    let year: number | undefined;
+    if (typeof yearValue === "string" && yearValue !== "") {
+        const parsedYear = Number(yearValue);
 
+        if (
+            Number.isFinite(parsedYear) &&
+            Number.isInteger(parsedYear) &&
+            parsedYear >= 1900 &&
+            parsedYear <= 2100
+        ) {
+            year = parsedYear;
+        } else {
+            status.textContent = "年度が正しくありません。";
+            return;
+        }
+    }
+
+    const teacherValue = formData.get("teacher") as string;
+    const teacher = typeof teacherValue === "string" ? teacherValue : undefined;
+    const examtypeValue = formData.get("examtype") as string;
+    const examtype = typeof examtypeValue === "string" ? teacherValue : undefined;
     const isanswer =
         formData.get("isanswer") === null ? undefined : formData.get("isanswer") === "true";
+    const errorMessage = document.createElement("span");
 
     // 検索のたびに前回検索して表示されたものを削除
     resultList.replaceChildren();
     status.textContent = "検索中...";
 
     try {
-        const documents = await searchDocuments(
-            subject,
-            year,
-            typeof teacher === "string" && teacher !== "" ? teacher : undefined,
-            typeof examtype === "string" && examtype !== "" ? examtype : undefined,
-            isanswer,
-        );
+        const documents = await searchDocuments(subject, year, teacher, examtype, isanswer);
 
         if (currentSearchId !== activeSearchId) {
             return;
@@ -110,7 +121,7 @@ form.addEventListener("submit", async (event) => {
                     URL.revokeObjectURL(url);
                 } catch (error) {
                     console.error(error);
-                    li.textContent = "ダウンロードに失敗しました";
+                    errorMessage.textContent = " ダウンロードに失敗しました";
                 }
             });
 
