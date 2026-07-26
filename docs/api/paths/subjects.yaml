@@ -77,7 +77,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: "../openapi.yaml#/components/schemas/SubjectCreate"
+          $ref: "../openapi.yaml#/components/schemas/SubjectBase"
         example:
           name: "線形代数"
           course_code: "090002"
