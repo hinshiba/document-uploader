@@ -6,6 +6,10 @@ import type {
     MajorId,
     Subject,
     Term,
+    SubjectId,
+    Year,
+    Teacher,
+    ExamType,
 } from "./constraints";
 
 // 実バックエンドテスト
@@ -62,7 +66,7 @@ export async function fetchSubjects(
     // faculty必須
     params.set("faculty", facultyId);
 
-    if (majorId !== undefined && majorId !== "") {
+    if (majorId !== undefined) {
         params.set("major", majorId);
     }
 
@@ -114,10 +118,10 @@ export interface DocumentSearchResult {
 }
 
 export async function searchDocuments(
-    subject: string,
-    year?: number,
-    teacher?: string,
-    examtype?: string,
+    subject: SubjectId,
+    year?: Year,
+    teacher?: Teacher,
+    examtype?: ExamType,
     isanswer?: boolean,
 ): Promise<DocumentSearchResult[]> {
     const params = new URLSearchParams();
@@ -128,11 +132,11 @@ export async function searchDocuments(
         params.set("year", String(year));
     }
 
-    if (teacher !== undefined && teacher !== "") {
+    if (teacher !== undefined) {
         params.set("teacher", teacher);
     }
 
-    if (examtype !== undefined && examtype !== "") {
+    if (examtype !== undefined) {
         params.set("examtype", String(examtype));
     }
 

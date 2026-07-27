@@ -157,8 +157,7 @@ form.addEventListener("submit", async (event) => {
     const year = toYear(formData.get("year"));
     const teacher = toTeacher(formData.get("teacher"));
     const examtype = toExamType(formData.get("examtype"));
-    const isanswer =
-        formData.get("isanswer") === null ? undefined : formData.get("isanswer") === "true";
+    const isanswer = formData.has("isanswer");
 
     try {
         const documents = await searchDocuments(subject, year, teacher, examtype, isanswer);
