@@ -1,5 +1,6 @@
 import "./components/major-select";
 import "./components/subject-select";
+import { toExamType, toSubjectId, toTeacher, toYear } from "./api/constraints";
 
 import { searchDocuments, downloadDocument } from "./api/client";
 import type { SelectionChangeDetail } from "./components/major-select";
@@ -34,48 +35,27 @@ form.addEventListener("submit", async (event) => {
     // スクリプト側で送信するので既定の送信動作を無効化
     event.preventDefault();
 
-    const currentSearchId = ++activeSearchId;
-
-    const formData = new FormData(form);
-
     if (!status) {
-        throw new Error("statusが見つかりません");
-    }
-
-    const subject = formData.get("subject");
-    if (typeof subject !== "string" || subject === "") {
-        status.textContent = "科目を選択してください。";
         return;
     }
-    const yearValue = formData.get("year");
-    let year: number | undefined;
-    if (typeof yearValue === "string" && yearValue !== "") {
-        const parsedYear = Number(yearValue);
+    status.textContent = "検索中...";
 
-        if (
-            Number.isFinite(parsedYear) &&
-            Number.isInteger(parsedYear) &&
-            parsedYear >= 1900 &&
-            parsedYear <= 2100
-        ) {
-            year = parsedYear;
-        } else {
-            status.textContent = "年度が正しくありません。";
-            return;
-        }
+    const currentSearchId = ++activeSearchId;
+    const formData = new FormData(form);
+    const subject = toSubjectId(formData.get("subject"));
+    if (subject === undefined) {
+        status.textContent = "科目を選択してください";
+        return;
     }
-
-    const teacherValue = formData.get("teacher") as string;
-    const teacher = typeof teacherValue === "string" ? teacherValue : undefined;
-    const examtypeValue = formData.get("examtype") as string;
-    const examtype = typeof examtypeValue === "string" ? teacherValue : undefined;
+    const year = toYear(formData.get("year"));
+    const teacher = toTeacher(formData.get("teacher"));
+    const examtype = toExamType(formData.get("examtype"));
     const isanswer =
         formData.get("isanswer") === null ? undefined : formData.get("isanswer") === "true";
     const errorMessage = document.createElement("span");
 
     // 検索のたびに前回検索して表示されたものを削除
     resultList.replaceChildren();
-    status.textContent = "検索中...";
 
     try {
         const documents = await searchDocuments(subject, year, teacher, examtype, isanswer);
