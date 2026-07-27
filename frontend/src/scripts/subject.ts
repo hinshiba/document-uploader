@@ -1,4 +1,16 @@
-import { postSubject, type SubjectCreate } from "./api/client";
+import { postSubject } from "./api/client.ts";
+import {
+    GRADE_MAX,
+    GRADE_MIN,
+    TERM_MAX,
+    TERM_MIN,
+    toFacultyId,
+    toGrade,
+    toMajorId,
+    toRequiredString,
+    toTerm,
+    type SubjectBase,
+} from "./api/constraints.ts";
 import "./components/major-select.ts";
 
 /**
@@ -23,37 +35,41 @@ const statusText = required<HTMLParagraphElement>("#thank");
  * フォームから科目情報を組み立てる
  * @throws 入力内容が不正な場合
  */
-function buildSubject(): SubjectCreate {
+function buildSubject(): SubjectBase {
     const formdata = new FormData(form);
 
-    const faculty = formdata.get("faculty");
-    const major = formdata.get("major");
-    const grade = Number(formdata.get("grade"));
-    const term = Number(formdata.get("term"));
-    const name = formdata.get("name");
-    const course_code = formdata.get("course_code");
+    const faculty = toFacultyId(formdata.get("faculty"));
+    const major = toMajorId(formdata.get("major"));
+    const grade = toGrade(formdata.get("grade"));
+    const term = toTerm(formdata.get("term"));
+    const name = toRequiredString(formdata.get("name"));
+    const course_code = toRequiredString(formdata.get("course_code"));
 
-    if (typeof faculty !== "string" || faculty === "") {
+    if (faculty === undefined) {
         throw new Error("学部が選択されていません。");
     }
 
-    if (typeof major !== "string" || major === "") {
+    if (major === undefined) {
         throw new Error("専攻が選択されていません。");
     }
 
-    if (Number.isInteger(grade) === false || grade < 1 || grade > 9) {
-        throw new Error("学年の値が不正です。学年は1～9の整数で選択してください。");
+    if (grade === undefined) {
+        throw new Error(
+            `学年の値が不正です。学年は ${GRADE_MIN}～${GRADE_MAX} の整数で選択してください。`,
+        );
     }
 
-    if (Number.isInteger(term) === false || term < 1 || term > 4) {
-        throw new Error("学期の値が不正です。学期は1～4の整数で選択してください。");
+    if (term === undefined) {
+        throw new Error(
+            `学期の値が不正です。学期は ${TERM_MIN}～${TERM_MAX} の整数で選択してください。`,
+        );
     }
 
-    if (typeof name !== "string" || name === "") {
+    if (name === undefined) {
         throw new Error("科目名を入力してください。");
     }
 
-    if (typeof course_code !== "string" || course_code === "") {
+    if (course_code === undefined) {
         throw new Error("講義番号を入力してください。");
     }
 
@@ -72,7 +88,7 @@ form.addEventListener("submit", async (event) => {
     // 既定のページ再読み込みを防ぐ
     event.preventDefault();
 
-    let subject: SubjectCreate;
+    let subject: SubjectBase;
 
     try {
         subject = buildSubject();
