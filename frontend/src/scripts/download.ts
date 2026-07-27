@@ -9,7 +9,7 @@ import type { SubjectSelect } from "./components/subject-select";
 const form = document.querySelector<HTMLFormElement>("#search-form");
 const majorSelect = document.querySelector("major-select");
 const subjectSelect = document.querySelector<SubjectSelect>("subject-select");
-const resultList = document.querySelector<HTMLUListElement>("#result-list");
+const resultList = document.querySelector<HTMLUListElement>("#drop-area");
 const status = document.querySelector<HTMLFormElement>("#status");
 let activeSearchId = 0;
 const errorMessage = document.createElement("span");
