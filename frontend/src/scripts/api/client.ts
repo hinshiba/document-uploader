@@ -5,6 +5,7 @@ import type {
     Grade,
     MajorId,
     Subject,
+    SubjectBase,
     Term,
 } from "./constraints";
 
@@ -108,7 +109,7 @@ export async function postDocuments(
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
 }
 
-export async function postSubject(subject: SubjectCreate): Promise<Subject> {
+export async function postSubject(subject: SubjectBase): Promise<Subject> {
     const res = await fetchWithTimeout(`${API_BASE}/subjects`, {
         method: "POST",
         headers: {
