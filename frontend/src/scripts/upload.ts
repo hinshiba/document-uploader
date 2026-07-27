@@ -59,11 +59,21 @@ const subjectSelect = document.querySelector("subject-select") as SubjectSelect 
 function renderFileList(files: FileList): void {
     // 選択のたびに作り直し，ドロップと選択の二重表示を防ぐ
     fileList.replaceChildren();
-    for (const file of files) {
+    Array.from(files).forEach((file, index) => {
         const li = document.createElement("li");
         li.textContent = file.name;
+        const button = document.createElement("button");
+        button.textContent = "削除";
+        button.type = "button";
+        button.className = "close-button";
+
+        button.addEventListener("click", () => {
+            removeFile(index);
+        });
+
+        li.append(button);
         fileList.appendChild(li);
-    }
+    });
     // ファイルがあれば案内文を隠す
     message.hidden = files.length > 0;
     clearFileButton.hidden = files.length === 0;
@@ -157,6 +167,7 @@ form.addEventListener("submit", async (event) => {
         statusText.textContent = "送信に失敗しました．時間をおいて再試行してください";
         submitButton.disabled = false;
         submitButton.textContent = "送信";
+        console.log([...files].map((file) => file.name));
     }
 });
 
@@ -189,3 +200,19 @@ function clearFiles(): void {
 clearFileButton.addEventListener("click", () => {
     clearFiles();
 });
+
+function removeFile(index: number): void {
+    const files = fileInput.files;
+    if (!files) return;
+
+    const dt = new DataTransfer();
+
+    Array.from(files).forEach((file, i) => {
+        if (i !== index) {
+            dt.items.add(file);
+        }
+    });
+
+    fileInput.files = dt.files;
+    renderFileList(dt.files);
+}

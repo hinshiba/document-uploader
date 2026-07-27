@@ -12,8 +12,10 @@
         text-align: left;
     }
 
-    li {
+    li,
+    .close-button {
         padding: 0.25rem 0.5rem;
         border-bottom: 1px solid $border-color;
+        margin: 5px;
     }
 }
