@@ -5,9 +5,10 @@ import type { DocumentSearchResult } from "./api/client";
 import { searchDocuments, downloadDocument } from "./api/client";
 import type { SelectionChangeDetail } from "./components/major-select";
 import type { SubjectSelect } from "./components/subject-select";
+import type { MajorSelect } from "./components/major-select";
 
 const form = document.querySelector<HTMLFormElement>("#search-form");
-const majorSelect = document.querySelector("major-select");
+const majorSelect = document.querySelector<MajorSelect>("major-select");
 const subjectSelect = document.querySelector<SubjectSelect>("subject-select");
 const resultList = document.querySelector<HTMLUListElement>("#drop-area");
 const status = document.querySelector<HTMLFormElement>("#status");
