@@ -167,7 +167,6 @@ form.addEventListener("submit", async (event) => {
         statusText.textContent = "送信に失敗しました．時間をおいて再試行してください";
         submitButton.disabled = false;
         submitButton.textContent = "送信";
-        console.log([...files].map((file) => file.name));
     }
 });
 
