@@ -16,5 +16,19 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "oxc.fmt.configPath": "frontend/.oxfmtrc.json",
-  "stylelint.validate": ["css", "scss"]
+  "stylelint.validate": [
+    "css",
+    "scss"
+  ],
+  "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix",
+  "nixEnvSelector.useFlakes": true,
+  "nixEnvSelector.flakeShell": "default",
+  "terminal.integrated.profiles.linux": {
+    "nix develop": {
+      "path": "nix",
+      "args": [
+        "develop"
+      ]
+    }
+  }
 }
