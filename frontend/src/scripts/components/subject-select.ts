@@ -41,7 +41,7 @@ export class SubjectSelect extends LitElement {
 
     /** コンポーネント状態 */
     @state()
-    private status: Status = Status.Loading;
+    private status: Status = Status.Ready;
 
     /** 取得した教科，未収得時は空配列 */
     @state()
@@ -165,7 +165,7 @@ export class SubjectSelect extends LitElement {
 
         // HTMLに教科選択，学年選択，学期選択のoptionを生成する。学部が選択されていない場合は空の配列となる。
         // @changeごとに変更される
-        return html`
+        return html`<div class="section-content">
             <label>
                 学年
                 <select .value=${String(this.selectedGrade ?? "")} @change=${this.onGradeChange}>
@@ -189,7 +189,7 @@ export class SubjectSelect extends LitElement {
                 ${this.status === Status.Loading ? html`読み込み中...` : ""}
                 ${this.status === Status.Error ? html`教科一覧の取得に失敗しました` : ""}
             </label>
-        `;
+        </div>`;
     }
 
     /** 教科変更時に呼び出される updateFormState でformDataに保存する*/

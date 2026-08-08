@@ -20,6 +20,7 @@ import {
 import "./components/major-select.ts";
 import "./components/subject-select.ts";
 import { SubjectSelect } from "./components/subject-select";
+import { MajorSelect } from "./components/major-select";
 import type { SelectionChangeDetail } from "./components/major-select";
 /**
  * 要素を型付きで取得するヘルパ
@@ -52,8 +53,8 @@ const fileList = required<HTMLUListElement>("#makelist");
 const message = required<HTMLParagraphElement>("#message");
 const submitButton = required<HTMLButtonElement>("#uploadbtn");
 const statusText = required<HTMLParagraphElement>("#thank");
-const majorSelect = document.querySelector("major-select");
-const subjectSelect = document.querySelector("subject-select") as SubjectSelect | null;
+const majorSelect = required<MajorSelect>("major-select");
+const subjectSelect = required<SubjectSelect>("subject-select");
 
 /** 選択中のファイル一覧を画面に描画する */
 function renderFileList(files: FileList): void {
@@ -160,11 +161,8 @@ form.addEventListener("submit", async (event) => {
 });
 
 // major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
-majorSelect?.addEventListener("selection-change", (e) => {
+majorSelect.addEventListener("selection-change", (e) => {
     const event = e as CustomEvent<SelectionChangeDetail>;
-
-    if (subjectSelect) {
-        subjectSelect.facultyId = event.detail.facultyId;
-        subjectSelect.majorId = event.detail.majorId;
-    }
+    subjectSelect.facultyId = event.detail.facultyId;
+    subjectSelect.majorId = event.detail.majorId;
 });
