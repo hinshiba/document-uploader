@@ -163,9 +163,6 @@ form.addEventListener("submit", async (event) => {
 // major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
 majorSelect.addEventListener("selection-change", (e) => {
     const event = e as CustomEvent<SelectionChangeDetail>;
-
-    if (subjectSelect) {
-        subjectSelect.facultyId = event.detail.facultyId;
-        subjectSelect.majorId = event.detail.majorId;
-    }
+    subjectSelect.facultyId = event.detail.facultyId;
+    subjectSelect.majorId = event.detail.majorId;
 });

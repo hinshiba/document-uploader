@@ -118,6 +118,16 @@ export interface DocumentSearchResult {
     metadata: DocumentMetadata;
 }
 
+/** ドキュメントを検索する
+ * /docs GET に対応
+ * @param subject 検索する科目のID
+ * @param year 検索する年度
+ * @param teacher 検索する担当者
+ * @param examtype 検索する試験種別
+ * @param isanswer 解答付きかどうか
+ * @returns 検索結果のドキュメント一覧
+ * @throws
+ */
 export async function searchDocuments(
     subject: SubjectId,
     year?: Year,
@@ -156,12 +166,19 @@ export async function searchDocuments(
 
     return (await res.json()) as DocumentSearchResult[];
 }
+
 /** downloadDocumentの型を指定 */
 export interface DownloadDocument {
     filename: string;
     blob: Blob;
 }
 
+/** ドキュメントをダウンロードする
+ * /docs/{id} GET に対応
+ * @param id ダウンロードするドキュメントのID
+ * @returns ファイル名とファイルデータ
+ * @throws
+ */
 export async function downloadDocument(id: string): Promise<DownloadDocument> {
     const res = await fetchWithTimeout(`${API_BASE}/docs/${id}`, {
         headers: DEV_HEADERS,
