@@ -114,21 +114,21 @@ function createResultItem(doc: DocumentSearchResult) {
  * Blob URLを生成してブラウザのダウンロード処理を実行する。
  */
 async function download(id: string) {
+    let file;
+
     try {
-        const file = await downloadDocument(id);
-
-        const url = URL.createObjectURL(file.blob);
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = file.filename;
-        a.click();
-
-        URL.revokeObjectURL(url);
+        file = await downloadDocument(id);
     } catch (error) {
         console.error(error);
         errorMessage.textContent = " ダウンロードに失敗しました";
+        return;
     }
+    const url = URL.createObjectURL(file.blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.filename;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 /**
