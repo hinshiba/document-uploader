@@ -143,10 +143,6 @@ async function download(id: string) {
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    if (!status) {
-        return;
-    }
-
     const currentSearchId = ++activeSearchId;
 
     errorMessage.textContent = "";
