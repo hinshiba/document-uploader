@@ -112,6 +112,7 @@ export async function postDocuments(
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
 }
 
+/** searchDocumentsの型を指定 */
 export interface DocumentSearchResult {
     id: string;
     metadata: DocumentMetadata;
@@ -155,7 +156,7 @@ export async function searchDocuments(
 
     return (await res.json()) as DocumentSearchResult[];
 }
-
+/** downloadDocumentの型を指定 */
 export interface DownloadDocument {
     filename: string;
     blob: Blob;

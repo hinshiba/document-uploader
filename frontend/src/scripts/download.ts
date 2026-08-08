@@ -7,27 +7,31 @@ import type { SelectionChangeDetail } from "./components/major-select";
 import type { SubjectSelect } from "./components/subject-select";
 import type { MajorSelect } from "./components/major-select";
 
-const form = document.querySelector<HTMLFormElement>("#search-form");
-const majorSelect = document.querySelector<MajorSelect>("major-select");
-const subjectSelect = document.querySelector<SubjectSelect>("subject-select");
-const resultList = document.querySelector<HTMLUListElement>("#drop-area");
-const status = document.querySelector<HTMLFormElement>("#status");
-let activeSearchId = 0;
-const errorMessage = document.createElement("span");
+function required<T extends Element>(selector: string): T {
+    const el = document.querySelector<T>(selector);
+    if (!el) throw new Error(`Element not found. selector: ${selector}`);
+    return el;
+}
+
+const form = required<HTMLFormElement>("#search-form");
+const majorSelect = required<MajorSelect>("major-select");
+const subjectSelect = required<SubjectSelect>("subject-select");
+const resultList = required<HTMLUListElement>("#download-result");
+const status = required<HTMLParagraphElement>("#status");
+const errorMessage = required<HTMLSpanElement>("#error-message");
+
 /**
  * 最新の検索リクエストを識別するID
  */
+let activeSearchId = 0;
 
 // FIXME: requiredによるエラー処理の統一
 if (!form || !majorSelect || !subjectSelect || !resultList) {
     throw new Error("必要なHTML要素が見つかりません");
 }
 
-/**
- * major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
- */
+// major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
 majorSelect.addEventListener("selection-change", (event) => {
-    // major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
     const detail = (event as CustomEvent<SelectionChangeDetail>).detail;
 
     subjectSelect.facultyId = detail.facultyId;
@@ -37,7 +41,7 @@ majorSelect.addEventListener("selection-change", (event) => {
 /**
  * 検索結果一覧を画面に描画する
  *
- * @param documents - APIから取得したドキュメント検索結果
+ * @param doc - APIから取得したドキュメント検索結果
  * @param listElement - 検索結果を表示するHTML要素
  * @param statusElement - 検索状態（検索中など）を表示するHTML要素
  *
@@ -45,22 +49,22 @@ majorSelect.addEventListener("selection-change", (event) => {
  * 結果がある場合は各ドキュメントをリスト要素として生成する。
  */
 function renderResults(
-    documents: DocumentSearchResult[],
-    ListElement: HTMLElement,
+    doc: DocumentSearchResult[],
+    listElement: HTMLElement,
     statusElement: HTMLElement,
 ) {
-    ListElement.replaceChildren();
+    listElement.replaceChildren();
 
-    if (documents.length === 0) {
+    if (doc.length === 0) {
         const li = document.createElement("li");
         li.textContent = "検索結果はありません";
-        ListElement.append(li);
+        listElement.append(li);
         statusElement.textContent = "";
         return;
     }
 
-    for (const document of documents) {
-        ListElement.append(createResultItem(document));
+    for (const document of doc) {
+        listElement.append(createResultItem(document));
     }
 
     statusElement.textContent = "";
