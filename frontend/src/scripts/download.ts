@@ -37,9 +37,9 @@ majorSelect.addEventListener("selection-change", (event) => {
 /**
  * 検索結果一覧を画面に描画する
  *
- * @param documents - APIから取得したドキュメント検索結果
- * @param listElement - 検索結果を表示するHTML要素
- * @param statusElement - 検索状態（検索中など）を表示するHTML要素
+ * @param documents APIから取得したドキュメント検索結果
+ * @param listElement 検索結果を表示するHTML要素
+ * @param statusElement 検索状態（検索中など）を表示するHTML要素
  *
  * 検索結果が0件の場合は「検索結果はありません」を表示する。
  * 結果がある場合は各ドキュメントをリスト要素として生成する。
