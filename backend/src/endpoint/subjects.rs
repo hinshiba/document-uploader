@@ -65,7 +65,7 @@ impl Input {
     }
 }
 
-#[derive(Debug, Clone, Hash, Deserialize, Serialize)]
+#[derive(Debug, Clone, Hash, Deserialize)]
 pub struct PostInput {
     name: String,
     course_code: String,
