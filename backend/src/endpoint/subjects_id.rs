@@ -16,10 +16,17 @@ use crate::{
         subject::Subject,
     },
     usecase::{
-        app::update_subject::{
-            UpdateSubjectInput,
-            UpdateSubjectOutput,
-            UpdateSubjectUseCase,
+        app::{
+            update_subject::{
+                UpdateSubjectInput,
+                UpdateSubjectOutput,
+                UpdateSubjectUseCase,
+            },
+            delete_subject::{
+                DeleteSubjectInput,
+                DeleteSubjectOutput,
+                DeleteSubjectUseCase,
+            }
         },
         repository::SubjectRepository,
     }
@@ -95,6 +102,45 @@ pub async fn put_subject<I: SubjectRepository>(
               })
             )
         },
+    }
+}
+
+#[tracing::instrument(skip(repo), ret(level="info"))]
+pub async fn delete_subject<I: SubjectRepository>(
+    extract::State(repo): extract::State<I>,
+    extract::Path(subject_id): extract::Path<uuid::Uuid>,
+) -> EndpointResult<impl IntoResponse> {
+    match DeleteSubjectUseCase::new(repo).execute(
+            DeleteSubjectInput {
+                subject_id: Id::new(subject_id)
+            }
+        ).await
+    {
+        Ok(DeleteSubjectOutput::Deleted) => (StatusCode::NO_CONTENT, Ok(())),
+        Ok(DeleteSubjectOutput::ErrReferencedByDocuments) => (
+            StatusCode::CONFLICT,
+            Err(EndpointError {
+                message: "subject is still referenced by documents".to_owned(),
+                details: Some("reassign or delete them before deleting this subject".to_owned())
+            })
+        ),
+        Ok(DeleteSubjectOutput::ErrSubjectNotExist(_subject_id)) => (
+            StatusCode::NOT_FOUND,
+            Err(EndpointError {
+                message: "invalid subject_id".to_owned(),
+                details: Some("subject does not exist".to_owned()),
+            })
+        ),
+        Err(err) => {
+            tracing::error!("{}", err);
+
+            ( StatusCode::INTERNAL_SERVER_ERROR
+            , Err(EndpointError {
+                message: "unexpected error occured".to_owned(),
+                details: None,
+              })
+            )
+        }
     }
 }
 
