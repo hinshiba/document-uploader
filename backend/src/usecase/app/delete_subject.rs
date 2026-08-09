@@ -28,7 +28,7 @@ impl<I> DeleteSubjectUseCase<I> {
 
 impl<I: SubjectRepository> DeleteSubjectUseCase<I> {
     // TODO: SubjectIdがドキュメントから参照されているかを検証する
-    #[tracing::instrument(skip(self), err)]
+    #[tracing::instrument(skip(self), ret(level="debug"), err)]
     pub async fn execute(&self, input: DeleteSubjectInput) -> anyhow::Result<DeleteSubjectOutput> {
         self.repository.delete_subject(input.subject_id).await?;
 

@@ -46,7 +46,7 @@ impl<I> UpdateSubjectUseCase<I> {
 
 impl<I: SubjectRepository> UpdateSubjectUseCase<I> {
     // TODO: `course_code`と`major_id`, `faculty_id`の検証を追加する
-    #[tracing::instrument(skip(self), err)]
+    #[tracing::instrument(skip(self), ret(level="debug"), err)]
     pub async fn execute(&self, input: UpdateSubjectInput) -> anyhow::Result<UpdateSubjectOutput> {
         // 変更対象となる`Subject`が存在するか検証する
         if self.repository.search_subjects(
