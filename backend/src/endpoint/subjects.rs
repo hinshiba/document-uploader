@@ -144,7 +144,7 @@ pub async fn post_subject<I: SubjectRepository>(
                   Json(SubjectDto::from_domain(&subject))
             )))
         },
-        Ok(Err(err)) => error_with_400(err),
+        Ok(Err((code, err))) => (code, Err(err)),
         Err(err) => {
             tracing::error!("{}", err);
 
@@ -175,34 +175,38 @@ fn error_with_400<T>(e: EndpointError) -> EndpointResult<T> {
 }
 
 #[inline]
-fn convert_create_subject_output(o: CreateSubjectOutput) -> Result<Subject, EndpointError> {
+fn convert_create_subject_output(o: CreateSubjectOutput) -> Result<Subject, (StatusCode, EndpointError)> {
     use CreateSubjectOutput::*;
 
     match o {
         Created(subject) => Ok(subject),
-        ErrCourseCodeNonUnique(course_code) => Err(
+        ErrCourseCodeNonUnique(course_code) => Err((
+            StatusCode::CONFLICT,
             EndpointError {
                 message: "duplicate check failed".to_owned(),
                 details: Some(format!("subject which have course_code '{}' already exists", course_code)),
             }
-        ),
-        ErrFacultyNotExist(_faculty_id) => Err(
+        )),
+        ErrFacultyNotExist(_faculty_id) => Err((
+            StatusCode::BAD_REQUEST,
             EndpointError {
                 message: "invalid faculty_id".to_owned(),
                 details: Some("faculty does not exist".to_owned()),
             }
-        ),
-        ErrMajorNotExist(_major_id) => Err(
+        )),
+        ErrMajorNotExist(_major_id) => Err((
+            StatusCode::BAD_REQUEST,
             EndpointError {
                 message: "invalid major_id".to_owned(),
                 details: Some("major does not exist".to_owned()),
             }
-        ),
-        ErrFacultyMajorRelation(_faculty_id, _major_id) => Err(
+        )),
+        ErrFacultyMajorRelation(_faculty_id, _major_id) => Err((
+            StatusCode::BAD_REQUEST,
             EndpointError {
                 message: "invalid major_id".to_owned(),
                 details: Some("major does not belong to faculty".to_owned()),
             }
-        ),
+        )),
     }
 }
