@@ -29,6 +29,7 @@ pub enum CreateSubjectOutput {
     ErrCourseCodeNonUnique(String),
     ErrFacultyNotExist(Id<Faculty>),
     ErrMajorNotExist(Id<Major>),
+    ErrFacultyMajorRelation(Id<Faculty>, Id<Major>),
 }
 
 impl<I> CreateSubjectUseCase<I> {
