@@ -5,6 +5,7 @@ pub mod dto;
 pub mod docs;
 pub mod faculties;
 pub mod subjects;
+pub mod subjects_id;
 
 pub type EndpointResult<T> = (axum::http::StatusCode, Result<T, EndpointError>);
 
