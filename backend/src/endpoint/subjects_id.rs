@@ -91,7 +91,7 @@ pub async fn put_subject<I: SubjectRepository>(
               }))
             )
         }
-        Ok(Err(err)) => error_with_400(err),
+        Ok(Err((code, err))) => (code, Err(err)),
         Err(err) => {
             tracing::error!("{}", err);
 
@@ -160,40 +160,45 @@ fn error_with_400<T>(e: EndpointError) -> EndpointResult<T> {
 }
 
 #[inline]
-fn convert_update_subject_output(o: UpdateSubjectOutput) -> Result<Subject, EndpointError> {
+fn convert_update_subject_output(o: UpdateSubjectOutput) -> Result<Subject, (StatusCode, EndpointError)> {
     use UpdateSubjectOutput::*;
 
     match o {
         Updated(subject) => Ok(subject),
-        ErrCourseCodeNonUnique(course_code) => Err(
+        ErrCourseCodeNonUnique(course_code) => Err((
+            StatusCode::BAD_REQUEST,
             EndpointError {
                 message: "duplicate check failed".to_owned(),
                 details: Some(format!("subject which have course_code '{}' already exists", course_code)),
             }
-        ),
-        ErrSubjectNotExist(_subject_id) => Err(
+        )),
+        ErrSubjectNotExist(_subject_id) => Err((
+            StatusCode::NOT_FOUND,
             EndpointError {
                 message: "invalid subject_id".to_owned(),
                 details: Some("subject does not exist".to_owned()),
             }
-        ),
-        ErrFacultyNotExist(_faculty_id) => Err(
+        )),
+        ErrFacultyNotExist(_faculty_id) => Err((
+            StatusCode::BAD_REQUEST,
             EndpointError {
                 message: "invalid faculty_id".to_owned(),
                 details: Some("faculty does not exist".to_owned()),
             }
-        ),
-        ErrMajorNotExist(_major_id) => Err(
+        )),
+        ErrMajorNotExist(_major_id) => Err((
+            StatusCode::BAD_REQUEST,
             EndpointError {
                 message: "invalid major_id".to_owned(),
                 details: Some("major does not exist".to_owned()),
             }
-        ),
-        ErrFacultyMajorRelation(_faculty_id, _major_id) => Err(
+        )),
+        ErrFacultyMajorRelation(_faculty_id, _major_id) => Err((
+            StatusCode::BAD_REQUEST,
             EndpointError {
                 message: "invalid major_id".to_owned(),
                 details: Some("major does not belong to faculty".to_owned()),
             }
-        ),
+        )),
     }
 }
