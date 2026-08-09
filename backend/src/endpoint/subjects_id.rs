@@ -159,7 +159,7 @@ fn convert_update_subject_output(o: UpdateSubjectOutput) -> Result<Subject, (Sta
     match o {
         Updated(subject) => Ok(subject),
         ErrCourseCodeNonUnique(course_code) => Err((
-            StatusCode::BAD_REQUEST,
+            StatusCode::CONFLICT,
             EndpointError {
                 message: "duplicate check failed".to_owned(),
                 details: Some(format!("subject which have course_code '{}' already exists", course_code)),
