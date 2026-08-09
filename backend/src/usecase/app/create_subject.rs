@@ -23,9 +23,9 @@ pub struct CreateSubjectInput {
     pub term: Term<Subject>,
 }
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Hash)]
 pub enum CreateSubjectOutput {
-    Created(Id<Subject>),
+    Created(Subject),
     ErrCourseCodeNonUnique(String),
     ErrFacultyNotExist(Id<Faculty>),
     ErrMajorNotExist(Id<Major>),
@@ -55,8 +55,18 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
             input.term,
         );
 
+        // `Subject`の手動Clone
+        let subject_ret = Subject::new(
+            subject_create_id,
+            subject_create.name().to_owned(),
+            subject_create.faculty_id().clone(),
+            subject_create.major_id().clone(),
+            subject_create.grade().clone(),
+            subject_create.term().clone(),
+        );
+
         self.repository.create_subject(subject_create).await?;
 
-        Ok(CreateSubjectOutput::Created(subject_create_id))
+        Ok(CreateSubjectOutput::Created(subject_ret))
     }
 }
