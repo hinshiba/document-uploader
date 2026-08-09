@@ -1,0 +1,93 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                id AS \"id!\", name AS \"name!\", faculty_id AS \"faculty_id!\",\n                major_id AS \"major_id!\", grade AS \"grade!\", term AS \"term!\"\n            FROM subject_details\n            WHERE\n                ($1::uuid IS NULL OR id = $1) AND\n                ($2::text IS NULL OR name = $2) AND\n                ($3::uuid IS NULL OR faculty_id = $3) AND\n                ($4::uuid IS NULL OR major_id = $4) AND\n                ($5::bigint IS NULL OR grade = $5) AND\n                ($6::bigint IS NULL OR term = $6)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "faculty_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "faculty_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "major_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "major_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "grade!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "grade"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "term!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "term"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "4cb411f8d52419502d715ff218309e697950a4d8b27785d1f37c466556be1d33"
+}
