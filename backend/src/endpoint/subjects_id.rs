@@ -81,14 +81,7 @@ pub async fn put_subject<I: SubjectRepository>(
     {
         Ok(Ok(subject)) => {
             ( StatusCode::OK
-            , Ok(response::Json(SubjectDto {
-                id: subject.id().id().clone(),
-                name: subject.name().to_owned(),
-                faculty: subject.faculty_id().id().clone(),
-                major: subject.major_id().id().clone(),
-                grade: subject.grade().grade().clone(),
-                term: subject.term().term().clone()
-              }))
+            , Ok(response::Json(SubjectDto::from_domain(&subject)))
             )
         }
         Ok(Err((code, err))) => (code, Err(err)),
