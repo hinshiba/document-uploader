@@ -1,4 +1,5 @@
 pub mod get_faculties;
+pub mod create_subject;
 pub mod get_subjects;
 pub mod get_zip_document;
 pub mod store_document;
