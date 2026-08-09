@@ -66,7 +66,7 @@ impl Input {
 }
 
 #[derive(Debug, Clone, Hash, Deserialize)]
-pub struct PostInput {
+pub struct PostSubjectsInput {
     name: String,
     course_code: String,
     faculty: uuid::Uuid,
@@ -75,7 +75,7 @@ pub struct PostInput {
     term: i64,
 }
 
-impl PostInput {
+impl PostSubjectsInput {
     fn to_create_subject_input(&self) -> Result<CreateSubjectInput, EndpointError> {
         let create_subject_input = CreateSubjectInput {
             name: self.name.clone(),
@@ -125,7 +125,7 @@ pub async fn get_subjects<I: SubjectRepository>(
 #[tracing::instrument(skip(repo), ret(level="info"))]
 pub async fn post_subject<I: SubjectRepository>(
     State(repo): State<I>,
-    extract::Json(input): extract::Json<PostInput>,
+    extract::Json(input): extract::Json<PostSubjectsInput>,
 ) -> EndpointResult<impl IntoResponse> {
     let create_subject_input = match input.to_create_subject_input() {
         Ok(ret) => ret,
