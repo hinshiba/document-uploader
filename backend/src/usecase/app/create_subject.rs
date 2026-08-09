@@ -28,7 +28,6 @@ pub enum CreateSubjectOutput {
     Created,
     ErrCourseCodeNonUnique(String),
     ErrFacultyNotExist(Id<Faculty>),
-    ErrSubjectNotExist(Id<Subject>),
     ErrMajorNotExist(Id<Major>),
 }
 
