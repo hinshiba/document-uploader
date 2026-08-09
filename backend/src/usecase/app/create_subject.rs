@@ -39,7 +39,7 @@ impl<I> CreateSubjectUseCase<I> {
 
 impl<I: SubjectRepository> CreateSubjectUseCase<I> {
     // TODO: `course_code`による重複判定を実装する
-    #[tracing::instrument(skip(self), err)]
+    #[tracing::instrument(skip(self), ret(level="debug"), err)]
     pub async fn execute(&self, input: CreateSubjectInput) -> anyhow::Result<CreateSubjectOutput> {
         // SubjectIdはUseCaseで与える
         let subject_create_id: Id<Subject> = Id::new(uuid::Uuid::new_v4());
