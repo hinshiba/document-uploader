@@ -141,14 +141,7 @@ pub async fn post_subject<I: SubjectRepository>(
             ( StatusCode::CREATED
             , Ok(([(header::LOCATION, format!("/subjects/{}", subject.id().id().as_hyphenated()))
                   ],
-                  Json(SubjectDto {
-                    id: subject.id().id().clone(),
-                    name: subject.name().to_owned(),
-                    faculty: subject.faculty_id().id().clone(),
-                    major: subject.major_id().id().clone(),
-                    grade: subject.grade().grade().clone(),
-                    term: subject.term().term().clone()
-                  })
+                  Json(SubjectDto::from_domain(&subject))
             )))
         },
         Ok(Err(err)) => error_with_400(err),
