@@ -17,6 +17,7 @@ pub struct DeleteSubjectInput {
 #[derive(Debug, Clone, Hash)]
 pub enum DeleteSubjectOutput {
     Deleted,
+    ErrSubjectNotExist(Id<Subject>),
     ErrReferencedByDocuments,
 }
 
