@@ -17,8 +17,8 @@ pub struct CreateSubjectUseCase<I> {
 pub struct CreateSubjectInput {
     pub name: String,
     pub course_code: String,
-    pub faculty_id: uuid::Uuid,
-    pub major_id: uuid::Uuid,
+    pub faculty_id: Id<Faculty>,
+    pub major_id: Id<Major>,
     pub grade: Grade<Subject>,
     pub term: Term<Subject>,
 }
@@ -48,9 +48,9 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
             subject_create_id,
             input.name,
             // TODO: `faculty_id`を持つFacultyが存在することを検証する
-            Id::new(input.faculty_id),
+            input.faculty_id,
             // TODO: `major_id`を持つMajorが存在することを検証する
-            Id::new(input.major_id),
+            input.major_id,
             input.grade,
             input.term,
         );
