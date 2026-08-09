@@ -85,16 +85,7 @@ pub async fn put_subject<I: SubjectRepository>(
             )
         }
         Ok(Err((code, err))) => (code, Err(err)),
-        Err(err) => {
-            tracing::error!("{}", err);
-
-            ( StatusCode::INTERNAL_SERVER_ERROR
-            , Err(EndpointError {
-                message: "unexpected error occured".to_owned(),
-                details: None,
-              })
-            )
-        },
+        Err(err) => return_500_with_log!(err),
     }
 }
 
@@ -124,16 +115,7 @@ pub async fn delete_subject<I: SubjectRepository>(
                 details: Some("subject does not exist".to_owned()),
             })
         ),
-        Err(err) => {
-            tracing::error!("{}", err);
-
-            ( StatusCode::INTERNAL_SERVER_ERROR
-            , Err(EndpointError {
-                message: "unexpected error occured".to_owned(),
-                details: None,
-              })
-            )
-        }
+        Err(err) => return_500_with_log!(err),
     }
 }
 
