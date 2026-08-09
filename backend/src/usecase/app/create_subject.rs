@@ -50,7 +50,7 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
             input.name,
             // TODO: `faculty_id`を持つFacultyが存在することを検証する
             input.faculty_id,
-            // TODO: `major_id`を持つMajorが存在することを検証する
+            // TODO: `major_id`を持つMajorが存在し、それが`faculty_id`を持つFacultyに属することを検証する
             input.major_id,
             input.grade,
             input.term,
