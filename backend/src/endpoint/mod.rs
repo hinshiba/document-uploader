@@ -1,5 +1,8 @@
 use serde::Serialize;
 
+#[macro_use]
+mod util;
+
 pub mod alive;
 pub mod dto;
 pub mod docs;
