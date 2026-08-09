@@ -25,7 +25,7 @@ pub struct CreateSubjectInput {
 
 #[derive(Debug, Clone, Hash)]
 pub enum CreateSubjectOutput {
-    Created,
+    Created(Id<Subject>),
     ErrCourseCodeNonUnique(String),
     ErrFacultyNotExist(Id<Faculty>),
     ErrMajorNotExist(Id<Major>),
@@ -45,7 +45,7 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
         let subject_create_id: Id<Subject> = Id::new(uuid::Uuid::new_v4());
 
         let subject_create = Subject::new(
-            subject_create_id,
+            subject_create_id.clone(),
             input.name,
             // TODO: `faculty_id`を持つFacultyが存在することを検証する
             input.faculty_id,
@@ -57,6 +57,6 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
 
         self.repository.create_subject(subject_create).await?;
 
-        Ok(CreateSubjectOutput::Created)
+        Ok(CreateSubjectOutput::Created(subject_create_id))
     }
 }
