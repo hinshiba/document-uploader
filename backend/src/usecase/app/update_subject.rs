@@ -28,9 +28,9 @@ pub struct UpdateSubjectInput {
     pub term: Term<Subject>,
 }
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Hash)]
 pub enum UpdateSubjectOutput {
-    Updated,
+    Updated(Subject),
     ErrCourseCodeNonUnique(String),
     ErrFacultyNotExist(Id<Faculty>),
     ErrMajorNotExist(Id<Major>),
@@ -68,8 +68,8 @@ impl<I: SubjectRepository> UpdateSubjectUseCase<I> {
             term: input.term,
         };
 
-        self.repository.update_subject(input.id, content).await?;
+        let new_subject = self.repository.update_subject(input.id, content).await?;
 
-        Ok(UpdateSubjectOutput::Updated)
+        Ok(UpdateSubjectOutput::Updated(new_subject))
     }
 }
