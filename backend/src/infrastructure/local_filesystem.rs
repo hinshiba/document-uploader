@@ -56,3 +56,39 @@ impl DocumentFileRepository for LocalFileSystem {
         Ok(content)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    /// ファイルが保存可能で，適切な場所にあるか検証する．
+    /// そのファイルを取得し，同じ内容を復元できるか検証する．
+    #[tokio::test]
+    async fn store_and_get_document_file() {
+        // 一時ファイルの準備
+        let save_dir = std::env::temp_dir().join(uuid::Uuid::new_v4().to_string());
+        let repository = LocalFileSystem::new(save_dir.clone()).unwrap();
+        assert!(save_dir.is_dir());
+
+        // storeのテスト
+        let document_file = repository
+            .store_document_file(b"hello".to_vec(), DocumentFileType::Pdf)
+            .await
+            .unwrap();
+
+        assert_eq!(document_file.ty(), &DocumentFileType::Pdf);
+        assert_eq!(document_file.path().parent(), Some(save_dir.as_path()));
+        assert!(document_file.path().is_file());
+
+        // getのテスト
+        let content = repository
+            .get_document_file_content(&document_file)
+            .await
+            .unwrap();
+        assert_eq!(content, b"hello");
+
+        // 後始末
+        fs::remove_dir_all(&save_dir).unwrap();
+    }
+}
