@@ -1,70 +1,70 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT\n                id AS \"id!\", name AS \"name!\", faculty_id AS \"faculty_id!\",\n                major_id AS \"major_id!\", grade AS \"grade!\", term AS \"term!\"\n            FROM subject_details\n            WHERE id = $1\n        ",
+  "query": "\n            DELETE FROM subjects AS s\n                USING majors AS m\n                WHERE s.major_id = m.id AND s.id = $1\n                RETURNING s.id, s.name, m.faculty_id, s.major_id, s.grade, s.term\n        ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "id!",
+        "name": "id",
         "type_info": "Uuid",
         "origin": {
           "Table": {
-            "table": "subject_details",
+            "table": "subjects",
             "name": "id"
           }
         }
       },
       {
         "ordinal": 1,
-        "name": "name!",
+        "name": "name",
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "subject_details",
+            "table": "subjects",
             "name": "name"
           }
         }
       },
       {
         "ordinal": 2,
-        "name": "faculty_id!",
+        "name": "faculty_id",
         "type_info": "Uuid",
         "origin": {
           "Table": {
-            "table": "subject_details",
+            "table": "majors",
             "name": "faculty_id"
           }
         }
       },
       {
         "ordinal": 3,
-        "name": "major_id!",
+        "name": "major_id",
         "type_info": "Uuid",
         "origin": {
           "Table": {
-            "table": "subject_details",
+            "table": "subjects",
             "name": "major_id"
           }
         }
       },
       {
         "ordinal": 4,
-        "name": "grade!",
+        "name": "grade",
         "type_info": "Int8",
         "origin": {
           "Table": {
-            "table": "subject_details",
+            "table": "subjects",
             "name": "grade"
           }
         }
       },
       {
         "ordinal": 5,
-        "name": "term!",
+        "name": "term",
         "type_info": "Int8",
         "origin": {
           "Table": {
-            "table": "subject_details",
+            "table": "subjects",
             "name": "term"
           }
         }
@@ -76,13 +76,13 @@
       ]
     },
     "nullable": [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
     ]
   },
-  "hash": "1327eda7bb982a455b9ceec0e0ffc87f951ceefc4101e207b763ff3254c94cb6"
+  "hash": "a80cef53fa2818f9f27e3cc77d963f8cb8b077cd2011914eb9808678f55c731f"
 }

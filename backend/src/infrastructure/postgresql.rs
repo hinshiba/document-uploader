@@ -177,35 +177,18 @@ impl SubjectRepository for PostgresRepository {
 
     #[tracing::instrument(skip(self), ret, err(Display))]
     async fn delete_subject(&self, subject_id: Id<Subject>) -> anyhow::Result<Subject> {
-        let mut transaction = self.pool.begin().await?;
-
-        // 削除前の値を取得, DELETE ... RETURNINGではfaculty_idを解決できない
         let deleted = sqlx::query!(
             r#"
-            SELECT
-                id AS "id!", name AS "name!", faculty_id AS "faculty_id!",
-                major_id AS "major_id!", grade AS "grade!", term AS "term!"
-            FROM subject_details
-            WHERE id = $1
+            DELETE FROM subjects AS s
+                USING majors AS m
+                WHERE s.major_id = m.id AND s.id = $1
+                RETURNING s.id, s.name, m.faculty_id, s.major_id, s.grade, s.term
         "#,
             subject_id.id(),
         )
-        .fetch_optional(&mut *transaction)
+        .fetch_optional(&self.pool)
         .await?
         .ok_or_else(|| anyhow::anyhow!("subject does not exist"))?;
-
-        // 削除, documentsから参照されている場合は外部キー違反となる
-        let _ = sqlx::query!(
-            r#"
-            DELETE FROM subjects
-                WHERE id = $1
-        "#,
-            subject_id.id(),
-        )
-        .execute(&mut *transaction)
-        .await?;
-
-        transaction.commit().await?;
 
         Ok(Subject::new(
             Id::new(deleted.id),
