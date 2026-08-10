@@ -19,11 +19,16 @@ impl LocalFileSystem {
     ///
     /// # Errors
     ///
-    /// `save_dir`が`fs::create_dir_all`で作成できない場合はエラーとなる
-    pub fn new(save_dir: PathBuf) -> std::io::Result<Self> {
-        if !save_dir.exists() {
-            // すでに存在する場合はエラー扱いなので事前検証
-            std::fs::create_dir_all(&save_dir)?;
+    /// 次のような場合はエラーとなる
+    /// - `save_dir`が`fs::create_dir_all`で作成できない
+    /// - 同名のファイルが存在する
+    pub fn new(save_dir: PathBuf) -> anyhow::Result<Self> {
+        std::fs::create_dir_all(&save_dir)?;
+
+        if !save_dir.is_dir() {
+            return Err(anyhow!(format!(
+                "{save_dir:?} is not dir. And same name file exists."
+            )));
         }
 
         Ok(Self {
