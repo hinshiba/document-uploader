@@ -26,7 +26,9 @@ impl LocalFileSystem {
             std::fs::create_dir_all(&save_dir)?;
         }
 
-        Ok(Self { save_dir })
+        Ok(Self {
+            save_dir: std::fs::canonicalize(save_dir)?,
+        })
     }
 }
 
