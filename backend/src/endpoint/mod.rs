@@ -1,11 +1,15 @@
 use serde::Serialize;
 
+#[macro_use]
+mod util;
+
 pub mod alive;
 pub mod dto;
 pub mod docs;
 pub mod docs_id;
 pub mod faculties;
 pub mod subjects;
+pub mod subjects_id;
 
 pub type EndpointResult<T> = (axum::http::StatusCode, Result<T, EndpointError>);
 
