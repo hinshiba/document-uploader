@@ -85,7 +85,10 @@ mod tests {
             .unwrap();
 
         assert_eq!(document_file.ty(), &DocumentFileType::Pdf);
-        assert_eq!(document_file.path().parent(), Some(save_dir.as_path()));
+        assert_eq!(
+            document_file.path().parent(),
+            Some(std::fs::canonicalize(&save_dir).unwrap().as_path())
+        );
         assert!(document_file.path().is_file());
 
         // getのテスト
