@@ -114,17 +114,20 @@ mod tests {
 
     #[test]
     fn search_document_option() {
-        let a = SearchDocumentOption::minimal(Id::new(uuid::Uuid::new_v4()));
+        let subject_id = Id::new(uuid::Uuid::new_v4());
+        let a = SearchDocumentOption::minimal(subject_id.clone());
+        assert_eq!(a.subject_id, subject_id);
+        assert!(a.year.is_none());
+        assert!(a.teacher.is_none());
+        assert!(a.exam_type.is_none());
+        assert!(a.is_answer.is_none());
 
-        dbg!(a);
-
+        let subject_id = Id::new(uuid::Uuid::new_v4());
         let b = SearchDocumentOption {
             year: Some(Year::new(2026).unwrap()),
-            ..SearchDocumentOption::minimal(Id::new(uuid::Uuid::new_v4()))
+            ..SearchDocumentOption::minimal(subject_id.clone())
         };
-
-        dbg!(&b);
-
+        assert_eq!(b.subject_id, subject_id);
         assert_eq!(b.year.as_ref().map(Year::year), Some(&2026));
     }
 }
