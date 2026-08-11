@@ -16,7 +16,7 @@ use crate::{
     },
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PostgresRepository {
     pool: sqlx::PgPool,
 }
