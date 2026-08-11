@@ -17,6 +17,7 @@ use crate::domain::{
 use crate::usecase::repository::{
     UpdateSubjectContent,
     SearchSubjectOption,
+    SearchDocumentOption,
     DocumentRepository,
     DocumentFileRepository,
     FacultyRepository,
@@ -168,6 +169,34 @@ impl DocumentRepository for ExampleRepository {
         Ok(document)
     }
 
+    #[tracing::instrument(skip(self), err)]
+    async fn search_documents(&self, option: SearchDocumentOption) -> anyhow::Result<Vec<Document>> {
+        let inner = self.documents.lock().unwrap();
+
+        let found_documents = inner.iter()
+            .filter(|&d| {
+                let metadata = d.metadata();
+
+                let SearchDocumentOption {
+                    subject_id: option_subject_id,
+                    year: option_year,
+                    teacher: option_teacher,
+                    exam_type: option_exam_type,
+                    is_answer: option_is_answer,
+                } = &option;
+
+                   option_subject_id == metadata.subject_id()
+                && option_year.is_none_or(|year| &year == metadata.year())
+                && option_teacher.as_ref().is_none_or(|teacher| teacher == metadata.teacher())
+                && option_exam_type.is_none_or(|exam_type| &exam_type == metadata.exam_type())
+                && option_is_answer.is_none_or(|is_answer| &is_answer == metadata.is_answer())
+            })
+            .map(Self::clone_document)
+            .collect();
+
+        Ok(found_documents)
+    }
+
     #[tracing::instrument(skip(self))]
     async fn store_document(&self, document: Document) -> anyhow::Result<()> {
         let mut inner = self.documents.lock().unwrap();
@@ -211,7 +240,7 @@ impl FacultyRepository for ExampleRepository {
     async fn list_faculties(&self) -> anyhow::Result<Vec<Faculty>> {
         let faculties = Self::clone_faculties(&self.faculties);
         Ok(faculties)
-    }    
+    }
 }
 
 impl SubjectRepository for ExampleRepository {
