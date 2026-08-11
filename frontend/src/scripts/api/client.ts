@@ -91,7 +91,7 @@ export async function fetchSubjects(
  * /docs POST に対応
  * @param files アップロードする複数のファイル
  * @param metadata APIの要求するメタデータ
- * @throws
+ * @throws APIへのアップロードに失敗した場合
  */
 export async function postDocuments(
     files: readonly File[],
@@ -109,6 +109,13 @@ export async function postDocuments(
     if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
 }
 
+/**
+ * 科目を登録する
+ * /subjects POST に対応
+ * @param subject 登録する科目情報
+ * @returns 登録された科目情報
+ * @throws 登録に失敗した場合
+ */
 export async function postSubject(subject: SubjectBase): Promise<Subject> {
     const res = await fetchWithTimeout(`${API_BASE}/subjects`, {
         method: "POST",
