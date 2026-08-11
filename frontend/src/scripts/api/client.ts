@@ -12,8 +12,14 @@ import type {
     ExamType,
 } from "./constraints";
 
-// --define経由で注入
-declare const API_BASE: string;
+declare module "bun" {
+    interface Env {
+        /** APIのベースURL．スクリプトから注入され文字列リテラルへ置換される */
+        BUN_PUBLIC_API_BASE: string;
+    }
+}
+
+const API_BASE = process.env.BUN_PUBLIC_API_BASE;
 
 // Cloudflare Accessが自動付与するヘッダのダミー
 // モックは検証しないので何でもよい
