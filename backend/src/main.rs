@@ -47,7 +47,7 @@ async fn main() -> anyhow::Result<()> {
 
     let app = axum::Router::new()
         .nest("/api/v1", api_router(state))
-        .fallback_service(ServeDir::new("/"));
+        .fallback_service(ServeDir::new("public"));
 
     tracing::info!("start listening on http://{}", listener.local_addr()?);
 
