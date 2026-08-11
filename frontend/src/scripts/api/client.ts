@@ -7,6 +7,10 @@ import type {
     Subject,
     SubjectBase,
     Term,
+    SubjectId,
+    Year,
+    Teacher,
+    ExamType,
 } from "./constraints";
 
 // 実バックエンドテスト
@@ -63,15 +67,15 @@ export async function fetchSubjects(
     // faculty必須
     params.set("faculty", facultyId);
 
-    if (majorId) {
+    if (majorId !== undefined) {
         params.set("major", majorId);
     }
 
-    if (grade) {
+    if (grade !== undefined) {
         params.set("grade", String(grade));
     }
 
-    if (term) {
+    if (term !== undefined) {
         params.set("term", String(term));
     }
 
@@ -131,4 +135,102 @@ export async function postSubject(subject: SubjectBase): Promise<Subject> {
     }
 
     return (await res.json()) as Subject;
+}
+
+/** searchDocumentsの型を指定 */
+export interface DocumentSearchResult {
+    id: string;
+    metadata: DocumentMetadata;
+}
+
+/** ドキュメントを検索する
+ * /docs GET に対応
+ * @param subject 検索する科目のID
+ * @param year 検索する年度
+ * @param teacher 検索する担当者
+ * @param examtype 検索する試験種別
+ * @param isanswer 解答付きかどうか
+ * @returns 検索結果のドキュメント一覧
+ * @throws
+ */
+export async function searchDocuments(
+    subject: SubjectId,
+    year?: Year,
+    teacher?: Teacher,
+    examtype?: ExamType,
+    isanswer?: boolean,
+): Promise<DocumentSearchResult[]> {
+    const params = new URLSearchParams();
+
+    params.set("subject", subject);
+
+    if (year !== undefined) {
+        params.set("year", String(year));
+    }
+
+    if (teacher !== undefined) {
+        params.set("teacher", teacher);
+    }
+
+    if (examtype !== undefined) {
+        params.set("examtype", String(examtype));
+    }
+
+    if (isanswer !== undefined) {
+        params.set("isanswer", String(isanswer));
+    }
+    const url = `${API_BASE}/docs?${params.toString()}`;
+
+    const res = await fetchWithTimeout(url, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /docs -> ${res.status}`);
+    }
+
+    return (await res.json()) as DocumentSearchResult[];
+}
+
+/** downloadDocumentの型を指定 */
+export interface DownloadDocument {
+    filename: string;
+    blob: Blob;
+}
+
+/** ドキュメントをダウンロードする
+ * /docs/{id} GET に対応
+ * @param id ダウンロードするドキュメントのID
+ * @returns ファイル名とファイルデータ
+ * @throws
+ */
+export async function downloadDocument(id: string): Promise<DownloadDocument> {
+    const res = await fetchWithTimeout(`${API_BASE}/docs/${id}`, {
+        headers: DEV_HEADERS,
+    });
+
+    if (!res.ok) {
+        throw new Error(`GET /docs/${id} -> ${res.status}`);
+    }
+
+    // レスポンスのファイルデータをBlobとして取得する
+    const blob = await res.blob();
+
+    // レスポンスヘッダーからダウンロード時のファイル名を取得する
+    const disposition = res.headers.get("Content-Disposition");
+
+    // デフォルトのファイル名を設定;
+    let filename = "download";
+
+    if (disposition) {
+        const match = disposition.match(/filename="?(.+?)"?$/);
+        if (match) {
+            filename = String(match[1]);
+        }
+    }
+
+    return {
+        filename,
+        blob,
+    };
 }

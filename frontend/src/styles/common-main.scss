@@ -1,0 +1,19 @@
+.section-content {
+    width: 100%;
+    gap: 0.3rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    > label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+}
+
+main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
