@@ -12,9 +12,8 @@ import type {
     ExamType,
 } from "./constraints";
 
-// 実バックエンドテスト
-// "http://localhost:3000/api/v1"
-const API_BASE = "http://127.0.0.1:4010";
+// --define経由で注入
+declare const API_BASE: string;
 
 // Cloudflare Accessが自動付与するヘッダのダミー
 // モックは検証しないので何でもよい
