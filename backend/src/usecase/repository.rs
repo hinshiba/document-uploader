@@ -30,7 +30,7 @@ impl SearchDocumentOption {
     /// let a = SearchDocumentOption {
     ///     year: Some(Year::new(2026).unwrap()),
     ///     ..SearchDocumentOption::minimal(Id::new(uuid::Uuid::new_v4()))
-    /// }
+    /// };
     ///
     /// assert_eq!(a.year.as_ref().map(Year::year), Some(&2026));
     /// ```
