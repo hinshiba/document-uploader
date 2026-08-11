@@ -7,11 +7,14 @@
 //! 
 //! # Notes
 //! 
+//! `./public/` にあるファイルが配信される
+//!
 //! `./save_dir`にすべてのアップロードされたファイルは格納される
 
 use std::env;
 
 use anyhow::Context;
+use tower_http::services::ServeDir;
 
 use crate::{
     endpoint::api::api_router, 
@@ -43,7 +46,8 @@ async fn main() -> anyhow::Result<()> {
     );
 
     let app = axum::Router::new()
-        .nest("/api/v1", api_router(state));
+        .nest("/api/v1", api_router(state))
+        .fallback_service(ServeDir::new("/"));
 
     tracing::info!("start listening on http://{}", listener.local_addr()?);
 
