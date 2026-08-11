@@ -25,7 +25,8 @@ pub struct SearchDocumentOption {
 }
 
 impl SearchDocumentOption {
-    /// # Example:
+    /// # Example
+    ///
     /// ```
     /// let a = SearchDocumentOption {
     ///     year: Some(Year::new(2026).unwrap()),
