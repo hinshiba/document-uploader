@@ -10,13 +10,13 @@ export type ApiErrorKind = "timeout" | "network" | "client" | "server";
 const API_ERROR_MESSAGE: Record<ApiErrorKind, string> = {
     timeout: "タイムアウトエラー: 時間を置いて再試行してください．",
     network: "ネットワークエラー: ネットワーク接続を確認してください．",
-    client: "クライアントエラー: 入力に問題がないかご確認の後，開発者にお問い合わせください．",
+    client: "クライアントエラー: 開発者にお問い合わせください．",
     server: "サーバーエラー: サーバー管理者にお問い合わせください．",
 };
 
 /** Api呼出しで発生しうるエラー */
 export class ApiError extends Error {
-    override readonly name = "ApiErrorcth";
+    override readonly name = "ApiError";
 
     constructor(
         readonly kind: ApiErrorKind,
