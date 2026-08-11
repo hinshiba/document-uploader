@@ -83,8 +83,8 @@ function buildSubject(): SubjectBase {
     };
 }
 
-/** 送信ボタン(type="submit")によるフォーム送信を処理する */
 form.addEventListener("submit", async (event) => {
+    // 送信ボタン(type="submit")によるフォーム送信を処理する
     // 既定のページ再読み込みを防ぐ
     event.preventDefault();
 
