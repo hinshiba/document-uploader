@@ -33,7 +33,7 @@ const dropArea = required<HTMLDivElement>("#drop-area");
 const fileList = required<HTMLUListElement>("#makelist");
 const dropMessage = required<HTMLParagraphElement>("#message");
 const submitButton = required<HTMLButtonElement>("#uploadbtn");
-const procMessage = required<ProcMessage>("proc-message");
+const procMessage = required<ProcMessage>("#proc-message");
 const majorSelect = required<MajorSelect>("major-select");
 const subjectSelect = required<SubjectSelect>("subject-select");
 

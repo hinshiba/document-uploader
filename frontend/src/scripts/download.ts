@@ -15,7 +15,7 @@ const form = required<HTMLFormElement>("#search-form");
 const majorSelect = required<MajorSelect>("major-select");
 const subjectSelect = required<SubjectSelect>("subject-select");
 const resultList = required<HTMLUListElement>("#download-result");
-const procMessage = required<ProcMessage>("proc-message");
+const procMessage = required<ProcMessage>("#proc-message");
 
 /**
  * 最新の検索リクエストを識別するID
@@ -161,8 +161,6 @@ form.addEventListener("submit", async (event) => {
     procMessage.status = "";
 
     if (!res.ok) {
-        // 通信の詳細はclientが記録済み
-        log.download.error("search failed", { error: res.error });
         procMessage.error = res.error;
         return;
     }
