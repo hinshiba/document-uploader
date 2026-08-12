@@ -33,7 +33,7 @@ const DEV_HEADERS: Record<string, string> = { "Cf-Access-Jwt-Assertion": "dev" }
 const REQUEST_TIMEOUT_MS = 10_000;
 
 /**
- * method，signal，headers以外のオプション
+ * method，signal以外のオプション
  *
  * 規定動作がある関数において指定できないようにするため
  */
