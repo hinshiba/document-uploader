@@ -69,7 +69,6 @@ function apiError(
  * @param path API_BASEからの相対パス
  * @param options method，signal，headers以外のオプション
  * @returns 成功時はResponse，失敗時はApiError
- * @throws fetchでTimeoutErrorかTypeError以外が生じた場合
  */
 async function requestRaw(
     method: string,
@@ -101,7 +100,7 @@ async function requestRaw(
             }
 
             // 想定外エラー
-            throw e;
+            return apiError("unexpected", method, path, undefined, e);
         });
 }
 
@@ -109,7 +108,6 @@ async function requestRaw(
  * JSONをfetchする
  * @typeParam T 期待するレスポンスの型
  * @returns 成功時はT，失敗時はApiError
- * @throws fetchでTimeoutErrorかTypeError以外が生じた場合
  */
 async function requestJson<T>(
     method: string,
