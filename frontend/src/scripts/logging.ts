@@ -37,6 +37,4 @@ export const log = {
     api: getLogger(["app", "api"]),
     upload: getLogger(["app", "ui", "upload"]),
     download: getLogger(["app", "ui", "download"]),
-    majorSelect: getLogger(["app", "ui", "major-select"]),
-    subjectSelect: getLogger(["app", "ui", "subject-select"]),
 };

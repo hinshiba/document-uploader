@@ -51,7 +51,7 @@ export class ApiError extends Error {
 }
 
 /** エラーをユーザーが見える文字列に変換する */
-export function toUserMessage(e: unknown): string {
+export function toUserMessage(e: AppError): string {
     if (e instanceof ValidationError) {
         return e.message;
     }
