@@ -29,7 +29,7 @@ const API_BASE: string = process.env.BUN_PUBLIC_API_BASE;
 // モックは検証しないので何でもよい
 const DEV_HEADERS: Record<string, string> = { "Cf-Access-Jwt-Assertion": "dev" };
 
-/** リクエストのタイムアウト時間．遅延や停止でUIが固まるのを防ぐ */
+/** リクエストのタイムアウト時間 */
 const REQUEST_TIMEOUT_MS = 10_000;
 
 /**
