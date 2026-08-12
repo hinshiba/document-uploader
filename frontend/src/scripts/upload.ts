@@ -22,17 +22,6 @@ import "./components/subject-select.ts";
 import { SubjectSelect } from "./components/subject-select";
 import { MajorSelect } from "./components/major-select";
 import type { SelectionChangeDetail } from "./components/major-select";
-/**
- * 要素を型付きで取得するヘルパ
- * @param selector セレクタ
- * @returns 見つかった要素
- * @throws 要素が存在しない場合
- */
-function required<T extends Element>(selector: string): T {
-    const el = document.querySelector<T>(selector);
-    if (!el) throw new Error(`Element not found. selector: ${selector}`);
-    return el;
-}
 
 /**
  * 検証済みの値を取り出す

@@ -7,12 +7,6 @@ import type { SelectionChangeDetail } from "./components/major-select";
 import type { SubjectSelect } from "./components/subject-select";
 import type { MajorSelect } from "./components/major-select";
 
-function required<T extends Element>(selector: string): T {
-    const el = document.querySelector<T>(selector);
-    if (!el) throw new Error(`Element not found. selector: ${selector}`);
-    return el;
-}
-
 const form = required<HTMLFormElement>("#search-form");
 const majorSelect = required<MajorSelect>("major-select");
 const subjectSelect = required<SubjectSelect>("subject-select");
