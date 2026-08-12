@@ -28,19 +28,37 @@ const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
 /** リクエストのタイムアウト時間．遅延や停止でUIが固まるのを防ぐ */
 const REQUEST_TIMEOUT_MS = 10_000;
 
-/**
- * タイムアウト付きでfetchする
- * AbortControllerで中断し，全リクエストで挙動を揃える
- * @throws タイムアウト時はAbortError，その他fetchのエラー
- */
-async function fetchWithTimeout(input: string, init: RequestInit = {}): Promise<Response> {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-    try {
-        return await fetch(input, { ...init, signal: controller.signal });
-    } finally {
-        clearTimeout(timer);
+/** タイムアウト付きfetchを行い，レスポンスかエラーを返す */
+async function apiFetchBase(input: string, init?: RequestInit): Promise<Response | ApiError> {
+    const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+
+    return fetch(`${API_BASE}${input}`, { ...init, signal: timeoutSignal })
+        .then((res) => {
+            if (!res.ok) {
+                if (400 <= res.status && res.status < 500) {
+                    return new ApiError("client", init?.method ?? "GET", input, res.status);
+                }
+                return new ApiError("server", init?.method ?? "GET", input, res.status);
+            }
+            return res;
+        })
+        .catch((e) => {
+            if (e.name === "TimeoutError") {
+                return new ApiError("timeout", init?.method ?? "GET", input, undefined);
+            }
+            if (e.name === "TypeError") {
+                return new ApiError("network", init?.method ?? "GET", input, undefined);
+            }
+            throw e;
+        });
+}
+
+async function apiFetchJson<T>(input: string, init?: RequestInit): Promise<T | ApiError> {
+    const res = await apiFetchBase(input, init);
+    if (res instanceof ApiError) {
+        return res;
     }
+    return (await res.json()) as T;
 }
 
 /**
