@@ -1,3 +1,5 @@
+import { ApiError, type ApiErrorKind } from "../error";
+import { log } from "../logging";
 import type {
     DocumentMetadata,
     Faculty,
@@ -28,27 +30,70 @@ const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
 /** リクエストのタイムアウト時間．遅延や停止でUIが固まるのを防ぐ */
 const REQUEST_TIMEOUT_MS = 10_000;
 
-/** タイムアウト付きfetchを行い，レスポンスかエラーを返す */
-async function apiFetchBase(input: string, init?: RequestInit): Promise<Response | ApiError> {
-    const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+/**
+ * method，signal，headers以外のオプション
+ *
+ * 規定動作がある関数において指定できないようにするため
+ */
+type RequestOptions = Omit<RequestInit, "method" | "signal" | "headers"> & {
+    headers?: Record<string, string>;
+};
 
-    return fetch(`${API_BASE}${input}`, { ...init, signal: timeoutSignal })
+/**
+ * ApiErrorを生成し，エラーログを出力する
+ */
+function apiError(
+    kind: ApiErrorKind,
+    method: string,
+    path: string,
+    status?: number,
+    cause?: unknown,
+): ApiError {
+    log.api.error("request failed", { method, path, status, kind });
+    return new ApiError(kind, method, path, status, { cause });
+}
+
+/**
+ * タイムアウトと既定ヘッダを付けてfetchする
+ *
+ * 通信の失敗と 4xx/5xx を ApiError として返す
+ *
+ * @param method HTTPメソッド
+ * @param path API_BASEからの相対パス
+ * @param options method，signal，headers以外のオプション
+ * @returns 成功時はResponse，失敗時はApiError
+ * @throws fetchでTimeoutErrorかTypeError以外が生じた場合
+ */
+async function requestRaw(
+    method: string,
+    path: string,
+    options?: RequestOptions,
+): Promise<Response | ApiError> {
+    return await fetch(`${API_BASE}${path}`, {
+        ...options,
+        method,
+        headers: { ...DEV_HEADERS, ...options?.headers },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
         .then((res) => {
             if (!res.ok) {
-                if (400 <= res.status && res.status < 500) {
-                    return new ApiError("client", init?.method ?? "GET", input, res.status);
-                }
-                return new ApiError("server", init?.method ?? "GET", input, res.status);
+                const kind: ApiErrorKind = res.status < 500 ? "client" : "server";
+                return apiError(kind, method, path, res.status);
             }
+            log.api.debug("request succeeded", { method, path, status: res.status });
             return res;
         })
         .catch((e) => {
-            if (e.name === "TimeoutError") {
-                return new ApiError("timeout", init?.method ?? "GET", input, undefined);
+            if (e instanceof Error && e.name === "TimeoutError") {
+                return apiError("timeout", method, path, undefined, e);
             }
-            if (e.name === "TypeError") {
-                return new ApiError("network", init?.method ?? "GET", input, undefined);
+
+            // fetchが通信に失敗した場合はなぜかTypeError
+            if (e instanceof TypeError) {
+                return apiError("network", method, path, undefined, e);
             }
+
+            // 想定外エラー
             throw e;
         });
 }
