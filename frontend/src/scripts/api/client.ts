@@ -25,7 +25,7 @@ const API_BASE = process.env.BUN_PUBLIC_API_BASE;
 
 // Cloudflare Accessが自動付与するヘッダのダミー
 // モックは検証しないので何でもよい
-const DEV_HEADERS: HeadersInit = { "Cf-Access-Jwt-Assertion": "dev" };
+const DEV_HEADERS: Record<string, string> = { "Cf-Access-Jwt-Assertion": "dev" };
 
 /** リクエストのタイムアウト時間．遅延や停止でUIが固まるのを防ぐ */
 const REQUEST_TIMEOUT_MS = 10_000;
