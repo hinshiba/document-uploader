@@ -98,12 +98,27 @@ async function requestRaw(
         });
 }
 
-async function apiFetchJson<T>(input: string, init?: RequestInit): Promise<T | ApiError> {
-    const res = await apiFetchBase(input, init);
+/**
+ * JSONをfetchする
+ * @typeParam T 期待するレスポンスの型
+ * @returns 成功時はT，失敗時はApiError
+ * @throws fetchでTimeoutErrorかTypeError以外が生じた場合
+ */
+async function requestJson<T>(
+    method: string,
+    path: string,
+    options?: RequestOptions,
+): Promise<T | ApiError> {
+    const res = await requestRaw(method, path, options);
     if (res instanceof ApiError) {
         return res;
     }
-    return (await res.json()) as T;
+
+    return await res
+        .json()
+        .then((json) => json as T)
+        // ApiErrorなしでJsonにできないのはおそらくサーバーに問題あり
+        .catch((e) => apiError("server", method, path, res.status, e));
 }
 
 /**
