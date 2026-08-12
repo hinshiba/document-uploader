@@ -21,13 +21,11 @@ import type {
 declare module "bun" {
     interface Env {
         /** APIのベースURL */
-        BUN_PUBLIC_API_BASE?: string;
+        BUN_PUBLIC_API_BASE: string;
     }
 }
 
-if (typeof process.env.BUN_PUBLIC_API_BASE !== "string")
-    throw Error("BUN_PUBLIC_API_BASE is not set.");
-const API_BASE: string = process.env.BUN_PUBLIC_API_BASE;
+const API_BASE = process.env.BUN_PUBLIC_API_BASE;
 
 // Cloudflare Accessが自動付与するヘッダのダミー
 // モックは検証しないので何でもよい
