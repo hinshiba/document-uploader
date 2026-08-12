@@ -1,3 +1,7 @@
+/**
+ * バックエンドへのリクエストを定義する
+ */
+
 import { ApiError, type ApiErrorKind } from "../error";
 import { log } from "../logging";
 import type {
