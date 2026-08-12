@@ -67,10 +67,8 @@ async function apiFetchJson<T>(input: string, init?: RequestInit): Promise<T | A
  * @returns 学部専攻一覧
  * @throws
  */
-export async function fetchFaculties(): Promise<Faculty[]> {
-    const res = await fetchWithTimeout(`${API_BASE}/faculties`, { headers: DEV_HEADERS });
-    if (!res.ok) throw new Error(`GET /faculties -> ${res.status}`);
-    return (await res.json()) as Faculty[];
+export async function fetchFaculties(): Promise<Faculty[] | ApiError> {
+    return await apiFetchJson(`/faculties`, { headers: DEV_HEADERS });
 }
 
 /**
