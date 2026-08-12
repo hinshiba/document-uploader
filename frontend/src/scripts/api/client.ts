@@ -2,7 +2,7 @@
  * バックエンドへのリクエストを定義する
  */
 
-import { ApiError, type ApiErrorKind } from "../error";
+import { ApiError, err, ok, type ApiErrorKind, type Result } from "../error";
 import { log } from "../logging";
 import type {
     DocumentMetadata,
@@ -43,8 +43,11 @@ type RequestOptions = Omit<RequestInit, "method" | "signal" | "headers"> & {
     headers?: Record<string, string>;
 };
 
+/** このモジュールが返すResultの別名 */
+export type ApiResult<T> = Result<T, ApiError>;
+
 /**
- * ApiErrorを生成し，エラーログを出力する
+ * エラーログを出力し，ApiErrorを持つerrを生成する
  */
 function apiError(
     kind: ApiErrorKind,
@@ -52,9 +55,9 @@ function apiError(
     path: string,
     status?: number,
     cause?: unknown,
-): ApiError {
+): Result<never, ApiError> {
     log.api.error("request failed", { method, path, status, kind });
-    return new ApiError(kind, method, path, status, { cause });
+    return err(new ApiError(kind, method, path, status, { cause }));
 }
 
 /**
@@ -72,7 +75,7 @@ async function requestRaw(
     method: string,
     path: string,
     options?: RequestOptions,
-): Promise<Response | ApiError> {
+): Promise<ApiResult<Response>> {
     return await fetch(`${API_BASE}${path}`, {
         ...options,
         method,
@@ -85,7 +88,7 @@ async function requestRaw(
                 return apiError(kind, method, path, res.status);
             }
             log.api.debug("request succeeded", { method, path, status: res.status });
-            return res;
+            return ok(res);
         })
         .catch((e) => {
             if (e instanceof Error && e.name === "TimeoutError") {
@@ -112,17 +115,17 @@ async function requestJson<T>(
     method: string,
     path: string,
     options?: RequestOptions,
-): Promise<T | ApiError> {
+): Promise<ApiResult<T>> {
     const res = await requestRaw(method, path, options);
-    if (res instanceof ApiError) {
+    if (!res.ok) {
         return res;
     }
 
-    return await res
+    return await res.value
         .json()
-        .then((json) => json as T)
+        .then((json) => ok(json as T))
         // ApiErrorなしでJsonにできないのはおそらくサーバーに問題あり
-        .catch((e) => apiError("server", method, path, res.status, e));
+        .catch((e) => apiError("server", method, path, res.value.status, e));
 }
 
 /**
@@ -130,7 +133,7 @@ async function requestJson<T>(
  * /faculties GET に対応
  * @returns 学部専攻一覧．失敗時はApiError
  */
-export async function fetchFaculties(): Promise<Faculty[] | ApiError> {
+export async function fetchFaculties(): Promise<ApiResult<Faculty[]>> {
     return requestJson<Faculty[]>("GET", "/faculties");
 }
 
@@ -144,7 +147,7 @@ export async function fetchSubjects(
     majorId?: MajorId,
     grade?: Grade,
     term?: Term,
-): Promise<Subject[] | ApiError> {
+): Promise<ApiResult<Subject[]>> {
     const params = new URLSearchParams();
     // faculty必須
     params.set("faculty", facultyId);
@@ -174,15 +177,15 @@ export async function fetchSubjects(
 export async function postDocuments(
     files: readonly File[],
     metadata: DocumentMetadata,
-): Promise<undefined | ApiError> {
+): Promise<ApiResult<undefined>> {
     const body = new FormData();
     for (const f of files) body.append("files", f);
     body.append("metadata", JSON.stringify(metadata));
 
     const res = await requestRaw("POST", "/docs", { body });
-    if (res instanceof ApiError) return res;
+    if (!res.ok) return res;
 
-    return undefined;
+    return ok(undefined);
 }
 
 /** searchDocumentsの型を指定 */
@@ -206,7 +209,7 @@ export async function searchDocuments(
     teacher?: Teacher,
     examtype?: ExamType,
     isanswer?: boolean,
-): Promise<DocumentSearchResult[] | ApiError> {
+): Promise<ApiResult<DocumentSearchResult[]>> {
     const params = new URLSearchParams();
 
     params.set("subject", subject);
@@ -241,15 +244,15 @@ export interface DownloadDocument {
  * @param id ダウンロードするドキュメントのID
  * @returns ファイル名とファイルデータ．失敗時はApiError
  */
-export async function downloadDocument(id: string): Promise<DownloadDocument | ApiError> {
+export async function downloadDocument(id: string): Promise<ApiResult<DownloadDocument>> {
     const res = await requestRaw("GET", `/docs/${encodeURIComponent(id)}`);
-    if (res instanceof ApiError) return res;
+    if (!res.ok) return res;
 
     // レスポンスのファイルデータをBlobとして取得する
-    const blob = await res.blob();
+    const blob = await res.value.blob();
 
     // レスポンスヘッダーからダウンロード時のファイル名を取得する
-    const disposition = res.headers.get("Content-Disposition");
+    const disposition = res.value.headers.get("Content-Disposition");
 
     // デフォルトのファイル名を設定;
     let filename = "download";
@@ -261,8 +264,8 @@ export async function downloadDocument(id: string): Promise<DownloadDocument | A
         }
     }
 
-    return {
+    return ok({
         filename,
         blob,
-    };
+    });
 }
