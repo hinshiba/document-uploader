@@ -124,25 +124,23 @@ async function requestJson<T>(
 /**
  * 学部専攻一覧を取得する
  * /faculties GET に対応
- * @returns 学部専攻一覧
- * @throws
+ * @returns 学部専攻一覧．失敗時はApiError
  */
 export async function fetchFaculties(): Promise<Faculty[] | ApiError> {
-    return await apiFetchJson(`/faculties`, { headers: DEV_HEADERS });
+    return requestJson<Faculty[]>("GET", "/faculties");
 }
 
 /**
  * 科目一覧を取得する
  * /subjects GET に対応
- * @returns 条件に一致する科目一覧
- * @throws
+ * @returns 条件に一致する科目一覧．失敗時はApiError
  */
 export async function fetchSubjects(
     facultyId: FacultyId,
     majorId?: MajorId,
     grade?: Grade,
     term?: Term,
-): Promise<Subject[]> {
+): Promise<Subject[] | ApiError> {
     const params = new URLSearchParams();
     // faculty必須
     params.set("faculty", facultyId);
@@ -159,15 +157,7 @@ export async function fetchSubjects(
         params.set("term", String(term));
     }
 
-    const res = await fetchWithTimeout(`${API_BASE}/subjects?${params.toString()}`, {
-        headers: DEV_HEADERS,
-    });
-
-    if (!res.ok) {
-        throw new Error(`GET /subjects -> ${res.status}`);
-    }
-
-    return (await res.json()) as Subject[];
+    return requestJson<Subject[]>("GET", `/subjects?${params.toString()}`);
 }
 
 /**
@@ -175,22 +165,20 @@ export async function fetchSubjects(
  * /docs POST に対応
  * @param files アップロードする複数のファイル
  * @param metadata APIの要求するメタデータ
- * @throws
+ * @returns 成功時はundefined，失敗時はApiError
  */
 export async function postDocuments(
     files: readonly File[],
     metadata: DocumentMetadata,
-): Promise<void> {
+): Promise<undefined | ApiError> {
     const body = new FormData();
     for (const f of files) body.append("files", f);
     body.append("metadata", JSON.stringify(metadata));
 
-    const res = await fetchWithTimeout(`${API_BASE}/docs`, {
-        method: "POST",
-        headers: DEV_HEADERS,
-        body,
-    });
-    if (!res.ok) throw new Error(`POST /docs -> ${res.status}`);
+    const res = await requestRaw("POST", "/docs", { body });
+    if (res instanceof ApiError) return res;
+
+    return undefined;
 }
 
 /** searchDocumentsの型を指定 */
@@ -206,8 +194,7 @@ export interface DocumentSearchResult {
  * @param teacher 検索する担当者
  * @param examtype 検索する試験種別
  * @param isanswer 解答付きかどうか
- * @returns 検索結果のドキュメント一覧
- * @throws
+ * @returns 検索結果のドキュメント一覧．失敗時はApiError
  */
 export async function searchDocuments(
     subject: SubjectId,
@@ -215,7 +202,7 @@ export async function searchDocuments(
     teacher?: Teacher,
     examtype?: ExamType,
     isanswer?: boolean,
-): Promise<DocumentSearchResult[]> {
+): Promise<DocumentSearchResult[] | ApiError> {
     const params = new URLSearchParams();
 
     params.set("subject", subject);
@@ -235,17 +222,8 @@ export async function searchDocuments(
     if (isanswer !== undefined) {
         params.set("isanswer", String(isanswer));
     }
-    const url = `${API_BASE}/docs?${params.toString()}`;
 
-    const res = await fetchWithTimeout(url, {
-        headers: DEV_HEADERS,
-    });
-
-    if (!res.ok) {
-        throw new Error(`GET /docs -> ${res.status}`);
-    }
-
-    return (await res.json()) as DocumentSearchResult[];
+    return requestJson<DocumentSearchResult[]>("GET", `/docs?${params.toString()}`);
 }
 
 /** downloadDocumentの型を指定 */
@@ -257,17 +235,11 @@ export interface DownloadDocument {
 /** ドキュメントをダウンロードする
  * /docs/{id} GET に対応
  * @param id ダウンロードするドキュメントのID
- * @returns ファイル名とファイルデータ
- * @throws
+ * @returns ファイル名とファイルデータ．失敗時はApiError
  */
-export async function downloadDocument(id: string): Promise<DownloadDocument> {
-    const res = await fetchWithTimeout(`${API_BASE}/docs/${id}`, {
-        headers: DEV_HEADERS,
-    });
-
-    if (!res.ok) {
-        throw new Error(`GET /docs/${id} -> ${res.status}`);
-    }
+export async function downloadDocument(id: string): Promise<DownloadDocument | ApiError> {
+    const res = await requestRaw("GET", `/docs/${encodeURIComponent(id)}`);
+    if (res instanceof ApiError) return res;
 
     // レスポンスのファイルデータをBlobとして取得する
     const blob = await res.blob();
