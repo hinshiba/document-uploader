@@ -1,6 +1,8 @@
+import "./proc-message.ts";
+
 import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { fetchSubjects } from "../api/client";
+import { fetchSubjects, type ApiResult } from "../api/client";
 import {
     GRADE_MAX,
     TERM_MAX,
@@ -14,38 +16,39 @@ import {
     type SubjectId,
     type Term,
 } from "../api/constraints";
+import { ok } from "../error";
 
-enum Status {
-    Loading,
-    Ready,
-    Error,
+export interface SubjectSelectChangeDetail {
+    subjectId: SubjectId | undefined;
+    grade: Grade | undefined;
+    term: Term | undefined;
 }
 
+/* Eventに型を設ける */
+declare global {
+    interface HTMLElementEventMap {
+        "subject-select-change": CustomEvent<SubjectSelectChangeDetail>;
+    }
+}
+
+/**
+ * 学年と学期，教科の連動した選択のコンポーネント
+ *
+ * 絞り込みに使う学部と専攻は外部から与えられる
+ */
 @customElement("subject-select")
 export class SubjectSelect extends LitElement {
     // formのネイティブ要素としてふるまうために必要
     static formAssociated = true;
-    #internals: ElementInternals;
+    #internals: ElementInternals = this.attachInternals();
 
     /** 通信の競合状態を防ぐための最新のクエリ番号 */
     #loadId = 0;
 
-    constructor() {
-        super();
-        this.#internals = this.attachInternals();
-    }
-
-    protected override createRenderRoot() {
-        return this; // lightDom化
-    }
-
-    /** コンポーネント状態 */
+    /** 取得した教科またはエラー．読み込み中は`undefined`
+     * 学部が未選択のときはAPIを呼ばないため空配列とする */
     @state()
-    private status: Status = Status.Ready;
-
-    /** 取得した教科，未収得時は空配列 */
-    @state()
-    private subjects: Subject[] = [];
+    private response: ApiResult<Subject[]> | undefined = ok([]);
 
     /** 選択した教科Id．未選択は`undefined` */
     @state()
@@ -69,76 +72,61 @@ export class SubjectSelect extends LitElement {
     @property({ attribute: false })
     majorId: MajorId | undefined = undefined;
 
-    /** 更新時の処理 */
+    // lightDom化
+    protected override createRenderRoot() {
+        return this;
+    }
+
+    // 絞り込み条件が変わったら教科を取り直し，UIが更新されたらformが取得できる値を更新
     protected override updated(changedProperties: PropertyValues) {
         super.updated(changedProperties);
+
         const filterKeys = ["facultyId", "majorId", "selectedGrade", "selectedTerm"];
         if (filterKeys.some((key) => changedProperties.has(key))) {
+            // 絞り込みの結果消える可能性があるため教科の選択を取り消す
             this.selectedSubjectId = undefined;
-            void this.loadSubject();
-            this.updateFormState();
+            void this.loadSubjects();
+        }
+
+        this.syncFormValue();
+
+        // 上記の取り消しを反映してから通知するためここで発火する
+        const selectionKeys = ["selectedSubjectId", "selectedGrade", "selectedTerm"];
+        if (selectionKeys.some((key) => changedProperties.has(key))) {
+            this.emitChange();
         }
     }
 
-    /** APIから選択された学部IDに対応する教科一覧を取得する */
-    private async loadSubject() {
+    /** APIから選択された学部IDなどに対応する教科一覧を取得する */
+    private async loadSubjects() {
         // 通信するごと１ずつ増やす
         const id = ++this.#loadId;
 
         // 学部が選択されていない場合はAPIを呼ばない
         if (this.facultyId === undefined) {
-            this.subjects = [];
-            this.status = Status.Ready;
+            this.response = ok([]);
             return;
         }
 
-        this.status = Status.Loading;
+        // 読み込み中を表す
+        this.response = undefined;
 
-        try {
-            const subjects = await fetchSubjects(
-                this.facultyId,
-                this.majorId,
-                this.selectedGrade,
-                this.selectedTerm,
-            );
+        const response = await fetchSubjects(
+            this.facultyId,
+            this.majorId,
+            this.selectedGrade,
+            this.selectedTerm,
+        );
 
-            // 通信時のloadIdが一致した場合のみsubjectsに代入される
-            if (id !== this.#loadId) return; // stale response
-            this.subjects = subjects;
-
-            this.status = Status.Ready;
-        } catch (e) {
-            if (id !== this.#loadId) return;
-            console.error("教科一覧の取得に失敗", e);
-            this.status = Status.Error;
-        }
+        // 通信時のloadIdが一致した場合のみ反映される
+        if (id !== this.#loadId) return; // stale response
+        this.response = response;
     }
 
-    /** formの状態を更新する */
-    private updateFormState() {
-        const data = new FormData();
-        data.set("subject", this.selectedSubjectId ?? "");
-        data.set("grade", this.selectedGrade !== undefined ? String(this.selectedGrade) : "");
-        data.set("term", this.selectedTerm !== undefined ? String(this.selectedTerm) : "");
-
-        this.#internals.setFormValue(data);
-        if (
-            this.facultyId === undefined ||
-            this.selectedSubjectId === undefined ||
-            this.selectedGrade === undefined ||
-            this.selectedTerm === undefined
-        ) {
-            this.#internals.setValidity(
-                { valueMissing: true },
-                "学部、教科、学年、学期を選択してください",
-            );
-        } else {
-            this.#internals.setValidity({});
-        }
-    }
-
-    /** 画面表示設定HTMLそれぞれ教科，学年，学期 */
     override render() {
+        const subjects = this.response?.ok ? this.response.value : [];
+        const error = this.response?.ok === false ? this.response.error : undefined;
+
         // 添字+1を`option`の値とするため，要素数を上限値と一致させる
         const grades = [
             "1回生",
@@ -155,57 +143,89 @@ export class SubjectSelect extends LitElement {
             length: typeof TERM_MAX;
         };
 
-        const subject_options = this.subjects.map(
-            (s) => html`<option value=${s.id}>${s.name}</option>`,
-        );
-
+        const subject_options = subjects.map((s) => html`<option value=${s.id}>${s.name}</option>`);
         const grade_options = grades.map((g, n) => html`<option value=${n + 1}>${g}</option>`);
-
         const term_options = terms.map((t, n) => html`<option value=${n + 1}>${t}</option>`);
 
-        // HTMLに教科選択，学年選択，学期選択のoptionを生成する。学部が選択されていない場合は空の配列となる。
-        // @changeごとに変更される
-        return html`<div class="section-content">
-            <label>
-                学年
-                <select .value=${String(this.selectedGrade ?? "")} @change=${this.onGradeChange}>
-                    <option value="">--学年--</option>
-                    ${grade_options}
-                </select>
-            </label>
-            <label>
-                学期
-                <select .value=${String(this.selectedTerm ?? "")} @change=${this.onTermChange}>
-                    <option value="">--学期--</option>
-                    ${term_options}
-                </select>
-            </label>
-            <label>
-                教科
-                <select .value=${this.selectedSubjectId ?? ""} @change=${this.onSubjectChange}>
-                    <option value="">教科を選択してください</option>
-                    ${subject_options}
-                </select>
-                ${this.status === Status.Loading ? html`読み込み中...` : ""}
-                ${this.status === Status.Error ? html`教科一覧の取得に失敗しました` : ""}
-            </label>
-        </div>`;
+        return html` <proc-message
+                .status=${this.response === undefined ? "読み込み中" : ""}
+                .error=${error}
+            ></proc-message>
+            <div class="section-content">
+                <label>
+                    学年
+                    <select
+                        .value=${String(this.selectedGrade ?? "")}
+                        @change=${this.onGradeChange}
+                    >
+                        <option value="">--学年--</option>
+                        ${grade_options}
+                    </select>
+                </label>
+                <label>
+                    学期
+                    <select .value=${String(this.selectedTerm ?? "")} @change=${this.onTermChange}>
+                        <option value="">--学期--</option>
+                        ${term_options}
+                    </select>
+                </label>
+                <label>
+                    教科
+                    <select .value=${this.selectedSubjectId ?? ""} @change=${this.onSubjectChange}>
+                        <option value="">教科を選択してください</option>
+                        ${subject_options}
+                    </select>
+                </label>
+            </div>`;
     }
 
-    /** 教科変更時に呼び出される updateFormState でformDataに保存する*/
+    /** formが使える情報を設定する */
+    private syncFormValue() {
+        const data = new FormData();
+        data.set("subject", this.selectedSubjectId ?? "");
+        data.set("grade", this.selectedGrade !== undefined ? String(this.selectedGrade) : "");
+        data.set("term", this.selectedTerm !== undefined ? String(this.selectedTerm) : "");
+        this.#internals.setFormValue(data);
+
+        // 未選択があれば無効とする
+        if (
+            this.facultyId === undefined ||
+            this.selectedSubjectId === undefined ||
+            this.selectedGrade === undefined ||
+            this.selectedTerm === undefined
+        ) {
+            this.#internals.setValidity(
+                { valueMissing: true },
+                "学部、教科、学年、学期を選択してください",
+            );
+        } else {
+            this.#internals.setValidity({});
+        }
+    }
+
     private onSubjectChange(e: Event) {
         // 未選択の`option`は空文字なので検証で弾かれる
         this.selectedSubjectId = toSubjectId((e.target as HTMLSelectElement).value);
-        this.updateFormState();
     }
 
-    /** 学年変更時に呼び出される updateFormState でformDataに保存する*/
     private onGradeChange(e: Event) {
         this.selectedGrade = toGrade((e.target as HTMLSelectElement).value);
     }
 
-    /** 学期変更時に呼び出される updateFormState でformDataに保存する*/
     private onTermChange(e: Event) {
         this.selectedTerm = toTerm((e.target as HTMLSelectElement).value);
+    }
+
+    private emitChange() {
+        this.dispatchEvent(
+            new CustomEvent("subject-select-change", {
+                detail: {
+                    subjectId: this.selectedSubjectId,
+                    grade: this.selectedGrade,
+                    term: this.selectedTerm,
+                },
+                bubbles: true,
+            }),
+        );
     }
 }
