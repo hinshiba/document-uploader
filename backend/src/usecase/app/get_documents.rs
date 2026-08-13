@@ -37,7 +37,7 @@ impl<I: DocumentRepository> GetDocumentsUseCase<I> {
     #[tracing::instrument(skip(self), ret(level="debug"), err)]
     pub async fn execute(&self, option: GetDocumentsOption) -> anyhow::Result<Vec<Document>> {
         // `option.year`の検証に失敗したら空配列を返す
-        let Ok(option_year) = option.year.map(|y| Year::new(y)).transpose()
+        let Ok(option_year) = option.year.map(Year::new).transpose()
         else {
             return Ok(vec![]);
         };
