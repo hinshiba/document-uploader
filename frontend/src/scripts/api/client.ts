@@ -12,9 +12,14 @@ import type {
     ExamType,
 } from "./constraints";
 
-// 実バックエンドテスト
-// "http://localhost:3000/api/v1"
-const API_BASE = "http://127.0.0.1:4010";
+declare module "bun" {
+    interface Env {
+        /** APIのベースURL．スクリプトから注入され文字列リテラルへ置換される */
+        BUN_PUBLIC_API_BASE: string;
+    }
+}
+
+const API_BASE = process.env.BUN_PUBLIC_API_BASE;
 
 // Cloudflare Accessが自動付与するヘッダのダミー
 // モックは検証しないので何でもよい
