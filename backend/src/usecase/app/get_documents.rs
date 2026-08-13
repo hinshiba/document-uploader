@@ -4,7 +4,6 @@ use crate::{
         Year,
         document::{
             Document,
-            DocumentMetadata,
             ExamType,
         },
     },
@@ -54,5 +53,47 @@ impl<I: DocumentRepository> GetDocumentsUseCase<I> {
         let result_vec = self.repository.search_documents(repo_option).await?;
 
         Ok(result_vec)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::document::DocumentMetadata;
+
+    #[test]
+    fn transpose_option_result() {
+        let a = Some(2026_i64);
+        let b = a.map(|y| Year::<DocumentMetadata>::new(y));
+        assert!( matches!(
+            dbg!(&b),
+            Some(Ok(b_)) if b_.year() == &2026
+        ) );
+        assert!( matches!(
+            dbg!(b.transpose()),
+            Ok(Some(b_)) if b_.year() == &2026
+        ) );
+
+        let c = Some(1);
+        let d = c.map(|y| Year::<DocumentMetadata>::new(y));
+        assert!( matches!(
+            dbg!(&d),
+            Some(Err(_))
+        ) );
+        assert!( matches!(
+            dbg!(d.transpose()),
+            Err(_)
+        ) );
+
+        let e = None;
+        let f = e.map(|y| Year::<DocumentMetadata>::new(y));
+        assert!( matches!(
+            dbg!(&f),
+            None
+        ) );
+        assert!( matches!(
+            dbg!(f.transpose()),
+            Ok(None),
+        ) );
     }
 }
