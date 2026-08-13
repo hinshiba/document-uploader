@@ -1,7 +1,7 @@
 import "./proc-message.ts";
 
 import { html, LitElement, type PropertyValues } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, query, state } from "lit/decorators.js";
 import { fetchFaculties, type ApiResult } from "../api/client";
 import {
     toFacultyId,
@@ -44,6 +44,14 @@ export class MajorSelect extends LitElement {
     @state()
     private selectedMajorId: MajorId | undefined = undefined;
 
+    /** 検証メッセージの表示先とする`select`．描画前は`null` */
+    @query('[data-field="faculty"]')
+    private facultySelect!: HTMLSelectElement | null;
+
+    /** facultySelectと同様に検証メッセージの表示先とする`select` */
+    @query('[data-field="major"]')
+    private majorSelect!: HTMLSelectElement | null;
+
     // lightDom化
     protected override createRenderRoot() {
         return this;
@@ -83,14 +91,22 @@ export class MajorSelect extends LitElement {
             <div class="section-content">
                 <label>
                     学部
-                    <select .value=${this.selectedFacultyId ?? ""} @change=${this.onFacultyChange}>
+                    <select
+                        data-field="faculty"
+                        .value=${this.selectedFacultyId ?? ""}
+                        @change=${this.onFacultyChange}
+                    >
                         <option value="">--学部--</option>
                         ${faculty_options}
                     </select>
                 </label>
                 <label>
                     系/コース/専攻
-                    <select .value=${this.selectedMajorId ?? ""} @change=${this.onMajorChange}>
+                    <select
+                        data-field="major"
+                        .value=${this.selectedMajorId ?? ""}
+                        @change=${this.onMajorChange}
+                    >
                         <option value="">--系/コース/専攻--</option>
                         ${major_options}
                     </select>
@@ -106,10 +122,18 @@ export class MajorSelect extends LitElement {
         this.#internals.setFormValue(data);
 
         // 未選択があれば無効とする
-        if (this.selectedFacultyId === undefined || this.selectedMajorId === undefined) {
+        // カスタム要素自身はフォーカスできないため，第3引数で未選択の`select`をメッセージの表示先とする
+        if (this.selectedFacultyId === undefined) {
             this.#internals.setValidity(
                 { valueMissing: true },
-                "学部と系/コース/専攻を選択してください",
+                "学部を選択してください",
+                this.facultySelect ?? undefined,
+            );
+        } else if (this.selectedMajorId === undefined) {
+            this.#internals.setValidity(
+                { valueMissing: true },
+                "系/コース/専攻を選択してください",
+                this.majorSelect ?? undefined,
             );
         } else {
             this.#internals.setValidity({});

@@ -84,6 +84,7 @@ form.addEventListener("submit", async (event) => {
     // 既定のページ再読み込みを防ぐ
     event.preventDefault();
 
+    // ファイル未選択はinputの`required`で弾かれるため，ここは型を絞るための防御
     const files = fileInput.files;
     if (!files || files.length === 0) return;
 
@@ -117,6 +118,8 @@ form.addEventListener("submit", async (event) => {
     fileList.replaceChildren();
     procMessage.status = "送信完了！！協力ありがとうございました";
     submitButton.hidden = true;
+    // 隠すだけではフォーカスできない`required`違反が残るため，検証の対象から外す
+    fileInput.disabled = true;
     fileInput.hidden = true;
 });
 

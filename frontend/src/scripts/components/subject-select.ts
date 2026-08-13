@@ -1,7 +1,7 @@
 import "./proc-message.ts";
 
 import { html, LitElement, type PropertyValues } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property, query, state } from "lit/decorators.js";
 import { fetchSubjects, type ApiResult } from "../api/client";
 import {
     GRADE_MAX,
@@ -71,6 +71,18 @@ export class SubjectSelect extends LitElement {
     /** facultyIdと同様に選択中の専攻Id */
     @property({ attribute: false })
     majorId: MajorId | undefined = undefined;
+
+    /** 検証メッセージの表示先とする`select`．描画前は`null` */
+    @query('[data-field="grade"]')
+    private gradeSelect!: HTMLSelectElement | null;
+
+    /** gradeSelectと同様に検証メッセージの表示先とする`select` */
+    @query('[data-field="term"]')
+    private termSelect!: HTMLSelectElement | null;
+
+    /** gradeSelectと同様に検証メッセージの表示先とする`select` */
+    @query('[data-field="subject"]')
+    private subjectSelect!: HTMLSelectElement | null;
 
     // lightDom化
     protected override createRenderRoot() {
@@ -155,6 +167,7 @@ export class SubjectSelect extends LitElement {
                 <label>
                     学年
                     <select
+                        data-field="grade"
                         .value=${String(this.selectedGrade ?? "")}
                         @change=${this.onGradeChange}
                     >
@@ -164,14 +177,22 @@ export class SubjectSelect extends LitElement {
                 </label>
                 <label>
                     学期
-                    <select .value=${String(this.selectedTerm ?? "")} @change=${this.onTermChange}>
+                    <select
+                        data-field="term"
+                        .value=${String(this.selectedTerm ?? "")}
+                        @change=${this.onTermChange}
+                    >
                         <option value="">--学期--</option>
                         ${term_options}
                     </select>
                 </label>
                 <label>
                     教科
-                    <select .value=${this.selectedSubjectId ?? ""} @change=${this.onSubjectChange}>
+                    <select
+                        data-field="subject"
+                        .value=${this.selectedSubjectId ?? ""}
+                        @change=${this.onSubjectChange}
+                    >
                         <option value="">教科を選択してください</option>
                         ${subject_options}
                     </select>
@@ -188,15 +209,25 @@ export class SubjectSelect extends LitElement {
         this.#internals.setFormValue(data);
 
         // 未選択があれば無効とする
-        if (
-            this.facultyId === undefined ||
-            this.selectedSubjectId === undefined ||
-            this.selectedGrade === undefined ||
-            this.selectedTerm === undefined
-        ) {
+        // カスタム要素自身はフォーカスできないため，第3引数で未選択の`select`をメッセージの表示先とする
+        if (this.selectedGrade === undefined) {
             this.#internals.setValidity(
                 { valueMissing: true },
-                "学部、教科、学年、学期を選択してください",
+                "学年を選択してください",
+                this.gradeSelect ?? undefined,
+            );
+        } else if (this.selectedTerm === undefined) {
+            this.#internals.setValidity(
+                { valueMissing: true },
+                "学期を選択してください",
+                this.termSelect ?? undefined,
+            );
+            // 学部が未選択なら教科の選択肢が空なので，教科の未選択として扱う
+        } else if (this.facultyId === undefined || this.selectedSubjectId === undefined) {
+            this.#internals.setValidity(
+                { valueMissing: true },
+                "教科を選択してください",
+                this.subjectSelect ?? undefined,
             );
         } else {
             this.#internals.setValidity({});
