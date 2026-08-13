@@ -7,6 +7,7 @@ use crate::{
             DocumentMetadata,
             ExamType,
         },
+        subject::Subject,
     },
     usecase::repository::{
         SearchDocumentOption,
@@ -21,7 +22,7 @@ pub struct GetDocumentsUseCase<I> {
 
 #[derive(Debug, Clone, Hash)]
 pub struct GetDocumentsOption {
-    pub subject_id: uuid::Uuid,
+    pub subject_id: Id<Subject>,
     pub year: Option<Year<DocumentMetadata>>,
     pub teacher: Option<String>,
     pub exam_type: Option<ExamType>,
@@ -38,7 +39,7 @@ impl<I: DocumentRepository> GetDocumentsUseCase<I> {
     #[tracing::instrument(skip(self), ret(level="debug"), err)]
     pub async fn execute(&self, option: GetDocumentsOption) -> anyhow::Result<Vec<Document>> {
         let repo_option = SearchDocumentOption {
-            subject_id: Id::new(option.subject_id),
+            subject_id: option.subject_id,
             year: option.year,
             teacher: option.teacher,
             exam_type: option.exam_type,
