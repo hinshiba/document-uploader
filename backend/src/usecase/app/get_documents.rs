@@ -4,6 +4,7 @@ use crate::{
         Year,
         document::{
             Document,
+            DocumentMetadata,
             ExamType,
         },
     },
@@ -21,7 +22,7 @@ pub struct GetDocumentsUseCase<I> {
 #[derive(Debug, Clone, Hash)]
 pub struct GetDocumentsOption {
     pub subject_id: uuid::Uuid,
-    pub year: Option<i64>,
+    pub year: Option<Year<DocumentMetadata>>,
     pub teacher: Option<String>,
     pub exam_type: Option<ExamType>,
     pub is_answer: Option<bool>,
@@ -36,15 +37,9 @@ impl<I> GetDocumentsUseCase<I> {
 impl<I: DocumentRepository> GetDocumentsUseCase<I> {
     #[tracing::instrument(skip(self), ret(level="debug"), err)]
     pub async fn execute(&self, option: GetDocumentsOption) -> anyhow::Result<Vec<Document>> {
-        // `option.year`の検証に失敗したら空配列を返す
-        let Ok(option_year) = option.year.map(Year::new).transpose()
-        else {
-            return Ok(vec![]);
-        };
-
         let repo_option = SearchDocumentOption {
             subject_id: Id::new(option.subject_id),
-            year: option_year,
+            year: option.year,
             teacher: option.teacher,
             exam_type: option.exam_type,
             is_answer: option.is_answer,
