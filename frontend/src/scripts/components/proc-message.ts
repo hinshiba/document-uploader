@@ -18,9 +18,12 @@ export class ProcMessage extends LitElement {
     }
 
     override render() {
+        // ライブリージョンを読み上げ対象に残すため，要素は消さずhiddenで隠す
         return html`
-            <p role="status">${this.status}</p>
-            <p role="alert">${this.error ? toUserMessage(this.error) : ""}</p>
+            <p role="status" ?hidden=${this.status === ""}>${this.status}</p>
+            <p role="alert" ?hidden=${this.error === undefined}>
+                ${this.error ? toUserMessage(this.error) : ""}
+            </p>
         `;
     }
 }

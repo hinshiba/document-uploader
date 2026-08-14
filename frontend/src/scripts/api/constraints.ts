@@ -21,6 +21,9 @@ export type Teacher = components["schemas"]["DocumentMetadata"]["teacher"] & {
 export type FacultyId = components["schemas"]["Faculty"]["id"] & { readonly [brand]: "FacultyId" };
 export type MajorId = components["schemas"]["Major"]["id"] & { readonly [brand]: "MajorId" };
 export type SubjectId = components["schemas"]["Subject"]["id"] & { readonly [brand]: "SubjectId" };
+export type DocumentId = components["schemas"]["Document"]["id"] & {
+    readonly [brand]: "DocumentId";
+};
 export type ExamType = components["schemas"]["ExamType"];
 
 // 交差型で各フィールドを絞り込み，未検証の`string`や`number`を代入できないようにする
@@ -43,13 +46,18 @@ export type DocumentMetadata = components["schemas"]["DocumentMetadata"] & {
     num: Num;
 };
 
+export type Document = components["schemas"]["Document"] & {
+    id: DocumentId;
+    metadata: DocumentMetadata;
+};
+
 // 共通の検証
 
 /**
  * 整数変換と範囲検証を共通化する
  * `string`からの厳密な変換はJSの仕様上きりがないので，期待しないこと
- * @param min 省略可能な下限値
- * @param max 省略可能な上限値
+ * @param min - 省略可能な下限値
+ * @param max - 省略可能な上限値
  * @returns 検証を通らない場合は`undefined`
  */
 function toBoundedInt(data: unknown, min?: number, max?: number): number | undefined {

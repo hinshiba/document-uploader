@@ -1,8 +1,14 @@
 import "./components/major-select";
 import "./components/subject-select";
 import "./components/proc-message";
-import { toExamType, toSubjectId, toTeacher, toYear } from "./api/constraints";
-import type { DocumentSearchResult } from "./api/client";
+import {
+    toExamType,
+    toSubjectId,
+    toTeacher,
+    toYear,
+    type Document,
+    type DocumentId,
+} from "./api/constraints";
 import { searchDocuments, downloadDocument } from "./api/client";
 import type { SubjectSelect } from "./components/subject-select";
 import type { MajorSelect } from "./components/major-select";
@@ -38,7 +44,7 @@ majorSelect.addEventListener("major-select-change", (event) => {
  * 検索結果が0件の場合は「検索結果はありません」を表示する．
  * 結果がある場合は各ドキュメントをリスト要素として生成する．
  */
-function renderResults(docs: DocumentSearchResult[]) {
+function renderResults(docs: Document[]) {
     resultList.replaceChildren();
 
     if (docs.length === 0) {
@@ -62,7 +68,7 @@ function renderResults(docs: DocumentSearchResult[]) {
  * 年度・担当教員・試験種別・解答有無を表示し，
  * ダウンロードボタンを押すと対象ファイルを取得する．
  */
-function createResultItem(doc: DocumentSearchResult) {
+function createResultItem(doc: Document) {
     const metadata = doc.metadata;
 
     const li = document.createElement("li");
@@ -96,7 +102,7 @@ function createResultItem(doc: DocumentSearchResult) {
  * APIからZIPファイルを取得し，
  * Blob URLを生成してブラウザのダウンロード処理を実行する．
  */
-async function download(id: string) {
+async function download(id: DocumentId) {
     procMessage.error = undefined;
 
     const res = await downloadDocument(id);
@@ -111,7 +117,8 @@ async function download(id: string) {
     a.href = url;
     a.download = file.filename;
     a.click();
-    URL.revokeObjectURL(url);
+    // ブラウザがダウンロードを開始する前に失効しないようにする
+    setTimeout(() => URL.revokeObjectURL(url), 0);
 
     log.download.info("download succeeded", { id, filename: file.filename });
 }

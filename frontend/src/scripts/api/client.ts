@@ -5,6 +5,8 @@
 import { ApiError, err, ok, type ApiErrorKind, type Result } from "../error";
 import { log } from "../logging";
 import type {
+    Document,
+    DocumentId,
     DocumentMetadata,
     Faculty,
     FacultyId,
@@ -66,9 +68,9 @@ function apiError(
  *
  * 通信の失敗と 4xx/5xx を ApiError として返す
  *
- * @param method HTTPメソッド
- * @param path API_BASEからの相対パス
- * @param options method，signal，headers以外のオプション
+ * @param method - HTTPメソッド
+ * @param path - API_BASEからの相対パス
+ * @param options - method，signal，headers以外のオプション
  * @returns 成功時はResponse，失敗時はApiError
  */
 async function requestRaw(
@@ -107,7 +109,7 @@ async function requestRaw(
 
 /**
  * JSONをfetchする
- * @typeParam T 期待するレスポンスの型
+ * @typeParam T - 期待するレスポンスの型
  * @returns 成功時はT，失敗時はApiError
  */
 async function requestJson<T>(
@@ -169,7 +171,7 @@ export async function fetchSubjects(
 /**
  * 科目を登録する
  * /subjects POST に対応
- * @param subject 登録する科目情報
+ * @param subject - 登録する科目情報
  * @returns 登録された科目．失敗時はApiError
  */
 export async function postSubject(subject: SubjectBase): Promise<ApiResult<Subject>> {
@@ -182,8 +184,8 @@ export async function postSubject(subject: SubjectBase): Promise<ApiResult<Subje
 /**
  * ドキュメントをアップロードする
  * /docs POST に対応
- * @param files アップロードする複数のファイル
- * @param metadata APIの要求するメタデータ
+ * @param files - アップロードする複数のファイル
+ * @param metadata - APIの要求するメタデータ
  * @returns 成功時はundefined，失敗時はApiError
  */
 export async function postDocuments(
@@ -200,19 +202,13 @@ export async function postDocuments(
     return ok(undefined);
 }
 
-/** searchDocumentsの型を指定 */
-export interface DocumentSearchResult {
-    id: string;
-    metadata: DocumentMetadata;
-}
-
 /** ドキュメントを検索する
  * /docs GET に対応
- * @param subject 検索する科目のID
- * @param year 検索する年度
- * @param teacher 検索する担当者
- * @param examtype 検索する試験種別
- * @param isanswer 解答付きかどうか
+ * @param subject - 検索する科目のID
+ * @param year - 検索する年度
+ * @param teacher - 検索する担当者
+ * @param examtype - 検索する試験種別
+ * @param isanswer - 解答付きかどうか
  * @returns 検索結果のドキュメント一覧．失敗時はApiError
  */
 export async function searchDocuments(
@@ -221,7 +217,7 @@ export async function searchDocuments(
     teacher?: Teacher,
     examtype?: ExamType,
     isanswer?: boolean,
-): Promise<ApiResult<DocumentSearchResult[]>> {
+): Promise<ApiResult<Document[]>> {
     const params = new URLSearchParams();
 
     params.set("subject", subject);
@@ -242,7 +238,7 @@ export async function searchDocuments(
         params.set("isanswer", String(isanswer));
     }
 
-    return requestJson<DocumentSearchResult[]>("GET", `/docs?${params.toString()}`);
+    return requestJson<Document[]>("GET", `/docs?${params.toString()}`);
 }
 
 /** downloadDocumentの型を指定 */
@@ -251,33 +247,56 @@ export interface DownloadDocument {
     blob: Blob;
 }
 
-/** ドキュメントをダウンロードする
- * /docs/{id} GET に対応
- * @param id ダウンロードするドキュメントのID
- * @returns ファイル名とファイルデータ．失敗時はApiError
+/** レスポンスがzip固定なので拡張子を含める */
+const DEFAULT_DOWNLOAD_FILENAME = "download.zip";
+
+/**
+ * `Content-Disposition`からダウンロード時のファイル名を取り出す
+ *
+ * RFC 6266のfilename*を優先し，無ければfilenameにフォールバックする
+ * @param disposition - ヘッダの値．ヘッダが無い場合は`null`
+ * @returns ファイル名を取り出せない場合は`undefined`
  */
-export async function downloadDocument(id: string): Promise<ApiResult<DownloadDocument>> {
-    const res = await requestRaw("GET", `/docs/${encodeURIComponent(id)}`);
-    if (!res.ok) return res;
+function parseFilename(disposition: string | null): string | undefined {
+    if (disposition === null) return undefined;
 
-    // レスポンスのファイルデータをBlobとして取得する
-    const blob = await res.value.blob();
-
-    // レスポンスヘッダーからダウンロード時のファイル名を取得する
-    const disposition = res.value.headers.get("Content-Disposition");
-
-    // デフォルトのファイル名を設定;
-    let filename = "download";
-
-    if (disposition) {
-        const match = disposition.match(/filename="?(.+?)"?$/);
-        if (match) {
-            filename = String(match[1]);
+    // パーセントエンコードされた非ASCIIのファイル名はこちらでしか渡らない
+    const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (encoded?.[1] !== undefined) {
+        try {
+            return decodeURIComponent(encoded[1]);
+        } catch {
+            // 不正なエンコードはfilenameへのフォールバックで拾う
         }
     }
 
+    return disposition.match(/filename="?([^";]+)"?/i)?.[1];
+}
+
+/** ドキュメントをダウンロードする
+ * /docs/{id} GET に対応
+ * @param id - ダウンロードするドキュメントのID
+ * @returns ファイル名とファイルデータ．失敗時はApiError
+ */
+export async function downloadDocument(id: DocumentId): Promise<ApiResult<DownloadDocument>> {
+    const path = `/docs/${encodeURIComponent(id)}`;
+    const res = await requestRaw("GET", path);
+    if (!res.ok) return res;
+
+    // レスポンスのファイルデータをBlobとして取得する
+    const blob = await res.value
+        .blob()
+        .then((b) => ok(b))
+        // ApiErrorなしでBlobにできないのはおそらくサーバーに問題あり
+        .catch((e) => apiError("server", "GET", path, res.value.status, e));
+    if (!blob.ok) return blob;
+
+    // レスポンスヘッダーからダウンロード時のファイル名を取得する
+    const disposition = res.value.headers.get("Content-Disposition");
+    const filename = parseFilename(disposition) ?? DEFAULT_DOWNLOAD_FILENAME;
+
     return ok({
         filename,
-        blob,
+        blob: blob.value,
     });
 }
