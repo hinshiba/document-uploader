@@ -56,8 +56,8 @@ export type Document = components["schemas"]["Document"] & {
 /**
  * 整数変換と範囲検証を共通化する
  * `string`からの厳密な変換はJSの仕様上きりがないので，期待しないこと
- * @param min 省略可能な下限値
- * @param max 省略可能な上限値
+ * @param min - 省略可能な下限値
+ * @param max - 省略可能な上限値
  * @returns 検証を通らない場合は`undefined`
  */
 function toBoundedInt(data: unknown, min?: number, max?: number): number | undefined {

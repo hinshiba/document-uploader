@@ -17,15 +17,15 @@ import {
     toYear,
     type DocumentMetadata,
 } from "./api/constraints";
-import "./components/major-select.ts";
-import "./components/subject-select.ts";
-import "./components/proc-message.ts";
+import "./components/major-select";
+import "./components/subject-select";
+import "./components/proc-message";
 import { SubjectSelect } from "./components/subject-select";
 import { MajorSelect } from "./components/major-select";
 import { ProcMessage } from "./components/proc-message";
-import { required } from "./dom.ts";
-import { err, ok, ValidationError, type Result } from "./error.ts";
-import { log } from "./logging.ts";
+import { required } from "./dom";
+import { err, ok, ValidationError, type Result } from "./error";
+import { log } from "./logging";
 
 const form = required<HTMLFormElement>("form");
 const fileInput = required<HTMLInputElement>("#file");

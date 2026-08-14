@@ -4,7 +4,7 @@
 
 /**
  * 要素を型付きで取得するヘルパ
- * @param selector セレクタ
+ * @param selector - セレクタ
  * @returns 見つかった要素
  * @throws 要素が存在しない場合
  */

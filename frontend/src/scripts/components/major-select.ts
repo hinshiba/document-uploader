@@ -1,4 +1,4 @@
-import "./proc-message.ts";
+import "./proc-message";
 
 import { html, LitElement, type PropertyValues } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
