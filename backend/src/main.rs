@@ -9,7 +9,8 @@ mod usecase;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenvy::dotenv().ok();
+    // 同名の環境変数が登録されている場合はそちらが優先されることに注意
+    let _ = dotenvy::dotenv();
 
     init_tracing_subscriber();
     let listener = tokio::net::TcpListener::bind(env::var("LISTEN_ADDR").context("LISTEN_ADDR is not set.")?).await?;
