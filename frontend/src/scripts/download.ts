@@ -73,7 +73,7 @@ function createResultItem(doc: Document) {
     const button = document.createElement("button");
 
     button.type = "button";
-    button.textContent = "downloadする";
+    button.textContent = "ダウンロード";
 
     li.append(
         `${metadata.year}年度 ` +
