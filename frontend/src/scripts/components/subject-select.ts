@@ -32,7 +32,7 @@ declare global {
 }
 
 /**
- * 学年と学期，教科の連動した選択のコンポーネント
+ * 学年と学期，科目の連動した選択のコンポーネント
  *
  * 絞り込みに使う学部と専攻は外部から与えられる
  */
@@ -45,12 +45,12 @@ export class SubjectSelect extends LitElement {
     /** 通信の競合状態を防ぐための最新のクエリ番号 */
     #loadId = 0;
 
-    /** 取得した教科またはエラー．読み込み中は`undefined`
+    /** 取得した科目またはエラー．読み込み中は`undefined`
      * 学部が未選択のときはAPIを呼ばないため空配列とする */
     @state()
     private response: ApiResult<Subject[]> | undefined = ok([]);
 
-    /** 選択した教科Id．未選択は`undefined` */
+    /** 選択した科目Id．未選択は`undefined` */
     @state()
     private selectedSubjectId: SubjectId | undefined = undefined;
 
@@ -89,14 +89,14 @@ export class SubjectSelect extends LitElement {
         return this;
     }
 
-    // 絞り込み条件が変わったら教科を取り直す
+    // 絞り込み条件が変わったら科目を取り直す
     // 取り消しを同じ更新サイクルに反映させるため描画前に行う
     protected override willUpdate(changedProperties: PropertyValues) {
         super.willUpdate(changedProperties);
 
         const filterKeys = ["facultyId", "majorId", "selectedGrade", "selectedTerm"];
         if (filterKeys.some((key) => changedProperties.has(key))) {
-            // 絞り込みの結果消える可能性があるため教科の選択を取り消す
+            // 絞り込みの結果消える可能性があるため科目の選択を取り消す
             this.selectedSubjectId = undefined;
             void this.loadSubjects();
         }
@@ -115,7 +115,7 @@ export class SubjectSelect extends LitElement {
         }
     }
 
-    /** APIから選択された学部IDなどに対応する教科一覧を取得する */
+    /** APIから選択された学部IDなどに対応する科目一覧を取得する */
     private async loadSubjects() {
         // 通信するごと１ずつ増やす
         const id = ++this.#loadId;
@@ -192,13 +192,13 @@ export class SubjectSelect extends LitElement {
                 </select>
             </label>
             <label>
-                教科
+                科目
                 <select
                     data-field="subject"
                     .value=${this.selectedSubjectId ?? ""}
                     @change=${this.onSubjectChange}
                 >
-                    <option value="">教科を選択してください</option>
+                    <option value="">--科目--</option>
                     ${subject_options}
                 </select>
             </label>`;
@@ -226,11 +226,11 @@ export class SubjectSelect extends LitElement {
                 "学期を選択してください",
                 this.termSelect ?? undefined,
             );
-            // 学部が未選択なら教科の選択肢が空なので，教科の未選択として扱う
+            // 学部が未選択なら科目の選択肢が空なので，科目の未選択として扱う
         } else if (this.facultyId === undefined || this.selectedSubjectId === undefined) {
             this.#internals.setValidity(
                 { valueMissing: true },
-                "教科を選択してください",
+                "科目を選択してください",
                 this.subjectSelect ?? undefined,
             );
         } else {

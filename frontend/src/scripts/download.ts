@@ -138,10 +138,10 @@ form.addEventListener("submit", async (event) => {
 
     const formData = new FormData(form);
 
-    // 教科以外は絞り込みの任意項目なので検証しない
+    // 科目以外は絞り込みの任意項目なので検証しない
     const subject = toSubjectId(formData.get("subject"));
     if (subject === undefined) {
-        const error = new ValidationError("教科が選択されていません．");
+        const error = new ValidationError("科目が選択されていません．");
         log.download.info("invalid search condition", { message: error.message });
         procMessage.error = error;
         return;
