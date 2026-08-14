@@ -15,6 +15,8 @@ use std::env;
 
 use anyhow::Context;
 use tower_http::services::ServeDir;
+use tower_http::cors::{Any, CorsLayer};
+use axum::http::HeaderValue;
 
 use endpoint::api::api_router;
 
@@ -43,7 +45,14 @@ async fn main() -> anyhow::Result<()> {
 
     let app = axum::Router::new()
         .nest("/api/v1", api_router(state))
-        .fallback_service(ServeDir::new("public"));
+        .fallback_service(ServeDir::new("public"))
+        .layer(
+            CorsLayer::new()
+                .allow_headers(Any)
+                .allow_origin([
+                    "http://localhost:3000".parse::<HeaderValue>()?,
+                ])
+        );
 
     tracing::info!("start listening on http://{}", listener.local_addr()?);
 
