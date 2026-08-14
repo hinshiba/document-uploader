@@ -111,7 +111,8 @@ async function download(id: string) {
     a.href = url;
     a.download = file.filename;
     a.click();
-    URL.revokeObjectURL(url);
+    // ブラウザがダウンロードを開始する前に失効しないようにする
+    setTimeout(() => URL.revokeObjectURL(url), 0);
 
     log.download.info("download succeeded", { id, filename: file.filename });
 }

@@ -257,11 +257,17 @@ export interface DownloadDocument {
  * @returns ファイル名とファイルデータ．失敗時はApiError
  */
 export async function downloadDocument(id: string): Promise<ApiResult<DownloadDocument>> {
-    const res = await requestRaw("GET", `/docs/${encodeURIComponent(id)}`);
+    const path = `/docs/${encodeURIComponent(id)}`;
+    const res = await requestRaw("GET", path);
     if (!res.ok) return res;
 
     // レスポンスのファイルデータをBlobとして取得する
-    const blob = await res.value.blob();
+    const blob = await res.value
+        .blob()
+        .then((b) => ok(b))
+        // ApiErrorなしでBlobにできないのはおそらくサーバーに問題あり
+        .catch((e) => apiError("server", "GET", path, res.value.status, e));
+    if (!blob.ok) return blob;
 
     // レスポンスヘッダーからダウンロード時のファイル名を取得する
     const disposition = res.value.headers.get("Content-Disposition");
@@ -278,6 +284,6 @@ export async function downloadDocument(id: string): Promise<ApiResult<DownloadDo
 
     return ok({
         filename,
-        blob,
+        blob: blob.value,
     });
 }
