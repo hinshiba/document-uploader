@@ -1,6 +1,7 @@
 @use "../../var" as *;
 
 .search-area {
+    margin: $space-md 0;
     padding: $space-lg;
     border: $border-width-thick solid $border-color;
     background-color: $surface-color;
