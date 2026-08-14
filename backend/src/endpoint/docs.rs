@@ -5,9 +5,13 @@ use axum::{
         Multipart,
         State,
         multipart::Field,
+        Query,
     },
     http::StatusCode,
-    response::IntoResponse,
+    response::{
+        Json,
+        IntoResponse,
+    },
 };
 use serde::Deserialize;
 
@@ -24,10 +28,16 @@ use crate::{
         },
     },
     usecase::{
-        app::store_document::{
-            StoreDocumentInput,
-            StoreDocumentInputFile,
-            StoreDocumentUseCase,
+        app::{
+            get_documents::{
+                GetDocumentsOption,
+                GetDocumentsUseCase,
+            },
+            store_document::{
+                StoreDocumentInput,
+                StoreDocumentInputFile,
+                StoreDocumentUseCase,
+            },
         },
         repository::{
             DocumentFileRepository,
@@ -36,6 +46,7 @@ use crate::{
     }
 };
 use super::{
+    dto::document::DocumentDto,
     EndpointError,
     EndpointResult,
 };
@@ -81,6 +92,46 @@ impl DocumentMetadataInput {
         EndpointError {
             message: "multi part error".to_owned(),
             details: Some(e.to_string()),
+        }
+    }
+}
+
+#[derive(Debug, Hash, Deserialize)]
+pub struct GetDocumentsInput {
+    subject: uuid::Uuid,
+    year: Option<i64>,
+    teacher: Option<String>,
+    examtype: Option<String>,
+    isanswer: Option<bool>,
+}
+
+impl GetDocumentsInput {
+    pub fn to_usecase_input(&self) -> Result<GetDocumentsOption, EndpointError> {
+        let subject_id = Id::new(self.subject);
+        let year = self.year
+            .map(Year::new)
+            .transpose()
+            .map_err(Self::parse_error_to_endpoint_error)?;
+        let exam_type = self.examtype
+            .clone()
+            .map(|e| e.parse())
+            .transpose()
+            .map_err(Self::parse_error_to_endpoint_error)?;
+
+        Ok(GetDocumentsOption {
+            subject_id,
+            year,
+            teacher: self.teacher.clone(),
+            exam_type,
+            is_answer: self.isanswer,
+        })
+    }
+
+    #[inline]
+    fn parse_error_to_endpoint_error(e: impl std::error::Error) -> EndpointError {
+        EndpointError {
+            message: "parameter error".to_owned(),
+            details: Some(e.to_string())
         }
     }
 }
@@ -163,7 +214,7 @@ pub async fn post_document<I: DocumentFileRepository + DocumentRepository>(
     }
 
     let files = files;
-    
+
     // filesが空だった場合はエラーを投げる
     if files.len() < 1 {
         return error_with_400(
@@ -222,6 +273,31 @@ pub async fn post_document<I: DocumentFileRepository + DocumentRepository>(
     }
 }
 
+#[tracing::instrument(skip(repo), ret(level="info"))]
+pub async fn get_documents<I: DocumentRepository>(
+    State(repo): State<I>,
+    Query(input): Query<GetDocumentsInput>,
+) -> EndpointResult<impl IntoResponse> {
+    let option = match input.to_usecase_input() {
+        Ok(option) => option,
+        Err(err) => {
+            return error_with_400(err);
+        }
+    };
+
+    match GetDocumentsUseCase::new(repo).execute(option).await {
+        Ok(documents) => {
+            ( StatusCode::OK
+            , Ok(Json(
+                documents.into_iter()
+                    .map(|d| DocumentDto::from_domain(&d))
+                    .collect::<Vec<_>>()
+            )))
+        },
+        Err(err) => return_500_with_log!(err),
+    }
+}
+
 // 以下helper functions
 
 #[inline]
@@ -251,7 +327,7 @@ async fn get_metadata<'a>(field: Field<'a>) -> Result<DocumentMetadataInput, End
             })
         }
     };
-    
+
     Ok(metadata)
 }
 
@@ -294,7 +370,7 @@ async fn get_file<'a>(field: Field<'a>) -> Result<(DocumentFileType, Vec<u8>), E
             })
         }
     };
-    
+
     Ok((file_type, content))
 }
 
@@ -328,7 +404,7 @@ mod tests {
         let document_metadata_input = document_metadata_input.unwrap();
 
         let document_metadata = document_metadata_input.to_document_metadata();
-        
+
         dbg!(&document_metadata);
         assert!(document_metadata.is_ok());
     }
@@ -352,7 +428,7 @@ mod tests {
             let file_type = file_type.unwrap();
 
             let file_type = file_type.parse::<DocumentFileType>();
-            
+
             dbg!(&file_type);
             assert!(file_type.is_ok());
             let file_type = file_type.unwrap();
