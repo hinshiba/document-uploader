@@ -1,6 +1,9 @@
 @use "../var" as *;
 
+// mainと異なり画面幅いっぱいに広がるため，相対値で余白を取る
+$padding-inline: 2%;
+
 header {
-    border-bottom: 1px solid $border-color;
-    padding: 0 2%;
+    border-bottom: $border-width solid $divider-color;
+    padding: 0 $padding-inline;
 }

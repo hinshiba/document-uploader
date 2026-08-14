@@ -1,116 +1,109 @@
-import { postSubject } from "./api/client.ts";
+import { postSubject } from "./api/client";
 import {
     GRADE_MAX,
     GRADE_MIN,
     TERM_MAX,
     TERM_MIN,
+    toCourseCode,
     toFacultyId,
     toGrade,
     toMajorId,
     toRequiredString,
     toTerm,
     type SubjectBase,
-} from "./api/constraints.ts";
-import "./components/major-select.ts";
+} from "./api/constraints";
+import "./components/major-select";
+import "./components/proc-message";
+import type { ProcMessage } from "./components/proc-message";
+import { required } from "./dom";
+import { err, ok, ValidationError, type Result } from "./error";
+import { log } from "./logging";
 
-/**
- * 要素を型付きで取得するヘルパ
- * @param selector セレクタ
- * @returns 見つかった要素
- * @throws 要素が存在しない場合
- */
-function required<T extends Element>(selector: string): T {
-    const el = document.querySelector<T>(selector);
-    if (!el) throw new Error(`Element not found. selector: ${selector}`);
-    return el;
-}
-
-// type="module" のスクリプトは defer 相当で DOM 構築後に実行されるため，
-// ここで要素を取得してよい
 const form = required<HTMLFormElement>("form");
 const submitButton = required<HTMLButtonElement>("#registerbtn");
-const statusText = required<HTMLParagraphElement>("#thank");
+const procMessage = required<ProcMessage>("#proc-message");
+
+// 送信ボタンによるフォーム送信を処理する
+form.addEventListener("submit", async (event) => {
+    // 既定のページ再読み込みを防ぐ
+    event.preventDefault();
+
+    // 前回の結果表示を消す
+    procMessage.status = "";
+    procMessage.error = undefined;
+
+    // 検証は送信前に済ませ，入力不備と通信失敗でメッセージを分ける
+    const subject = buildSubject();
+    if (!subject.ok) {
+        log.subject.info("invalid subject", { message: subject.error.message });
+        procMessage.error = subject.error;
+        return;
+    }
+
+    submitButton.disabled = true;
+    procMessage.status = "登録中...";
+
+    const res = await postSubject(subject.value);
+    if (!res.ok) {
+        procMessage.status = "";
+        procMessage.error = res.error;
+        submitButton.disabled = false;
+        return;
+    }
+
+    log.subject.info("subject registered", { id: res.value.id });
+
+    // 成功時は再送信できないよう送信ボタンを隠す
+    procMessage.status = "科目を登録しました．ご協力ありがとうございました．";
+    submitButton.hidden = true;
+});
 
 /**
  * フォームから科目情報を組み立てる
- * @throws 入力内容が不正な場合
+ * @returns 検証済みの科目情報．不備があれば最初に見つかったValidationError
  */
-function buildSubject(): SubjectBase {
+function buildSubject(): Result<SubjectBase, ValidationError> {
     const formdata = new FormData(form);
 
     const faculty = toFacultyId(formdata.get("faculty"));
+    if (faculty === undefined) return err(new ValidationError("学部が選択されていません．"));
+
     const major = toMajorId(formdata.get("major"));
+    if (major === undefined) return err(new ValidationError("専攻が選択されていません．"));
+
     const grade = toGrade(formdata.get("grade"));
+    if (grade === undefined)
+        return err(
+            new ValidationError(
+                `学年の値が不正です．学年は${GRADE_MIN}～${GRADE_MAX}の整数で選択してください．`,
+            ),
+        );
+
     const term = toTerm(formdata.get("term"));
+    if (term === undefined)
+        return err(
+            new ValidationError(
+                `学期の値が不正です．学期は${TERM_MIN}～${TERM_MAX}の整数で選択してください．`,
+            ),
+        );
+
     const name = toRequiredString(formdata.get("name"));
-    const course_code = toRequiredString(formdata.get("course_code"));
+    if (name === undefined) return err(new ValidationError("科目名が入力されていません．"));
 
-    if (faculty === undefined) {
-        throw new Error("学部が選択されていません。");
-    }
-
-    if (major === undefined) {
-        throw new Error("専攻が選択されていません。");
-    }
-
-    if (grade === undefined) {
-        throw new Error(
-            `学年の値が不正です。学年は ${GRADE_MIN}～${GRADE_MAX} の整数で選択してください。`,
+    const course_code = toCourseCode(formdata.get("course_code"));
+    if (course_code === undefined)
+        return err(
+            new ValidationError(
+                "講義番号の値が不正です．講義番号は6桁，または西暦を含む10桁の数字で入力してください．",
+            ),
         );
-    }
 
-    if (term === undefined) {
-        throw new Error(
-            `学期の値が不正です。学期は ${TERM_MIN}～${TERM_MAX} の整数で選択してください。`,
-        );
-    }
-
-    if (name === undefined) {
-        throw new Error("科目名を入力してください。");
-    }
-
-    if (course_code === undefined) {
-        throw new Error("講義番号を入力してください。");
-    }
-
-    return {
+    return ok({
         faculty,
         major,
         grade,
         term,
         name,
         course_code,
-    };
+    });
 }
-
-form.addEventListener("submit", async (event) => {
-    // 送信ボタン(type="submit")によるフォーム送信を処理する
-    // 既定のページ再読み込みを防ぐ
-    event.preventDefault();
-
-    let subject: SubjectBase;
-
-    try {
-        subject = buildSubject();
-    } catch (e) {
-        console.error("入力内容が不正", e);
-        statusText.textContent = e instanceof Error ? e.message : "入力内容を確認してください";
-        return;
-    }
-
-    submitButton.disabled = true;
-    submitButton.textContent = "登録中...";
-
-    try {
-        await postSubject(subject);
-
-        statusText.textContent = "科目を登録しました。ご協力ありがとうございました。";
-        submitButton.hidden = true;
-    } catch (e) {
-        console.error("科目登録に失敗", e);
-        statusText.textContent = "登録に失敗しました。時間をおいて再試行してください。";
-
-        submitButton.disabled = false;
-        submitButton.textContent = "登録";
-    }
-});

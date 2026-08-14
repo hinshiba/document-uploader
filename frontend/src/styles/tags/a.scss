@@ -1,0 +1,14 @@
+@use "../var" as *;
+
+a {
+    color: $primary-color;
+
+    // 既定の紫は他の配色から浮くため，訪問済みも同色にする
+    &:visited {
+        color: $primary-color;
+    }
+
+    &:hover {
+        color: $primary-hover-color;
+    }
+}

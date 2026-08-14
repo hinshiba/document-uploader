@@ -1,7 +1,8 @@
-import { html, LitElement, type PropertyValues } from "lit";
+import "./proc-message";
 
-import { customElement, state } from "lit/decorators.js";
-import { fetchFaculties } from "../api/client";
+import { html, LitElement, type PropertyValues } from "lit";
+import { customElement, query, state } from "lit/decorators.js";
+import { fetchFaculties, type ApiResult } from "../api/client";
 import {
     toFacultyId,
     toMajorId,
@@ -10,13 +11,7 @@ import {
     type MajorId,
 } from "../api/constraints";
 
-enum Status {
-    Loading,
-    Ready,
-    Error,
-}
-
-export interface SelectionChangeDetail {
+export interface MajorSelectChangeDetail {
     facultyId: FacultyId | undefined;
     majorId: MajorId | undefined;
 }
@@ -24,32 +19,22 @@ export interface SelectionChangeDetail {
 /* Eventに型を設ける */
 declare global {
     interface HTMLElementEventMap {
-        "selection-change": CustomEvent<SelectionChangeDetail>;
+        "major-select-change": CustomEvent<MajorSelectChangeDetail>;
     }
 }
 
+/**
+ * 学部と専攻の連動した選択のコンポーネント
+ */
 @customElement("major-select")
 export class MajorSelect extends LitElement {
     // formのネイティブ要素としてふるまうために必要
     static formAssociated = true;
-    #internals: ElementInternals;
+    #internals: ElementInternals = this.attachInternals();
 
-    constructor() {
-        super();
-        this.#internals = this.attachInternals();
-    }
-
-    protected override createRenderRoot() {
-        return this; // lightDom化
-    }
-
-    /** コンポーネント状態 */
+    /** 取得した学部と専攻の対応またはエラー．未取得時は`undefined` */
     @state()
-    private status: Status = Status.Loading;
-
-    /** 取得した学部と専攻の対応．未取得時は空配列 */
-    @state()
-    private faculties: Faculty[] = [];
+    private response: ApiResult<Faculty[]> | undefined;
 
     /** 選択した学部ID．未選択は`undefined` */
     @state()
@@ -59,17 +44,75 @@ export class MajorSelect extends LitElement {
     @state()
     private selectedMajorId: MajorId | undefined = undefined;
 
-    override connectedCallback(): void {
-        super.connectedCallback();
-        void this.loadFaclties();
+    /** 検証メッセージの表示先とする`select`．描画前は`null` */
+    @query('[data-field="faculty"]')
+    private facultySelect!: HTMLSelectElement | null;
+
+    /** facultySelectと同様に検証メッセージの表示先とする`select` */
+    @query('[data-field="major"]')
+    private majorSelect!: HTMLSelectElement | null;
+
+    // lightDom化
+    protected override createRenderRoot() {
+        return this;
     }
 
+    // domにアタッチされた時に学部一覧を取得する
+    override connectedCallback(): void {
+        super.connectedCallback();
+        void this.loadFaculties();
+    }
+
+    private async loadFaculties() {
+        this.response = await fetchFaculties();
+    }
+
+    // UIが更新されたらformが取得できる値を更新
     protected override updated(changedProperties: PropertyValues): void {
         super.updated(changedProperties);
         this.syncFormValue();
     }
 
-    /** formが使える情報と妥当性を設定する．updatedで呼び出される  */
+    override render() {
+        const faculties = this.response?.ok ? this.response.value : [];
+        const error = this.response?.ok === false ? this.response.error : undefined;
+
+        const faculty_options = faculties.map(
+            (f) => html`<option value=${f.id}>${f.name}</option>`,
+        );
+        const major_options = faculties
+            .find((f) => f.id === this.selectedFacultyId)
+            ?.majors.map((m) => html`<option value=${m.id}>${m.name}</option>`);
+
+        return html` <proc-message
+                .status=${this.response === undefined ? "読み込み中" : ""}
+                .error=${error}
+            ></proc-message>
+            <label>
+                学部
+                <select
+                    data-field="faculty"
+                    .value=${this.selectedFacultyId ?? ""}
+                    @change=${this.onFacultyChange}
+                >
+                    <option value="">--学部--</option>
+                    ${faculty_options}
+                </select>
+            </label>
+            <label>
+                系/コース/専攻
+                <select
+                    data-field="major"
+                    .value=${this.selectedMajorId ?? ""}
+                    @change=${this.onMajorChange}
+                >
+                    <option value="">--系/コース/専攻--</option>
+                    ${major_options}
+                </select>
+            </label>`;
+    }
+
+    /** formが使える情報を設定する  */
     private syncFormValue() {
         const data = new FormData();
         data.set("faculty", this.selectedFacultyId ?? "");
@@ -77,56 +120,22 @@ export class MajorSelect extends LitElement {
         this.#internals.setFormValue(data);
 
         // 未選択があれば無効とする
-        if (this.selectedFacultyId === undefined || this.selectedMajorId === undefined) {
+        // カスタム要素自身はフォーカスできないため，第3引数で未選択の`select`をメッセージの表示先とする
+        if (this.selectedFacultyId === undefined) {
             this.#internals.setValidity(
                 { valueMissing: true },
-                "学部と系/コース/専攻を選択してください",
+                "学部を選択してください",
+                this.facultySelect ?? undefined,
+            );
+        } else if (this.selectedMajorId === undefined) {
+            this.#internals.setValidity(
+                { valueMissing: true },
+                "系/コース/専攻を選択してください",
+                this.majorSelect ?? undefined,
             );
         } else {
             this.#internals.setValidity({});
         }
-    }
-
-    private async loadFaclties() {
-        this.status = Status.Loading;
-        try {
-            this.faculties = await fetchFaculties();
-            this.status = Status.Ready;
-        } catch (e) {
-            console.error("学部一覧の取得に失敗", e);
-            this.status = Status.Error;
-        }
-    }
-
-    override render() {
-        if (this.status === Status.Loading) return html`<p>読み込み中...</p>`;
-        if (this.status === Status.Error) return html`<p>学部一覧の取得に失敗しました</p>`;
-
-        // 読み込めた場合
-        const facluty_options = this.faculties.map(
-            (f) => html`<option value=${f.id}>${f.name}</option>`,
-        );
-
-        const major_options = this.faculties
-            .find((f) => f.id === this.selectedFacultyId)
-            ?.majors.map((m) => html`<option value=${m.id}>${m.name}</option>`);
-
-        return html` <div class="section-content">
-            <label>
-                学部
-                <select .value=${this.selectedFacultyId ?? ""} @change=${this.onFacultyChange}>
-                    <option value="">--学部--</option>
-                    ${facluty_options}
-                </select>
-            </label>
-            <label>
-                系/コース/専攻
-                <select .value=${this.selectedMajorId ?? ""} @change=${this.onMajorChange}>
-                    <option value="">--系/コース/専攻--</option>
-                    ${major_options}
-                </select></label
-            >
-        </div>`;
     }
 
     private onFacultyChange(e: Event) {
@@ -143,7 +152,7 @@ export class MajorSelect extends LitElement {
 
     private emitChange() {
         this.dispatchEvent(
-            new CustomEvent("selection-change", {
+            new CustomEvent("major-select-change", {
                 detail: { facultyId: this.selectedFacultyId, majorId: this.selectedMajorId },
                 bubbles: true,
             }),
