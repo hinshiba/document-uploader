@@ -23,7 +23,7 @@ use crate::usecase::repository::{
     SubjectRepository,
 };
 
-/// 現行のOpenAPIドキュメントの`example`に従うRepository
+/// Repositoryの参考実装
 #[derive(Debug)]
 pub struct ExampleRepository {
     documents: std::sync::Mutex<Vec<Document>>,
