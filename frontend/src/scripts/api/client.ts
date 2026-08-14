@@ -247,6 +247,32 @@ export interface DownloadDocument {
     blob: Blob;
 }
 
+/** レスポンスがzip固定なので拡張子を含める */
+const DEFAULT_DOWNLOAD_FILENAME = "download.zip";
+
+/**
+ * `Content-Disposition`からダウンロード時のファイル名を取り出す
+ *
+ * RFC 6266のfilename*を優先し，無ければfilenameにフォールバックする
+ * @param disposition - ヘッダの値．ヘッダが無い場合は`null`
+ * @returns ファイル名を取り出せない場合は`undefined`
+ */
+function parseFilename(disposition: string | null): string | undefined {
+    if (disposition === null) return undefined;
+
+    // パーセントエンコードされた非ASCIIのファイル名はこちらでしか渡らない
+    const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (encoded?.[1] !== undefined) {
+        try {
+            return decodeURIComponent(encoded[1]);
+        } catch {
+            // 不正なエンコードはfilenameへのフォールバックで拾う
+        }
+    }
+
+    return disposition.match(/filename="?([^";]+)"?/i)?.[1];
+}
+
 /** ドキュメントをダウンロードする
  * /docs/{id} GET に対応
  * @param id - ダウンロードするドキュメントのID
