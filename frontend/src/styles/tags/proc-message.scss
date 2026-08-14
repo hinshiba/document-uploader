@@ -1,6 +1,6 @@
 proc-message {
     // 表示するメッセージが無いときに余白やgapを生まないようにする
-    p:empty {
+    p[hidden] {
         display: none;
     }
 }
