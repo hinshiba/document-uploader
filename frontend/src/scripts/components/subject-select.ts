@@ -151,11 +151,11 @@ export class SubjectSelect extends LitElement {
             "2回生",
             "3回生",
             "4回生",
-            "M1",
-            "M2",
-            "D1",
-            "D2",
-            "D3",
+            "修士1年",
+            "修士2年",
+            "博士1年",
+            "博士2年",
+            "博士3年",
         ] as const satisfies { length: typeof GRADE_MAX };
         const terms = ["1学期", "2学期", "3学期", "4学期"] as const satisfies {
             length: typeof TERM_MAX;
