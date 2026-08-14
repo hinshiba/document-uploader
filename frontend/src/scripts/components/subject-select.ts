@@ -89,9 +89,10 @@ export class SubjectSelect extends LitElement {
         return this;
     }
 
-    // 絞り込み条件が変わったら教科を取り直し，UIが更新されたらformが取得できる値を更新
-    protected override updated(changedProperties: PropertyValues) {
-        super.updated(changedProperties);
+    // 絞り込み条件が変わったら教科を取り直す
+    // 取り消しを同じ更新サイクルに反映させるため描画前に行う
+    protected override willUpdate(changedProperties: PropertyValues) {
+        super.willUpdate(changedProperties);
 
         const filterKeys = ["facultyId", "majorId", "selectedGrade", "selectedTerm"];
         if (filterKeys.some((key) => changedProperties.has(key))) {
@@ -99,10 +100,15 @@ export class SubjectSelect extends LitElement {
             this.selectedSubjectId = undefined;
             void this.loadSubjects();
         }
+    }
+
+    // UIが更新されたらformが取得できる値を更新
+    protected override updated(changedProperties: PropertyValues) {
+        super.updated(changedProperties);
 
         this.syncFormValue();
 
-        // 上記の取り消しを反映してから通知するためここで発火する
+        // willUpdateでの取り消しを反映してから通知するためここで呼び出し
         const selectionKeys = ["selectedSubjectId", "selectedGrade", "selectedTerm"];
         if (selectionKeys.some((key) => changedProperties.has(key))) {
             this.emitChange();

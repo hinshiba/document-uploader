@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block styles %} {% endblock %} {% block content %}
+
+<main>
+    <h2>科目登録</h2>
+    <p>科目情報の登録にご協力ください．</p>
+
+    <form>
+        <p>登録したい科目の情報を入力してください．</p>
+
+        <major-select></major-select>
+
+        <label for="grade">学年</label>
+        <select id="grade" name="grade" required>
+            <option value="">--学年--</option>
+            <option value="1">1回生</option>
+            <option value="2">2回生</option>
+            <option value="3">3回生</option>
+            <option value="4">4回生</option>
+            <option value="5">M1</option>
+            <option value="6">M2</option>
+            <option value="7">D1</option>
+            <option value="8">D2</option>
+            <option value="9">D3</option>
+        </select>
+
+        <label for="term">学期</label>
+        <select id="term" name="term" required>
+            <option value="">--学期--</option>
+            <option value="1">1学期</option>
+            <option value="2">2学期</option>
+            <option value="3">3学期</option>
+            <option value="4">4学期</option>
+        </select>
+
+        <label for="name">科目名</label>
+        <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="線形代数"
+            required
+        >
+
+        <label for="course_code">講義番号</label>
+        <input
+            type="text"
+            id="course_code"
+            name="course_code"
+            placeholder="090002"
+            required
+        >
+
+        <proc-message id="proc-message"></proc-message>
+
+        <button id="registerbtn" type="submit">登録</button>
+    </form>
+</main>
+
+{% endblock content %} {% block scripts %}
+<script type="module" src="../scripts/subject.ts"></script>
+{% endblock %}

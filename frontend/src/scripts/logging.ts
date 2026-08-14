@@ -37,4 +37,5 @@ export const log = {
     api: getLogger(["app", "api"]),
     upload: getLogger(["app", "ui", "upload"]),
     download: getLogger(["app", "ui", "download"]),
+    subject: getLogger(["app", "ui", "subject"]),
 };
