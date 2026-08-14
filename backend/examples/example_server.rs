@@ -88,6 +88,9 @@ impl<I: DocumentRepository> DocumentRepository for Arc<I> {
     async fn find_document_by_id(&self, document_id: &domain::Id<domain::document::Document>) -> anyhow::Result<Option<domain::document::Document>> {
         <I as DocumentRepository>::find_document_by_id(&self, document_id).await
     }
+    async fn search_documents(&self, option: SearchDocumentOption) -> anyhow::Result<Vec<domain::document::Document>> {
+        <I as DocumentRepository>::search_documents(&self, option).await
+    }
 }
 
 impl<I: FacultyRepository> FacultyRepository for Arc<I> {
