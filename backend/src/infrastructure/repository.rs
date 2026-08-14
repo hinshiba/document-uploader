@@ -23,6 +23,46 @@ use crate::usecase::repository::{
     SubjectRepository,
 };
 
+macro_rules! construct_faculty {
+    ( $fname:ident : [ $($sname:expr),* ] ) => {
+        {
+            let f_id: Id<Faculty> = Id::new(::uuid::Uuid::new_v4());
+            Faculty::new(
+                f_id.clone(),
+                String::from(stringify!($fname)),
+                vec![
+                    $( Major::new(
+                        Id::new(::uuid::Uuid::new_v4()),
+                        String::from(stringify!($sname)),
+                        f_id.clone(),
+                    )),*
+                ]
+            )
+        }
+    };
+
+    ( $( $fname:ident : [ $($sname:expr),* ] ),+ ) => {
+        vec![
+            $(
+                {
+                    let f_id: Id<Faculty> = Id::new(::uuid::Uuid::new_v4());
+                    Faculty::new(
+                        f_id.clone(),
+                        String::from(stringify!($fname)),
+                        vec![
+                            $( Major::new(
+                                Id::new(::uuid::Uuid::new_v4()),
+                                String::from(stringify!($sname)),
+                                f_id.clone(),
+                            )),*
+                        ]
+                    )
+                }
+            ),+
+        ]
+    };
+}
+
 /// Repositoryの参考実装
 #[derive(Debug)]
 pub struct ExampleRepository {
@@ -49,61 +89,39 @@ impl ExampleRepository {
     // 以下helper functions
 
     fn example_faculties() -> Vec<Faculty> {
-        vec![
-            Faculty::new(
-                Id::new(uuid::uuid!("f47ac10b-58cc-4372-a567-0e02b2c3d479")),
-                "工学部".to_owned(),
-                vec![
-                    Major::new(
-                        Id::new(uuid::uuid!("550e8400-e29b-41d4-a716-446655440000")),
-                        "情電数理系/情報工学コース".to_owned(),
-                        Id::new(uuid::uuid!("f47ac10b-58cc-4372-a567-0e02b2c3d479")),
-                    ),
-                    Major::new(
-                        Id::new(uuid::uuid!("6ba7b810-9dad-11d1-80b4-00c04fd430c8")),
-                        "情電数理系/ネットワーク工学コース".to_owned(),
-                        Id::new(uuid::uuid!("f47ac10b-58cc-4372-a567-0e02b2c3d479")),
-                    ),
-                ]
-            ),
-            Faculty::new(
-                Id::new(uuid::uuid!("6ba7b812-9dad-11d1-80b4-00c04fd430c8")),
-                "理学部".to_owned(),
-                vec![
-                    Major::new(
-                        Id::new(uuid::uuid!("6ba7b813-9dad-11d1-80b4-00c04fd430c8")),
-                        "数学科".to_owned(),
-                        Id::new(uuid::uuid!("6ba7b812-9dad-11d1-80b4-00c04fd430c8")),
-                    ),
-                    Major::new(
-                        Id::new(uuid::uuid!("6ba7b814-9dad-11d1-80b4-00c04fd430c8")),
-                        "物理学科".to_owned(),
-                        Id::new(uuid::uuid!("6ba7b812-9dad-11d1-80b4-00c04fd430c8")),
-                    ),
-                ]
-            ),
+        construct_faculty![
+            教養教育 : [ 共通 ],
+            文学部 : [ 人文学科 ],
+            教育学部 : [ 教員養成, 養護教諭養成 ],
+            法学部 : [ 法学科 ],
+            経済学部 : [ 経済学科 ],
+            理学部 : [ 共通, 数学科, 物理学科, 化学科, 生物学科, 地球科学科 ],
+            医学部 : [ 医学科, 保健-看護, 保健-放射線, 保健-検査技術 ],
+            歯学部 : [ 薬学科, 創薬科学科 ],
+            工学部 : [
+                共通,
+                機械システム共通,
+                機械システム-機械,
+                機械システム-知能,
+                環境社会共通,
+                環境社会-都市,
+                環境社会-環境,
+                情電数学共通,
+                情電数学-IT,
+                情電数学-NE,
+                情電数学-EE,
+                情電数学-DS,
+                化学生命共通,
+                化学生命-応用化学,
+                化学生命-生命工学
+            ],
+            農学部 : [ 農学科 ],
+            GDP : [ GDP ]
         ]
     }
 
     fn example_subjects() -> Vec<Subject> {
-        vec![
-            Subject::new(
-                Id::new(uuid::uuid!("9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c")),
-                "線形代数".to_owned(),
-                Id::new(uuid::uuid!("f47ac10b-58cc-4372-a567-0e02b2c3d479")),
-                Id::new(uuid::uuid!("550e8400-e29b-41d4-a716-446655440000")),
-                Grade::new(1).unwrap(),
-                Term::new(1).unwrap(),
-            ),
-            Subject::new(
-                Id::new(uuid::uuid!("a1b2c3d4-e5f6-4a5b-9c8d-7e6f5a4b3c2d")),
-                "アルゴリズムと計算量".to_owned(),
-                Id::new(uuid::uuid!("f47ac10b-58cc-4372-a567-0e02b2c3d479")),
-                Id::new(uuid::uuid!("550e8400-e29b-41d4-a716-446655440000")),
-                Grade::new(2).unwrap(),
-                Term::new(2).unwrap(),
-            )
-        ]
+        vec![]
     }
 
     fn clone_faculties(faculties: &[Faculty]) -> Vec<Faculty> {
