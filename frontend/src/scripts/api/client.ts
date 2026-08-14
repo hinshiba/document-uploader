@@ -11,6 +11,7 @@ import type {
     Grade,
     MajorId,
     Subject,
+    SubjectBase,
     Term,
     SubjectId,
     Year,
@@ -163,6 +164,19 @@ export async function fetchSubjects(
     }
 
     return requestJson<Subject[]>("GET", `/subjects?${params.toString()}`);
+}
+
+/**
+ * 科目を登録する
+ * /subjects POST に対応
+ * @param subject 登録する科目情報
+ * @returns 登録された科目．失敗時はApiError
+ */
+export async function postSubject(subject: SubjectBase): Promise<ApiResult<Subject>> {
+    return requestJson<Subject>("POST", "/subjects", {
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subject),
+    });
 }
 
 /**
