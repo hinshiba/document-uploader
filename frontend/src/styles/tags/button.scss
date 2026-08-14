@@ -1,0 +1,23 @@
+@use "../var" as *;
+
+// form外に置かれるボタンとも見た目を統一するため，tagsで指定する
+$padding-inline: 1.5rem;
+$disabled-opacity: 0.5;
+
+button,
+input[type="submit"] {
+    padding: $space-sm $padding-inline;
+    border: none;
+    background-color: $primary-color;
+    color: $bg-color;
+    cursor: pointer;
+
+    &:hover {
+        background-color: $primary-hover-color;
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: $disabled-opacity;
+    }
+}
