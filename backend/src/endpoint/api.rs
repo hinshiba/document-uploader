@@ -4,7 +4,7 @@ use crate::{
         EndpointError,
         EndpointResult,
         alive::alive,
-        docs::post_document,
+        docs::{get_documents, post_document},
         docs_id::get_document_id,
         faculties::get_faculties,
         subjects::{get_subjects, post_subject},
@@ -20,7 +20,7 @@ use crate::{
 
 
 /// ドキュメントのアップロードで受け付けるリクエストボディ全体の上限
-/// 
+///
 /// axumの既定は2MB (https://docs.rs/axum/0.8.9/axum/extract/struct.Multipart.html#large-files)
 const MAX_UPLOAD_BODY_SIZE: usize = 100 * 1024 * 1024;
 
@@ -36,6 +36,7 @@ where S: FacultyRepository + SubjectRepository + DocumentRepository + DocumentFi
             "/docs",
             routing::post(post_document::<S>).layer(DefaultBodyLimit::max(MAX_UPLOAD_BODY_SIZE)),
         )
+        .route("/docs", routing::get(get_documents::<S>))
         .route("/docs/{id}", routing::get(get_document_id::<S>))
         .with_state(state)
         // nestの外側のfallbackへ落として静的ファイル配信されないようにする
