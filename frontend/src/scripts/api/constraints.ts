@@ -169,6 +169,24 @@ export function toSubjectId(data: unknown): SubjectId | undefined {
     return toRequiredString(data) as SubjectId | undefined;
 }
 
+// CourseCode
+
+// 講義番号は西暦(4桁)+6桁の番号，または6桁の番号のみ
+const COURSE_CODE_PATTERN = /^(?:\d{4})?\d{6}$/;
+
+/**
+ * `course_code`の検証を含むコンストラクタ
+ * 西暦付きの10桁で入力された場合は先頭4桁の西暦を除去する
+ * @returns 検証を通らない場合は`undefined`
+ */
+export function toCourseCode(data: unknown): string | undefined {
+    const trimmed = toRequiredString(data);
+    if (trimmed === undefined) return undefined;
+    if (!COURSE_CODE_PATTERN.test(trimmed)) return undefined;
+
+    return trimmed.length === 10 ? trimmed.slice(4) : trimmed;
+}
+
 // ExamType
 
 /**

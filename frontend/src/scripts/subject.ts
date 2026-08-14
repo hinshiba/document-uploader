@@ -4,6 +4,7 @@ import {
     GRADE_MIN,
     TERM_MAX,
     TERM_MIN,
+    toCourseCode,
     toFacultyId,
     toGrade,
     toMajorId,
@@ -89,9 +90,13 @@ function buildSubject(): Result<SubjectBase, ValidationError> {
     const name = toRequiredString(formdata.get("name"));
     if (name === undefined) return err(new ValidationError("科目名が入力されていません．"));
 
-    const course_code = toRequiredString(formdata.get("course_code"));
+    const course_code = toCourseCode(formdata.get("course_code"));
     if (course_code === undefined)
-        return err(new ValidationError("講義番号が入力されていません．"));
+        return err(
+            new ValidationError(
+                "講義番号の値が不正です．講義番号は6桁，または西暦を含む10桁の数字で入力してください．",
+            ),
+        );
 
     return ok({
         faculty,
