@@ -42,7 +42,7 @@ impl ExampleRepository {
             documents: std::sync::Mutex::new(Vec::new()),
             faculties: Self::example_faculties(),
             subjects: std::sync::Mutex::new(Self::example_subjects()),
-            save_dir,
+            save_dir: save_dir.canonicalize()?,
         } )
     }
 
@@ -211,7 +211,7 @@ impl FacultyRepository for ExampleRepository {
     async fn list_faculties(&self) -> anyhow::Result<Vec<Faculty>> {
         let faculties = Self::clone_faculties(&self.faculties);
         Ok(faculties)
-    }    
+    }
 }
 
 impl SubjectRepository for ExampleRepository {
