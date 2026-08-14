@@ -7,6 +7,7 @@ oxlintの`no-restricted-imports`で強制しており，`constraints.ts`だけ�
 
 `constraints.ts`の`toXxx`を通し，検証された型を用いてください．
 
+復帰可能なエラーで例外をthrowしないという方向にすること．
 
 ## フォーマットとリント
 
