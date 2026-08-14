@@ -21,6 +21,9 @@ export type Teacher = components["schemas"]["DocumentMetadata"]["teacher"] & {
 export type FacultyId = components["schemas"]["Faculty"]["id"] & { readonly [brand]: "FacultyId" };
 export type MajorId = components["schemas"]["Major"]["id"] & { readonly [brand]: "MajorId" };
 export type SubjectId = components["schemas"]["Subject"]["id"] & { readonly [brand]: "SubjectId" };
+export type DocumentId = components["schemas"]["Document"]["id"] & {
+    readonly [brand]: "DocumentId";
+};
 export type ExamType = components["schemas"]["ExamType"];
 
 // 交差型で各フィールドを絞り込み，未検証の`string`や`number`を代入できないようにする
@@ -41,6 +44,11 @@ export type DocumentMetadata = components["schemas"]["DocumentMetadata"] & {
     subject: SubjectId;
     teacher: Teacher;
     num: Num;
+};
+
+export type Document = components["schemas"]["Document"] & {
+    id: DocumentId;
+    metadata: DocumentMetadata;
 };
 
 // 共通の検証
