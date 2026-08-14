@@ -73,6 +73,7 @@ pub struct ExampleRepository {
 }
 
 impl ExampleRepository {
+    #[tracing::instrument(ret(level="debug"))]
     pub fn new(save_dir: std::path::PathBuf) -> std::io::Result<Self> {
         if !save_dir.exists() {
             std::fs::create_dir_all(&save_dir)?;
