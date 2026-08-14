@@ -1,17 +1,18 @@
+@use "../var" as *;
+
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-block: $space-sm;
+
+    > a {
+        font-size: $font-size-lg;
+    }
 
     ul {
         list-style: none;
         display: flex;
-        gap: 1em;
-        padding-left: 0;
-        margin-bottom: 0;
-    }
-
-    li {
-        margin-bottom: 0;
+        gap: $space-md;
     }
 }

@@ -1,19 +1,16 @@
 @use "../../var" as *;
 
 .search-area {
-    padding: 2rem;
-    border: 2px solid $border-color;
-    text-align: center;
+    padding: $space-lg;
+    border: $border-width-thick solid $border-color;
+    background-color: $surface-color;
 
     ul {
         list-style: none;
-        margin: 1rem 0 0;
-        padding: 0;
-        text-align: left;
     }
 
     li {
-        padding: 0.25rem 0.5rem;
-        border-bottom: 1px solid $border-color;
+        padding: $space-xs $space-sm;
+        border-bottom: $border-width solid $divider-color;
     }
 }

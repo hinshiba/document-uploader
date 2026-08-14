@@ -1,6 +1,7 @@
 @use "../var" as *;
 
 $field-gap: 0.75rem;
+$checkbox-scale: 1.5;
 
 form {
     display: flex;
@@ -8,39 +9,45 @@ form {
     gap: $field-gap;
 
     label {
+        display: flex;
+        flex-direction: column;
+        gap: $space-xs;
         margin-top: $field-gap;
         font-weight: bold;
+
+        // チェックボックスはラベル文と同じ行に並べる
+        &:has(input[type="checkbox"]) {
+            flex-direction: row;
+            align-items: center;
+        }
+    }
+
+    small {
+        font-weight: normal;
     }
 
     select,
     input[type="file"],
     input[type="text"],
     input[type="number"] {
-        padding: 0.5rem;
-        border: 1px solid $border-color;
+        padding: $space-sm;
+        border: $border-width solid $border-color;
+    }
+
+    input[type="checkbox"] {
+        transform: scale($checkbox-scale);
     }
 
     button,
     input[type="submit"] {
         align-self: flex-start;
-        padding: 0.5rem 1.5rem;
-        border: 1px solid $text-color;
-        background-color: $bg-color;
-        color: $text-color;
-        cursor: pointer;
-
-        &:hover {
-            background-color: $text-color;
-            color: $bg-color;
-        }
-
-        &:disabled {
-            cursor: default;
-            opacity: 0.5;
-        }
     }
 
-    input[type="checkbox"] {
-        transform: scale(1.5);
+    // カスタム要素は既定でinlineのため，内部のフィールドをformと同じ規則で並べる
+    major-select,
+    subject-select {
+        display: flex;
+        flex-direction: column;
+        gap: $field-gap;
     }
 }

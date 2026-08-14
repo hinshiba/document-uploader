@@ -23,10 +23,8 @@ const subjectSelect = required<SubjectSelect>("subject-select");
 const resultList = required<HTMLUListElement>("#download-result");
 const procMessage = required<ProcMessage>("#proc-message");
 
-/**
- * 最新の検索リクエストを識別するID
- */
-let activeSearchId = 0;
+/** 最新のアクションを識別するID */
+let activeActionId = 0;
 
 // major-select の facultyIdとmajorId を subject-select の facultyIdとmajorId に反映する
 majorSelect.addEventListener("major-select-change", (event) => {
@@ -75,8 +73,7 @@ function createResultItem(doc: Document) {
     const button = document.createElement("button");
 
     button.type = "button";
-    button.classList.add("download-button");
-    button.textContent = "downloadする";
+    button.textContent = "ダウンロード";
 
     li.append(
         `${metadata.year}年度 ` +
@@ -103,9 +100,14 @@ function createResultItem(doc: Document) {
  * Blob URLを生成してブラウザのダウンロード処理を実行する．
  */
 async function download(id: DocumentId) {
+    const currentActionId = ++activeActionId;
     procMessage.error = undefined;
 
     const res = await downloadDocument(id);
+
+    // 最新でないなら結果表示は行わない
+    if (currentActionId !== activeActionId) return;
+
     if (!res.ok) {
         procMessage.error = res.error;
         return;
@@ -123,19 +125,11 @@ async function download(id: DocumentId) {
     log.download.info("download succeeded", { id, filename: file.filename });
 }
 
-/**
- * 検索フォーム送信時の処理
- *
- * FormDataから検索条件を取得し，
- * 型変換後にAPIへ検索リクエストを送信する．
- *
- * activeSearchIdを利用して，
- * 古い検索結果が新しい検索結果を上書きしないよう制御する．
- */
+// 検索フォームのAPI要求処理
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const currentSearchId = ++activeSearchId;
+    const currentActionId = ++activeActionId;
 
     // 前回の結果表示を消す
     procMessage.status = "";
@@ -144,10 +138,10 @@ form.addEventListener("submit", async (event) => {
 
     const formData = new FormData(form);
 
-    // 教科以外は絞り込みの任意項目なので検証しない
+    // 科目以外は絞り込みの任意項目なので検証しない
     const subject = toSubjectId(formData.get("subject"));
     if (subject === undefined) {
-        const error = new ValidationError("教科が選択されていません．");
+        const error = new ValidationError("科目が選択されていません．");
         log.download.info("invalid search condition", { message: error.message });
         procMessage.error = error;
         return;
@@ -162,8 +156,8 @@ form.addEventListener("submit", async (event) => {
 
     const res = await searchDocuments(subject, year, teacher, examtype, isanswer);
 
-    // 古い検索の結果は捨てる
-    if (currentSearchId !== activeSearchId) return;
+    // 最新でないなら結果表示は行わない
+    if (currentActionId !== activeActionId) return;
 
     procMessage.status = "";
 

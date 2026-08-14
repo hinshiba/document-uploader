@@ -1,6 +1,26 @@
-// TODO: カラーを考える
-// $primary-color: #3498db;
-// $secondary-color: #2c3e50;
-$text-color: black;
-$border-color: #aaa;
-$bg-color: white;
+// 色
+$text-color: #000; // 本文
+$text-weak-color: #333; // 状態表示等の補助テキスト
+$bg-color: #fff; // 地
+$surface-color: #ccc; // 枠で囲った領域の面
+$primary-color: #06c; // 主要な操作
+$primary-hover-color: #03c; // 主要な操作のhover
+$error-color: #c30; // エラー
+$border-color: #999; // 入力欄や領域の境界
+$divider-color: #333; // 区切り線
+
+// フォント
+$line-height: 1.6;
+$font-size-lg: 1.25rem;
+
+// 余白・間隔
+$space-xs: 0.25rem;
+$space-sm: 0.5rem;
+$space-md: 1rem;
+$space-lg: 2rem;
+$space-xl: 2.5rem;
+
+// 寸法
+$content-max-width: 640px;
+$border-width: 1px;
+$border-width-thick: 2px;

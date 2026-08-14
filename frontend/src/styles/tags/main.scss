@@ -1,0 +1,7 @@
+@use "../var" as *;
+
+main {
+    max-width: $content-max-width;
+    margin: 0 auto;
+    padding: $space-lg $space-md;
+}
