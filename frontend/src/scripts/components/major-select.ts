@@ -88,30 +88,28 @@ export class MajorSelect extends LitElement {
                 .status=${this.response === undefined ? "読み込み中" : ""}
                 .error=${error}
             ></proc-message>
-            <div class="section-content">
-                <label>
-                    学部
-                    <select
-                        data-field="faculty"
-                        .value=${this.selectedFacultyId ?? ""}
-                        @change=${this.onFacultyChange}
-                    >
-                        <option value="">--学部--</option>
-                        ${faculty_options}
-                    </select>
-                </label>
-                <label>
-                    系/コース/専攻
-                    <select
-                        data-field="major"
-                        .value=${this.selectedMajorId ?? ""}
-                        @change=${this.onMajorChange}
-                    >
-                        <option value="">--系/コース/専攻--</option>
-                        ${major_options}
-                    </select>
-                </label>
-            </div>`;
+            <label>
+                学部
+                <select
+                    data-field="faculty"
+                    .value=${this.selectedFacultyId ?? ""}
+                    @change=${this.onFacultyChange}
+                >
+                    <option value="">--学部--</option>
+                    ${faculty_options}
+                </select>
+            </label>
+            <label>
+                系/コース/専攻
+                <select
+                    data-field="major"
+                    .value=${this.selectedMajorId ?? ""}
+                    @change=${this.onMajorChange}
+                >
+                    <option value="">--系/コース/専攻--</option>
+                    ${major_options}
+                </select>
+            </label>`;
     }
 
     /** formが使える情報を設定する  */

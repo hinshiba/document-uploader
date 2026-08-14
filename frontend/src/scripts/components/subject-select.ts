@@ -169,41 +169,39 @@ export class SubjectSelect extends LitElement {
                 .status=${this.response === undefined ? "読み込み中" : ""}
                 .error=${error}
             ></proc-message>
-            <div class="section-content">
-                <label>
-                    学年
-                    <select
-                        data-field="grade"
-                        .value=${String(this.selectedGrade ?? "")}
-                        @change=${this.onGradeChange}
-                    >
-                        <option value="">--学年--</option>
-                        ${grade_options}
-                    </select>
-                </label>
-                <label>
-                    学期
-                    <select
-                        data-field="term"
-                        .value=${String(this.selectedTerm ?? "")}
-                        @change=${this.onTermChange}
-                    >
-                        <option value="">--学期--</option>
-                        ${term_options}
-                    </select>
-                </label>
-                <label>
-                    教科
-                    <select
-                        data-field="subject"
-                        .value=${this.selectedSubjectId ?? ""}
-                        @change=${this.onSubjectChange}
-                    >
-                        <option value="">教科を選択してください</option>
-                        ${subject_options}
-                    </select>
-                </label>
-            </div>`;
+            <label>
+                学年
+                <select
+                    data-field="grade"
+                    .value=${String(this.selectedGrade ?? "")}
+                    @change=${this.onGradeChange}
+                >
+                    <option value="">--学年--</option>
+                    ${grade_options}
+                </select>
+            </label>
+            <label>
+                学期
+                <select
+                    data-field="term"
+                    .value=${String(this.selectedTerm ?? "")}
+                    @change=${this.onTermChange}
+                >
+                    <option value="">--学期--</option>
+                    ${term_options}
+                </select>
+            </label>
+            <label>
+                教科
+                <select
+                    data-field="subject"
+                    .value=${this.selectedSubjectId ?? ""}
+                    @change=${this.onSubjectChange}
+                >
+                    <option value="">教科を選択してください</option>
+                    ${subject_options}
+                </select>
+            </label>`;
     }
 
     /** formが使える情報を設定する */
