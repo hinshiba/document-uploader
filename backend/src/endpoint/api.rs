@@ -1,6 +1,8 @@
-use axum::{Router, routing};
+use axum::{Router, http::StatusCode, routing};
 use crate::{
     endpoint::{
+        EndpointError,
+        EndpointResult,
         alive::alive,
         docs::post_document,
         docs_id::get_document_id,
@@ -28,4 +30,17 @@ where S: FacultyRepository + SubjectRepository + DocumentRepository + DocumentFi
         .route("/docs", routing::post(post_document::<S>))
         .route("/docs/{id}", routing::get(get_document_id::<S>))
         .with_state(state)
+        // nestの外側のfallbackへ落として静的ファイル配信されないようにする
+        .fallback(api_not_found)
+}
+
+#[tracing::instrument(ret(level = "info"))]
+async fn api_not_found() -> EndpointResult<()> {
+    (
+        StatusCode::NOT_FOUND,
+        Err(EndpointError {
+            message: "not found".to_owned(),
+            details: None,
+        }),
+    )
 }
