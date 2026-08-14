@@ -18,11 +18,6 @@ use tower_http::services::ServeDir;
 
 use crate::{
     endpoint::api::api_router,
-    infrastructure::{
-        local_fs::LocalFileSystemRepository,
-        pgfs::PgFsRepository,
-        postgresql::PostgresRepository
-    }
 };
 
 mod domain;
@@ -40,7 +35,6 @@ async fn main() -> anyhow::Result<()> {
 
     init_tracing_subscriber();
     let listener = tokio::net::TcpListener::bind(env::var("LISTEN_ADDR").context("LISTEN_ADDR is not set.")?).await?;
-    let pgpool = sqlx::PgPool::connect(&env::var("DATABASE_URL").context("DATABASE_URL is not set.")?).await?;
 
 
     let state = Arc::new(init_example_repository()?);
