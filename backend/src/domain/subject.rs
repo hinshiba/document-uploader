@@ -1,3 +1,5 @@
+use crate::domain::FormatValidationError;
+
 use super::{
     Id,
     Grade,
@@ -74,5 +76,28 @@ impl Subject {
     }
     pub fn term(&self) -> &Term<Subject> {
         &self.term
+    }
+}
+
+/// 講義番号と一致する文字列
+/// 
+/// 重複判定に用いる
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct CourseCode {
+    inner: String,
+}
+
+impl CourseCode {
+    /// 講義番号を文字列から作成する
+    /// 
+    /// TODO: 検証を追加する(実存確認は大変なので......)
+    pub fn new(code: impl Into<String>) -> Result<Self, FormatValidationError> {
+        Ok(Self {
+            inner: code.into()
+        })
+    }
+
+    pub fn code(&self) -> &str {
+        &self.inner
     }
 }
