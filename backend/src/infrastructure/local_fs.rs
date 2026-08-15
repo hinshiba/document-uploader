@@ -10,12 +10,12 @@ use crate::{
 
 /// ローカルファイルシステムにドキュメントの実体を保存するためのリポジトリ実装
 #[derive(Debug, Clone)]
-pub struct LocalFileSystem {
+pub struct LocalFileSystemRepository {
     /// 保存のルートとなるディレクトリ
     save_dir: PathBuf,
 }
 
-impl LocalFileSystem {
+impl LocalFileSystemRepository {
     /// `save_dir`をルートとするドキュメントの実体を保存するリポジトリを作成する
     ///
     /// # Errors
@@ -38,7 +38,7 @@ impl LocalFileSystem {
     }
 }
 
-impl DocumentFileRepository for LocalFileSystem {
+impl DocumentFileRepository for LocalFileSystemRepository {
     #[tracing::instrument(skip_all, ret(level = "info"), err)]
     async fn store_document_file(
         &self,
@@ -76,7 +76,7 @@ mod tests {
     async fn store_and_get_document_file() {
         // 一時ファイルの準備
         let save_dir = std::env::temp_dir().join(uuid::Uuid::new_v4().to_string());
-        let repository = LocalFileSystem::new(save_dir.clone()).unwrap();
+        let repository = LocalFileSystemRepository::new(save_dir.clone()).unwrap();
         assert!(save_dir.is_dir());
 
         // storeのテスト
