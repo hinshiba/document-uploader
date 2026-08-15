@@ -22,7 +22,7 @@
         "dev-serve-back": "BUN_PUBLIC_API_BASE=http://127.0.0.1:3000/api/v1 BUN_PUBLIC_LOG_LEVEL=debug bun --hot src/temp/*.html",
         "dev-watch:html": "bun run scripts/gen-html.ts --watch",
         "dev-watch:css": "bun run scripts/gen-css.ts --watch",
-        "build": "rm -rf out && bun run gen && BUN_PUBLIC_API_BASE= BUN_PUBLIC_LOG_LEVEL=warning bun build src/temp/*.html --outdir=out --env='BUN_PUBLIC_*'",
+        "build": "rm -rf out && bun run gen && BUN_PUBLIC_API_BASE=/api/v1 BUN_PUBLIC_LOG_LEVEL=warning bun build src/temp/*.html --outdir=out --env='BUN_PUBLIC_*'",
         "gen": "bun run gen:api && bun run gen:html && bun run gen:css",
         "gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/scripts/api/types.ts",
         "gen:html": "bun run scripts/gen-html.ts",
