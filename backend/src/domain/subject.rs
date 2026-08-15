@@ -12,39 +12,18 @@ use super::{
 pub struct Subject {
     id: Id<Subject>,
     name: String,
+    course_code: CourseCode,
     faculty_id: Id<Faculty>,
     major_id: Id<Major>,
     grade: Grade<Subject>,
     term: Term<Subject>,
 }
 
-/// 講義番号と一致する文字列
-/// 
-/// 重複判定に用いる
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct CourseCode {
-    inner: String,
-}
-
-impl CourseCode {
-    /// 講義番号を文字列から作成する
-    /// 
-    /// TODO: 検証を追加する(実存確認は大変なので......)
-    pub fn new(code: impl Into<String>) -> Result<Self, ()> {
-        Ok(Self {
-            inner: code.into()
-        })
-    }
-
-    pub fn code(&self) -> &str {
-        &self.inner
-    }
-}
-
 impl Subject {
     pub fn new(
         id: Id<Subject>,
         name: String,
+        course_code: CourseCode,
         faculty_id: Id<Faculty>,
         major_id: Id<Major>,
         grade: Grade<Subject>,
@@ -53,6 +32,7 @@ impl Subject {
         Self {
             id,
             name,
+            course_code,
             faculty_id,
             major_id,
             grade,
