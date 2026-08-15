@@ -7,6 +7,7 @@ use crate::domain::{
 use crate::infrastructure::{local_fs::LocalFileSystemRepository, postgresql::PostgresRepository};
 use crate::usecase::repository::{
     DocumentFileRepository,
+    SearchDocumentOption,
     DocumentRepository,
     FacultyRepository,
     SearchSubjectOption,
@@ -36,6 +37,10 @@ impl DocumentRepository for PgFsRepository {
 
     async fn store_document(&self, document: Document) -> anyhow::Result<()> {
         self.pool.store_document(document).await
+    }
+
+    async fn search_documents(&self, option: SearchDocumentOption) -> anyhow::Result<Vec<Document>> {
+        self.pool.search_documents(option).await
     }
 }
 
