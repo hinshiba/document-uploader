@@ -1,5 +1,12 @@
 # frontend
 
+## 開発サーバ
+
+ページのURLはbackendの`ServeDir`に合わせ，`/upload.html`のように拡張子付きに統一する．
+
+CLIの`bun --hot src/temp/*.html`は`/upload`にしかマップせずURLがずれるため，`scripts/dev-server.ts`で`src/temp/*.html`から`Bun.serve`のroutesを組み立てている．
+ページを追加したときは開発サーバの再起動が必要である．既存ページの再生成はそのまま反映される．
+
 ## TS
 
 `types.ts`を`constraints.ts`以外でインポートしないでください．

@@ -18,7 +18,7 @@
     "scripts": {
         "dev": "bun run gen && bun run --parallel 'dev-watch:*' dev-serve-mock",
         "dev:back": "bun run build:back && bun run sync:public && bun run dev-serve-example",
-        "dev-serve-mock": "BUN_PUBLIC_API_BASE=http://127.0.0.1:4010 BUN_PUBLIC_LOG_LEVEL=debug bun --hot src/temp/*.html",
+        "dev-serve-mock": "BUN_PUBLIC_API_BASE=http://127.0.0.1:4010 BUN_PUBLIC_LOG_LEVEL=debug bun --hot scripts/dev-server.ts",
         "dev-serve-example": "cd ../backend && cargo run --example example_server",
         "dev-watch:html": "bun run scripts/gen-html.ts --watch",
         "dev-watch:css": "bun run scripts/gen-css.ts --watch",
