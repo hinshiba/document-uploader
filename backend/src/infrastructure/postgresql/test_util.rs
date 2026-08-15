@@ -1,6 +1,6 @@
 //! テスト用のヘルパー群
 //!
-//! 学部・専攻はマイグレーションのシードと衝突しないよう, 
+//! 学部・専攻はマイグレーションのシードと衝突しないよう,
 //! テスト内では`テスト学部A`のような明らかにテスト用と分かる名前を用いる
 
 use sqlx::PgPool;
@@ -73,31 +73,30 @@ pub(super) fn subject_of(
     )
 }
 
-/// `subjects`へ直接投入し, そのidを返す
-///
-/// faculty_idはmajor_id経由でしか解決されない
-pub(super) async fn insert_subject(
-    pool: &PgPool,
-    name: &str,
-    major_id: Uuid,
-    grade: i64,
-    term: i64,
-) -> Uuid {
-    let subject_id = Uuid::new_v4();
-    sqlx::query!(
-        "INSERT INTO subjects (id, name, major_id, grade, term)
-            VALUES ($1, $2, $3, $4, $5)",
-        subject_id,
-        name,
-        major_id,
-        grade,
-        term
-    )
-    .execute(pool)
-    .await
-    .unwrap();
-    subject_id
-}
+/// `subjects`へ直接投入する, faculty_idはmajor_id経由でしか解決されない
+    async fn insert_subject(
+        pool: &PgPool,
+        id: Uuid,
+        name: &str,
+        course_code: &str,
+        major_id: Uuid,
+        grade: i64,
+        term: i64,
+    ) {
+        sqlx::query!(
+            "INSERT INTO subjects (id, name, course_code, major_id, grade, term)
+                VALUES ($1, $2, $3, $4, $5, $6)",
+            id,
+            name,
+            course_code,
+            major_id,
+            grade,
+            term
+        )
+        .execute(pool)
+        .await
+        .unwrap();
+    }
 
 /// `documents`へ投入する値
 ///

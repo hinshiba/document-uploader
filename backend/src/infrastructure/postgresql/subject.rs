@@ -1,5 +1,5 @@
 use crate::{
-    domain::{Grade, Id, Term, faculty::Faculty, major::Major, subject::Subject},
+    domain::{Grade, Id, Term, faculty::Faculty, major::Major, subject::{Subject, CourseCode}},
     usecase::repository::{SearchSubjectOption, SubjectRepository, UpdateSubjectContent},
 };
 
@@ -44,7 +44,7 @@ impl SubjectRepository for PostgresRepository {
         sqlx::query!(
             r#"
             SELECT
-                id AS "id!", name AS "name!", faculty_id AS "faculty_id!",
+                id AS "id!", name AS "name!", course_code AS "course_code!", faculty_id AS "faculty_id!",
                 major_id AS "major_id!", grade AS "grade!", term AS "term!"
             FROM subject_details
             WHERE
@@ -69,6 +69,7 @@ impl SubjectRepository for PostgresRepository {
             Ok(Subject::new(
                 Id::new(r.id),
                 r.name,
+                CourseCode::new(r.course_code)?,
                 Id::new(r.faculty_id),
                 Id::new(r.major_id),
                 Grade::new(r.grade)?,
@@ -92,12 +93,13 @@ impl SubjectRepository for PostgresRepository {
         // 科目の格納
         let result = sqlx::query!(
             r#"
-            INSERT INTO subjects (id, name, major_id, grade, term)
-                VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO subjects (id, name, course_code, major_id, grade, term)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (id) DO NOTHING
         "#,
             subject.id().id(),
             subject.name(),
+            subject.course_code().code(),
             subject.major_id().id(),
             subject.grade().grade(),
             subject.term().term(),
@@ -133,12 +135,13 @@ impl SubjectRepository for PostgresRepository {
         let updated = sqlx::query!(
             r#"
             UPDATE subjects
-                SET name = $2, major_id = $3, grade = $4, term = $5
+                SET name = $2, course_code = $3, major_id = $4, grade = $5, term = $6
                 WHERE id = $1
-                RETURNING id, name, major_id, grade, term
+                RETURNING id, name, course_code, major_id, grade, term
         "#,
             subject_id.id(),
             content.name,
+            content.course_code.code(),
             content.major_id.id(),
             content.grade.grade(),
             content.term.term(),
@@ -152,6 +155,7 @@ impl SubjectRepository for PostgresRepository {
         Ok(Subject::new(
             Id::new(updated.id),
             updated.name,
+            CourseCode::new(updated.course_code)?,
             content.faculty_id,
             Id::new(updated.major_id),
             Grade::new(updated.grade)?,
@@ -166,7 +170,7 @@ impl SubjectRepository for PostgresRepository {
             DELETE FROM subjects AS s
                 USING majors AS m
                 WHERE s.major_id = m.id AND s.id = $1
-                RETURNING s.id, s.name, m.faculty_id, s.major_id, s.grade, s.term
+                RETURNING s.id, s.name, s.course_code, m.faculty_id, s.major_id, s.grade, s.term
         "#,
             subject_id.id(),
         )
@@ -177,6 +181,7 @@ impl SubjectRepository for PostgresRepository {
         Ok(Subject::new(
             Id::new(deleted.id),
             deleted.name,
+            CourseCode::new(deleted.course_code)?,
             Id::new(deleted.faculty_id),
             Id::new(deleted.major_id),
             Grade::new(deleted.grade)?,
@@ -198,10 +203,9 @@ mod tests {
     /// 条件を1つも指定しないとき全件返ることを確認
     #[sqlx::test]
     async fn search_subjects_returns_all_when_option_is_empty(pool: PgPool) {
-        let (_, major_a) = insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let (_, major_b) = insert_faculty_major(&pool, "テスト学部B", "テスト専攻B").await;
-        insert_subject(&pool, "テスト科目A", major_a, 1, 1).await;
-        insert_subject(&pool, "テスト科目B", major_b, 2, 3).await;
+        let (_, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
+        insert_subject(&pool, Uuid::new_v4(), "線形代数", "090219", eng_major, 1, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "解析学", "090220", sci_major, 2, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -215,35 +219,35 @@ mod tests {
     /// majors経由の学部絞り込みが効くことを確認
     #[sqlx::test]
     async fn search_subjects_filters_by_faculty(pool: PgPool) {
-        let (faculty_a_id, major_a) =
-            insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let (_, major_b) = insert_faculty_major(&pool, "テスト学部B", "テスト専攻B").await;
-        let subject_a = insert_subject(&pool, "テスト科目A", major_a, 1, 1).await;
-        insert_subject(&pool, "テスト科目B", major_b, 2, 3).await;
+        let (eng_id, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
+        let eng_subject = Uuid::new_v4();
+        insert_subject(&pool, eng_subject, "線形代数", "090219", eng_major, 1, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "解析学", "090220", sci_major, 2, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
             .search_subjects(SearchSubjectOption {
-                faculty_id: Some(Id::new(faculty_a_id)),
+                faculty_id: Some(Id::new(eng_id)),
                 ..Default::default()
             })
             .await
             .unwrap();
 
         assert_eq!(subjects.len(), 1);
-        assert_eq!(subjects[0].id().id(), &subject_a);
-        assert_eq!(subjects[0].faculty_id().id(), &faculty_a_id);
+        assert_eq!(subjects[0].id().id(), &eng_subject);
+        assert_eq!(subjects[0].faculty_id().id(), &eng_id);
     }
 
-    /// 学年と学期という複数条件がANDで結合されることを確認
+    /// 複数条件がANDで結合されることを確認
     #[sqlx::test]
     async fn search_subjects_filters_by_grade_and_term(pool: PgPool) {
-        let (_, major_a) = insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let target = insert_subject(&pool, "テスト科目A", major_a, 2, 3).await;
+        let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
+        let target = Uuid::new_v4();
+        insert_subject(&pool, target, "線形代数", "090219", eng_major, 2, 3).await;
         // 学年のみ一致
-        insert_subject(&pool, "テスト科目B", major_a, 2, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "電磁気学", "090220", eng_major, 2, 1).await;
         // 学期のみ一致
-        insert_subject(&pool, "テスト科目C", major_a, 1, 3).await;
+        insert_subject(&pool, Uuid::new_v4(), "熱力学", "090221", eng_major, 1, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -263,21 +267,13 @@ mod tests {
     /// 作成した科目が学部込みで読み戻せることを確認
     #[sqlx::test]
     async fn create_subject_inserts_row(pool: PgPool) {
-        let (faculty_a_id, major_a) =
-            insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
+        let (eng_id, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
 
         let repo = PostgresRepository::new(pool);
-        repo.create_subject(subject_of(
-            subject_id,
-            "テスト科目A",
-            faculty_a_id,
-            major_a,
-            1,
-            2,
-        ))
-        .await
-        .unwrap();
+        repo.create_subject(subject_of(subject_id, "線形代数", "090219", eng_id, eng_major, 1, 2))
+            .await
+            .unwrap();
 
         let subjects = repo
             .search_subjects(SearchSubjectOption {
@@ -289,9 +285,10 @@ mod tests {
 
         assert_eq!(subjects.len(), 1);
         let subject = &subjects[0];
-        assert_eq!(subject.name(), "テスト科目A");
-        assert_eq!(subject.faculty_id().id(), &faculty_a_id);
-        assert_eq!(subject.major_id().id(), &major_a);
+        assert_eq!(subject.name(), "線形代数");
+        assert_eq!(subject.course_code().code(), "090219");
+        assert_eq!(subject.faculty_id().id(), &eng_id);
+        assert_eq!(subject.major_id().id(), &eng_major);
         assert_eq!(subject.grade().grade(), &1);
         assert_eq!(subject.term().term(), &2);
     }
@@ -299,31 +296,16 @@ mod tests {
     /// id重複がエラーとなり, 既存の行が書き換わらないことを確認
     #[sqlx::test]
     async fn create_subject_rejects_duplicate_id(pool: PgPool) {
-        let (faculty_a_id, major_a) =
-            insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
+        let (eng_id, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
 
         let repo = PostgresRepository::new(pool);
-        repo.create_subject(subject_of(
-            subject_id,
-            "テスト科目A",
-            faculty_a_id,
-            major_a,
-            1,
-            2,
-        ))
-        .await
-        .unwrap();
+        repo.create_subject(subject_of(subject_id, "線形代数", "090219", eng_id, eng_major, 1, 2))
+            .await
+            .unwrap();
 
         let result = repo
-            .create_subject(subject_of(
-                subject_id,
-                "テスト科目B",
-                faculty_a_id,
-                major_a,
-                3,
-                4,
-            ))
+            .create_subject(subject_of(subject_id, "解析学", "090220", eng_id, eng_major, 3, 4))
             .await;
         assert!(result.is_err());
 
@@ -335,23 +317,23 @@ mod tests {
             })
             .await
             .unwrap();
-        assert_eq!(subjects[0].name(), "テスト科目A");
+        assert_eq!(subjects[0].name(), "線形代数");
     }
 
     /// 専攻が学部に属さない組み合わせが弾かれることを確認
     #[sqlx::test]
     async fn create_subject_rejects_major_faculty_mismatch(pool: PgPool) {
-        let (faculty_a_id, _) = insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let (_, major_b) = insert_faculty_major(&pool, "テスト学部B", "テスト専攻B").await;
+        let (eng_id, _, _, sci_major) = seed_faculties_and_majors(&pool).await;
 
         let repo = PostgresRepository::new(pool);
-        // テスト学部Aにテスト専攻Bを組み合わせる
+        // 工学部に数学科を組み合わせる
         let result = repo
             .create_subject(subject_of(
                 Uuid::new_v4(),
-                "テスト科目A",
-                faculty_a_id,
-                major_b,
+                "線形代数",
+                "090219",
+                eng_id,
+                sci_major,
                 1,
                 2,
             ))
@@ -370,20 +352,19 @@ mod tests {
     /// 更新後の値が返り, DBにも反映されることを確認
     #[sqlx::test]
     async fn update_subject_returns_updated_subject(pool: PgPool) {
-        let (faculty_a_id, major_a) =
-            insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let (faculty_b_id, major_b) =
-            insert_faculty_major(&pool, "テスト学部B", "テスト専攻B").await;
-        let subject_id = insert_subject(&pool, "テスト科目A", major_a, 1, 2).await;
+        let (eng_id, eng_major, sci_id, sci_major) = seed_faculties_and_majors(&pool).await;
+        let subject_id = Uuid::new_v4();
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let updated = repo
             .update_subject(
                 Id::new(subject_id),
                 UpdateSubjectContent {
-                    name: "テスト科目B".to_owned(),
-                    faculty_id: Id::new(faculty_b_id),
-                    major_id: Id::new(major_b),
+                    name: "解析学".to_owned(),
+                    course_code: CourseCode::new("090220").unwrap(),
+                    faculty_id: Id::new(sci_id),
+                    major_id: Id::new(sci_major),
                     grade: Grade::new(3).unwrap(),
                     term: Term::new(4).unwrap(),
                 },
@@ -392,9 +373,10 @@ mod tests {
             .unwrap();
 
         assert_eq!(updated.id().id(), &subject_id);
-        assert_eq!(updated.name(), "テスト科目B");
-        assert_eq!(updated.faculty_id().id(), &faculty_b_id);
-        assert_eq!(updated.major_id().id(), &major_b);
+        assert_eq!(updated.name(), "解析学");
+        assert_eq!(updated.course_code().code(), "090220");
+        assert_eq!(updated.faculty_id().id(), &sci_id);
+        assert_eq!(updated.major_id().id(), &sci_major);
         assert_eq!(updated.grade().grade(), &3);
         assert_eq!(updated.term().term(), &4);
 
@@ -406,24 +388,24 @@ mod tests {
             })
             .await
             .unwrap();
-        assert_eq!(stored[0].faculty_id().id(), &faculty_b_id);
-        assert_ne!(stored[0].faculty_id().id(), &faculty_a_id);
+        assert_eq!(stored[0].faculty_id().id(), &sci_id);
+        assert_ne!(stored[0].faculty_id().id(), &eng_id);
     }
 
     /// 存在しないidの更新がエラーとなることを確認
     #[sqlx::test]
     async fn update_subject_errors_when_not_found(pool: PgPool) {
-        let (faculty_a_id, major_a) =
-            insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
+        let (eng_id, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
 
         let repo = PostgresRepository::new(pool);
         let result = repo
             .update_subject(
                 Id::new(Uuid::new_v4()),
                 UpdateSubjectContent {
-                    name: "テスト科目A".to_owned(),
-                    faculty_id: Id::new(faculty_a_id),
-                    major_id: Id::new(major_a),
+                    name: "線形代数".to_owned(),
+                    course_code: CourseCode::new("090219").unwrap(),
+                    faculty_id: Id::new(eng_id),
+                    major_id: Id::new(eng_major),
                     grade: Grade::new(1).unwrap(),
                     term: Term::new(2).unwrap(),
                 },
@@ -436,20 +418,19 @@ mod tests {
     /// 専攻が学部に属さない更新が弾かれ, 既存の行が変わらないことを確認
     #[sqlx::test]
     async fn update_subject_rejects_major_faculty_mismatch(pool: PgPool) {
-        let (faculty_a_id, major_a) =
-            insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let (_, major_b) = insert_faculty_major(&pool, "テスト学部B", "テスト専攻B").await;
-        let subject_id = insert_subject(&pool, "テスト科目A", major_a, 1, 2).await;
+        let (eng_id, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
+        let subject_id = Uuid::new_v4();
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
-        // テスト学部Aにテスト専攻Bを組み合わせる
         let result = repo
             .update_subject(
                 Id::new(subject_id),
                 UpdateSubjectContent {
-                    name: "テスト科目B".to_owned(),
-                    faculty_id: Id::new(faculty_a_id),
-                    major_id: Id::new(major_b),
+                    name: "解析学".to_owned(),
+                    course_code: CourseCode::new("090220").unwrap(),
+                    faculty_id: Id::new(eng_id),
+                    major_id: Id::new(sci_major),
                     grade: Grade::new(3).unwrap(),
                     term: Term::new(4).unwrap(),
                 },
@@ -465,24 +446,25 @@ mod tests {
             })
             .await
             .unwrap();
-        assert_eq!(stored[0].name(), "テスト科目A");
+        assert_eq!(stored[0].name(), "線形代数");
     }
 
     // delete_subjectについて
     /// 削除前の値が返り, 行が消えることを確認
     #[sqlx::test]
     async fn delete_subject_returns_deleted_subject(pool: PgPool) {
-        let (faculty_a_id, major_a) =
-            insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let subject_id = insert_subject(&pool, "テスト科目A", major_a, 1, 2).await;
+        let (eng_id, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
+        let subject_id = Uuid::new_v4();
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let deleted = repo.delete_subject(Id::new(subject_id)).await.unwrap();
 
         assert_eq!(deleted.id().id(), &subject_id);
-        assert_eq!(deleted.name(), "テスト科目A");
-        assert_eq!(deleted.faculty_id().id(), &faculty_a_id);
-        assert_eq!(deleted.major_id().id(), &major_a);
+        assert_eq!(deleted.name(), "線形代数");
+        assert_eq!(deleted.course_code().code(), "090219");
+        assert_eq!(deleted.faculty_id().id(), &eng_id);
+        assert_eq!(deleted.major_id().id(), &eng_major);
         assert_eq!(deleted.grade().grade(), &1);
         assert_eq!(deleted.term().term(), &2);
 
@@ -505,9 +487,24 @@ mod tests {
     /// documentsから参照されている科目が削除できないことを確認
     #[sqlx::test]
     async fn delete_subject_errors_when_referenced_by_document(pool: PgPool) {
-        let (_, major_a) = insert_faculty_major(&pool, "テスト学部A", "テスト専攻A").await;
-        let subject_id = insert_subject(&pool, "テスト科目A", major_a, 1, 2).await;
-        insert_document(&pool, subject_id, DocumentSeed::default()).await;
+        let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
+        let subject_id = Uuid::new_v4();
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
+
+        sqlx::query!(
+            "INSERT INTO documents (id, subject_id, year, teacher, exam_type, is_answer, num)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)",
+            Uuid::new_v4(),
+            subject_id,
+            2025i64,
+            "山田",
+            0i64,
+            false,
+            1i64
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
 
         let repo = PostgresRepository::new(pool);
         let result = repo.delete_subject(Id::new(subject_id)).await;
