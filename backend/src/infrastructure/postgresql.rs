@@ -1025,6 +1025,106 @@ mod tests {
         assert!(document.is_none());
     }
 
+    // search_documentsについて
+    /// subject_idで絞り込まれ, ファイルが資料ごとに紐づくことを確認
+    #[sqlx::test]
+    async fn search_documents_filters_by_subject_id(pool: PgPool) {
+        let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
+        let target_subject = Uuid::new_v4();
+        let other_subject = Uuid::new_v4();
+        insert_subject(&pool, target_subject, "線形代数", eng_major, 1, 2).await;
+        insert_subject(&pool, other_subject, "解析学", eng_major, 1, 2).await;
+
+        let target = Uuid::new_v4();
+        insert_document(&pool, target, target_subject, 2024, "山田", 2, false, 1).await;
+        insert_document_files(&pool, target, &["path/to/a.pdf", "path/to/b.jpg"]).await;
+        let other = Uuid::new_v4();
+        insert_document(&pool, other, other_subject, 2024, "山田", 2, false, 1).await;
+        insert_document_files(&pool, other, &["path/to/c.pdf"]).await;
+
+        let repo = PostgresRepository::new(pool);
+        let documents = repo
+            .search_documents(SearchDocumentOption::minimal(Id::new(target_subject)))
+            .await
+            .unwrap();
+
+        assert_eq!(documents.len(), 1);
+        let document = &documents[0];
+        assert_eq!(document.id().id(), &target);
+
+        let meta = document.metadata();
+        assert_eq!(meta.subject_id().id(), &target_subject);
+        assert_eq!(meta.major_id().id(), &eng_major);
+        assert_eq!(meta.grade().grade(), &1);
+        assert_eq!(meta.term().term(), &2);
+        assert_eq!(meta.year().year(), &2024);
+        assert_eq!(meta.exam_type(), &ExamType::FinalTerm);
+
+        // 他の資料のファイルが混入しないこと
+        let mut paths: Vec<_> = document
+            .files()
+            .iter()
+            .map(|f| f.path().to_str().unwrap())
+            .collect();
+        paths.sort();
+        assert_eq!(paths, ["path/to/a.pdf", "path/to/b.jpg"]);
+    }
+
+    /// 任意条件がANDで結合されることを確認
+    #[sqlx::test]
+    async fn search_documents_filters_by_optional_conditions(pool: PgPool) {
+        let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
+        let subject_id = Uuid::new_v4();
+        insert_subject(&pool, subject_id, "線形代数", eng_major, 1, 2).await;
+
+        let target = Uuid::new_v4();
+        insert_document(&pool, target, subject_id, 2024, "山田", 2, true, 1).await;
+        insert_document_files(&pool, target, &["path/to/a.pdf"]).await;
+        // 年度のみ不一致
+        let other_year = Uuid::new_v4();
+        insert_document(&pool, other_year, subject_id, 2023, "山田", 2, true, 1).await;
+        insert_document_files(&pool, other_year, &["path/to/b.pdf"]).await;
+        // 教員のみ不一致
+        let other_teacher = Uuid::new_v4();
+        insert_document(&pool, other_teacher, subject_id, 2024, "田中", 2, true, 1).await;
+        insert_document_files(&pool, other_teacher, &["path/to/c.pdf"]).await;
+        // 試験種別のみ不一致
+        let other_exam_type = Uuid::new_v4();
+        insert_document(&pool, other_exam_type, subject_id, 2024, "山田", 1, true, 1).await;
+        insert_document_files(&pool, other_exam_type, &["path/to/d.pdf"]).await;
+        // 解答か否かのみ不一致
+        let other_is_answer = Uuid::new_v4();
+        insert_document(&pool, other_is_answer, subject_id, 2024, "山田", 2, false, 1).await;
+        insert_document_files(&pool, other_is_answer, &["path/to/e.pdf"]).await;
+
+        let repo = PostgresRepository::new(pool);
+        let documents = repo
+            .search_documents(SearchDocumentOption {
+                year: Some(Year::new(2024).unwrap()),
+                teacher: Some("山田".to_owned()),
+                exam_type: Some(ExamType::FinalTerm),
+                is_answer: Some(true),
+                ..SearchDocumentOption::minimal(Id::new(subject_id))
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(documents.len(), 1);
+        assert_eq!(documents[0].id().id(), &target);
+    }
+
+    /// 該当なしのとき空のVecが返ることを確認
+    #[sqlx::test]
+    async fn search_documents_returns_empty_when_no_match(pool: PgPool) {
+        let repo = PostgresRepository::new(pool);
+        let documents = repo
+            .search_documents(SearchDocumentOption::minimal(Id::new(Uuid::new_v4())))
+            .await
+            .unwrap();
+
+        assert!(documents.is_empty());
+    }
+
     // 以下helper functions
 
     /// 工学部/情報工学コースと理学部/数学科を投入する
@@ -1103,5 +1203,50 @@ mod tests {
         .execute(pool)
         .await
         .unwrap();
+    }
+
+    /// `documents`へ直接投入する
+    #[allow(clippy::too_many_arguments)]
+    async fn insert_document(
+        pool: &PgPool,
+        id: Uuid,
+        subject_id: Uuid,
+        year: i64,
+        teacher: &str,
+        exam_type: i64,
+        is_answer: bool,
+        num: i64,
+    ) {
+        sqlx::query!(
+            "INSERT INTO documents (id, subject_id, year, teacher, exam_type, is_answer, num)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)",
+            id,
+            subject_id,
+            year,
+            teacher,
+            exam_type,
+            is_answer,
+            num
+        )
+        .execute(pool)
+        .await
+        .unwrap();
+    }
+
+    /// `document_files`へ拡張子をfile_typeとして投入する
+    async fn insert_document_files(pool: &PgPool, document_id: Uuid, paths: &[&str]) {
+        for path in paths {
+            let file_type = path.rsplit('.').next().expect("拡張子なし");
+            sqlx::query!(
+                "INSERT INTO document_files (document_id, file_type, path)
+                    VALUES ($1, $2, $3)",
+                document_id,
+                file_type,
+                path
+            )
+            .execute(pool)
+            .await
+            .unwrap();
+        }
     }
 }
