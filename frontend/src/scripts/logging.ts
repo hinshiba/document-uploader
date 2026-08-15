@@ -1,5 +1,6 @@
 import {
     configureSync,
+    defaultConsoleFormatter,
     getConsoleSink,
     getLogger,
     isLogLevel,
