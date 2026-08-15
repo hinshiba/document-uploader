@@ -74,6 +74,22 @@ impl std::fmt::Display for RangeValidationError {
 
 impl std::error::Error for RangeValidationError {}
 
+/// 形式が誤っていることを示すエラー
+/// 
+/// 値の範囲がある場合は`RangeValidationError`を用いること
+#[derive(Clone, Debug)]
+pub struct FormatValidationError {
+    pub actual: String,
+}
+
+impl std::fmt::Display for FormatValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "format validation error: actual: {}", self.actual)
+    }
+}
+
+impl std::error::Error for FormatValidationError {}
+
 #[inline(always)]
 fn construct_with_range_validation<T>(ctor: impl FnOnce(i64) -> T, value: i64, range: (Option<i64>, Option<i64>)) -> Result<T, RangeValidationError> {
     if range.0.map_or(true, |l| l <= value)
