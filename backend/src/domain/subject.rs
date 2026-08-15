@@ -1,11 +1,10 @@
-use crate::domain::FormatValidationError;
-
 use super::{
     Id,
     Grade,
     Term,
     faculty::Faculty,
     major::Major,
+    FormatValidationError,
 };
 
 #[derive(Debug, Hash)]
