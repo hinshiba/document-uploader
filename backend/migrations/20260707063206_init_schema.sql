@@ -13,6 +13,7 @@ CREATE TABLE majors (
 CREATE TABLE subjects (
     id UUID PRIMARY KEY,
     name TEXT NOT NULL,
+    course_code TEXT NOT NULL UNIQUE,
     major_id UUID NOT NULL REFERENCES majors(id),
     grade BIGINT NOT NULL CHECK (grade BETWEEN 1 AND 9),
     term BIGINT NOT NULL CHECK (term BETWEEN 1 AND 4)

@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO subjects (id, name, course_code, major_id, grade, term)\n                VALUES ($1, $2, $3, $4, $5, $6)\n                ON CONFLICT (id) DO NOTHING\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1dc5236b573ea10cbbc28f7c955bce98134325b31c8e0363bfef1904908e620d"
+}

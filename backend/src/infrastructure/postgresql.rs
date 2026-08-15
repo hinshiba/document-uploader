@@ -8,7 +8,7 @@ use crate::{
         document::{Document, DocumentFile, DocumentMetadata, ExamType},
         faculty::Faculty,
         major::Major,
-        subject::Subject,
+        subject::{CourseCode, Subject},
     },
     usecase::repository::{
         DocumentRepository, FacultyRepository, SearchSubjectOption, SubjectRepository,
@@ -64,7 +64,7 @@ impl SubjectRepository for PostgresRepository {
         sqlx::query!(
             r#"
             SELECT
-                id AS "id!", name AS "name!", faculty_id AS "faculty_id!",
+                id AS "id!", name AS "name!", course_code AS "course_code!", faculty_id AS "faculty_id!",
                 major_id AS "major_id!", grade AS "grade!", term AS "term!"
             FROM subject_details
             WHERE
@@ -89,6 +89,7 @@ impl SubjectRepository for PostgresRepository {
             Ok(Subject::new(
                 Id::new(r.id),
                 r.name,
+                CourseCode::new(r.course_code)?,
                 Id::new(r.faculty_id),
                 Id::new(r.major_id),
                 Grade::new(r.grade)?,
@@ -112,12 +113,13 @@ impl SubjectRepository for PostgresRepository {
         // 科目の格納
         let result = sqlx::query!(
             r#"
-            INSERT INTO subjects (id, name, major_id, grade, term)
-                VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO subjects (id, name, course_code, major_id, grade, term)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT (id) DO NOTHING
         "#,
             subject.id().id(),
             subject.name(),
+            subject.course_code().code(),
             subject.major_id().id(),
             subject.grade().grade(),
             subject.term().term(),
@@ -153,12 +155,13 @@ impl SubjectRepository for PostgresRepository {
         let updated = sqlx::query!(
             r#"
             UPDATE subjects
-                SET name = $2, major_id = $3, grade = $4, term = $5
+                SET name = $2, course_code = $3, major_id = $4, grade = $5, term = $6
                 WHERE id = $1
-                RETURNING id, name, major_id, grade, term
+                RETURNING id, name, course_code, major_id, grade, term
         "#,
             subject_id.id(),
             content.name,
+            content.course_code.code(),
             content.major_id.id(),
             content.grade.grade(),
             content.term.term(),
@@ -172,6 +175,7 @@ impl SubjectRepository for PostgresRepository {
         Ok(Subject::new(
             Id::new(updated.id),
             updated.name,
+            CourseCode::new(updated.course_code)?,
             content.faculty_id,
             Id::new(updated.major_id),
             Grade::new(updated.grade)?,
@@ -186,7 +190,7 @@ impl SubjectRepository for PostgresRepository {
             DELETE FROM subjects AS s
                 USING majors AS m
                 WHERE s.major_id = m.id AND s.id = $1
-                RETURNING s.id, s.name, m.faculty_id, s.major_id, s.grade, s.term
+                RETURNING s.id, s.name, s.course_code, m.faculty_id, s.major_id, s.grade, s.term
         "#,
             subject_id.id(),
         )
@@ -197,6 +201,7 @@ impl SubjectRepository for PostgresRepository {
         Ok(Subject::new(
             Id::new(deleted.id),
             deleted.name,
+            CourseCode::new(deleted.course_code)?,
             Id::new(deleted.faculty_id),
             Id::new(deleted.major_id),
             Grade::new(deleted.grade)?,
@@ -497,10 +502,11 @@ mod tests {
 
         let subject_id = Uuid::new_v4();
         sqlx::query!(
-            "INSERT INTO subjects (id, name, major_id, grade, term) 
-                VALUES ($1, $2, $3, $4, $5)",
+            "INSERT INTO subjects (id, name, course_code, major_id, grade, term)
+                VALUES ($1, $2, $3, $4, $5, $6)",
             subject_id,
             "線形代数",
+            "090219",
             eng_major,
             1i64,
             2i64
@@ -517,6 +523,7 @@ mod tests {
         let subject = &subjects[0];
         assert_eq!(subject.id().id(), &subject_id);
         assert_eq!(subject.name(), "線形代数");
+        assert_eq!(subject.course_code().code(), "090219");
         assert_eq!(subject.major_id().id(), &eng_major);
         assert_eq!(subject.faculty_id().id(), &eng_id);
         assert_eq!(subject.grade().grade(), &1);
@@ -528,8 +535,8 @@ mod tests {
     #[sqlx::test]
     async fn search_subjects_returns_all_when_option_is_empty(pool: PgPool) {
         let (_, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
-        insert_subject(&pool, Uuid::new_v4(), "線形代数", eng_major, 1, 1).await;
-        insert_subject(&pool, Uuid::new_v4(), "解析学", sci_major, 2, 3).await;
+        insert_subject(&pool, Uuid::new_v4(), "線形代数", "090219", eng_major, 1, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "解析学", "090220", sci_major, 2, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -545,8 +552,8 @@ mod tests {
     async fn search_subjects_filters_by_faculty(pool: PgPool) {
         let (eng_id, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
         let eng_subject = Uuid::new_v4();
-        insert_subject(&pool, eng_subject, "線形代数", eng_major, 1, 1).await;
-        insert_subject(&pool, Uuid::new_v4(), "解析学", sci_major, 2, 3).await;
+        insert_subject(&pool, eng_subject, "線形代数", "090219", eng_major, 1, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "解析学", "090220", sci_major, 2, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -567,11 +574,11 @@ mod tests {
     async fn search_subjects_filters_by_grade_and_term(pool: PgPool) {
         let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let target = Uuid::new_v4();
-        insert_subject(&pool, target, "線形代数", eng_major, 2, 3).await;
+        insert_subject(&pool, target, "線形代数", "090219", eng_major, 2, 3).await;
         // 学年のみ一致
-        insert_subject(&pool, Uuid::new_v4(), "電磁気学", eng_major, 2, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "電磁気学", "090220", eng_major, 2, 1).await;
         // 学期のみ一致
-        insert_subject(&pool, Uuid::new_v4(), "熱力学", eng_major, 1, 3).await;
+        insert_subject(&pool, Uuid::new_v4(), "熱力学", "090221", eng_major, 1, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -595,7 +602,7 @@ mod tests {
         let subject_id = Uuid::new_v4();
 
         let repo = PostgresRepository::new(pool);
-        repo.create_subject(subject_of(subject_id, "線形代数", eng_id, eng_major, 1, 2))
+        repo.create_subject(subject_of(subject_id, "線形代数", "090219", eng_id, eng_major, 1, 2))
             .await
             .unwrap();
 
@@ -610,6 +617,7 @@ mod tests {
         assert_eq!(subjects.len(), 1);
         let subject = &subjects[0];
         assert_eq!(subject.name(), "線形代数");
+        assert_eq!(subject.course_code().code(), "090219");
         assert_eq!(subject.faculty_id().id(), &eng_id);
         assert_eq!(subject.major_id().id(), &eng_major);
         assert_eq!(subject.grade().grade(), &1);
@@ -623,12 +631,12 @@ mod tests {
         let subject_id = Uuid::new_v4();
 
         let repo = PostgresRepository::new(pool);
-        repo.create_subject(subject_of(subject_id, "線形代数", eng_id, eng_major, 1, 2))
+        repo.create_subject(subject_of(subject_id, "線形代数", "090219", eng_id, eng_major, 1, 2))
             .await
             .unwrap();
 
         let result = repo
-            .create_subject(subject_of(subject_id, "解析学", eng_id, eng_major, 3, 4))
+            .create_subject(subject_of(subject_id, "解析学", "090220", eng_id, eng_major, 3, 4))
             .await;
         assert!(result.is_err());
 
@@ -654,6 +662,7 @@ mod tests {
             .create_subject(subject_of(
                 Uuid::new_v4(),
                 "線形代数",
+                "090219",
                 eng_id,
                 sci_major,
                 1,
@@ -676,7 +685,7 @@ mod tests {
     async fn update_subject_returns_updated_subject(pool: PgPool) {
         let (eng_id, eng_major, sci_id, sci_major) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let updated = repo
@@ -684,6 +693,7 @@ mod tests {
                 Id::new(subject_id),
                 UpdateSubjectContent {
                     name: "解析学".to_owned(),
+                    course_code: CourseCode::new("090220").unwrap(),
                     faculty_id: Id::new(sci_id),
                     major_id: Id::new(sci_major),
                     grade: Grade::new(3).unwrap(),
@@ -695,6 +705,7 @@ mod tests {
 
         assert_eq!(updated.id().id(), &subject_id);
         assert_eq!(updated.name(), "解析学");
+        assert_eq!(updated.course_code().code(), "090220");
         assert_eq!(updated.faculty_id().id(), &sci_id);
         assert_eq!(updated.major_id().id(), &sci_major);
         assert_eq!(updated.grade().grade(), &3);
@@ -723,6 +734,7 @@ mod tests {
                 Id::new(Uuid::new_v4()),
                 UpdateSubjectContent {
                     name: "線形代数".to_owned(),
+                    course_code: CourseCode::new("090219").unwrap(),
                     faculty_id: Id::new(eng_id),
                     major_id: Id::new(eng_major),
                     grade: Grade::new(1).unwrap(),
@@ -739,7 +751,7 @@ mod tests {
     async fn update_subject_rejects_major_faculty_mismatch(pool: PgPool) {
         let (eng_id, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let result = repo
@@ -747,6 +759,7 @@ mod tests {
                 Id::new(subject_id),
                 UpdateSubjectContent {
                     name: "解析学".to_owned(),
+                    course_code: CourseCode::new("090220").unwrap(),
                     faculty_id: Id::new(eng_id),
                     major_id: Id::new(sci_major),
                     grade: Grade::new(3).unwrap(),
@@ -773,13 +786,14 @@ mod tests {
     async fn delete_subject_returns_deleted_subject(pool: PgPool) {
         let (eng_id, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let deleted = repo.delete_subject(Id::new(subject_id)).await.unwrap();
 
         assert_eq!(deleted.id().id(), &subject_id);
         assert_eq!(deleted.name(), "線形代数");
+        assert_eq!(deleted.course_code().code(), "090219");
         assert_eq!(deleted.faculty_id().id(), &eng_id);
         assert_eq!(deleted.major_id().id(), &eng_major);
         assert_eq!(deleted.grade().grade(), &1);
@@ -806,7 +820,7 @@ mod tests {
     async fn delete_subject_errors_when_referenced_by_document(pool: PgPool) {
         let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         sqlx::query!(
             "INSERT INTO documents (id, subject_id, year, teacher, exam_type, is_answer, num)
@@ -865,10 +879,11 @@ mod tests {
 
         let subject_id = Uuid::new_v4();
         sqlx::query!(
-            "INSERT INTO subjects (id, name, major_id, grade, term)
-                VALUES ($1, $2, $3, $4, $5)",
+            "INSERT INTO subjects (id, name, course_code, major_id, grade, term)
+                VALUES ($1, $2, $3, $4, $5, $6)",
             subject_id,
             "線形代数",
+            "090219",
             major_id,
             1i64,
             2i64
@@ -991,6 +1006,7 @@ mod tests {
     fn subject_of(
         id: Uuid,
         name: &str,
+        course_code: &str,
         faculty_id: Uuid,
         major_id: Uuid,
         grade: i64,
@@ -999,6 +1015,7 @@ mod tests {
         Subject::new(
             Id::new(id),
             name.to_owned(),
+            CourseCode::new(course_code).unwrap(),
             Id::new(faculty_id),
             Id::new(major_id),
             Grade::new(grade).unwrap(),
@@ -1011,15 +1028,17 @@ mod tests {
         pool: &PgPool,
         id: Uuid,
         name: &str,
+        course_code: &str,
         major_id: Uuid,
         grade: i64,
         term: i64,
     ) {
         sqlx::query!(
-            "INSERT INTO subjects (id, name, major_id, grade, term)
-                VALUES ($1, $2, $3, $4, $5)",
+            "INSERT INTO subjects (id, name, course_code, major_id, grade, term)
+                VALUES ($1, $2, $3, $4, $5, $6)",
             id,
             name,
+            course_code,
             major_id,
             grade,
             term
