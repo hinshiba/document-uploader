@@ -16,11 +16,15 @@
     },
     "private": true,
     "scripts": {
-        "dev": "bun run --parallel 'dev:*'",
-        "dev:serve": "bun run gen && bun --hot src/temp/*.html",
-        "dev:html": "bun run scripts/gen-html.ts --watch",
-        "dev:css": "bun run scripts/gen-css.ts --watch",
-        "build": "bun run gen && bun build src/temp/*.html --outdir=out",
+        "dev": "bun run gen && bun run --parallel 'dev-watch:*' dev-serve-mock",
+        "dev:back": "bun run build:back && bun run sync:public && bun run dev-serve-example",
+        "dev-serve-mock": "BUN_PUBLIC_API_BASE=http://127.0.0.1:4010 BUN_PUBLIC_LOG_LEVEL=debug bun --hot scripts/dev-server.ts",
+        "dev-serve-example": "cd ../backend && cargo run --example example_server",
+        "dev-watch:html": "bun run scripts/gen-html.ts --watch",
+        "dev-watch:css": "bun run scripts/gen-css.ts --watch",
+        "build": "rm -rf out && bun run gen && BUN_PUBLIC_API_BASE=/api/v1 BUN_PUBLIC_LOG_LEVEL=warning bun build src/temp/*.html --outdir=out --env='BUN_PUBLIC_*' --production",
+        "build:back": "rm -rf out && bun run gen && BUN_PUBLIC_API_BASE=/api/v1 BUN_PUBLIC_LOG_LEVEL=debug bun build src/temp/*.html --outdir=out --env='BUN_PUBLIC_*'",
+        "sync:public": "bun run scripts/sync-public.ts",
         "gen": "bun run gen:api && bun run gen:html && bun run gen:css",
         "gen:api": "openapi-typescript ../docs/api/openapi.yaml -o src/scripts/api/types.ts",
         "gen:html": "bun run scripts/gen-html.ts",
@@ -41,6 +45,7 @@
     },
     "type": "module",
     "dependencies": {
+        "@logtape/logtape": "^2.3.0",
         "lit": "^3.3.3"
     }
 }

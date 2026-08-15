@@ -5,46 +5,83 @@
 
 <main>
     <h2>アップロード</h2>
-    <p>貢献に感謝します</p>
+    <p>貢献に感謝します．</p>
 
     <form>
-        <p>アップロードしたい教科を選んでください．</p>
+        <p>お手数ですが，アップロードのための情報を入力してください．</p>
 
         <major-select></major-select>
 
         <subject-select></subject-select>
 
-        <label for="examtype">試験種別</label>
-        <select id="examtype" name="examtype" required>
-            <option value="">--試験種別--</option>
-            <option value="quiz">小テスト</option>
-            <option value="midterm">中間</option>
-            <option value="final">期末</option>
-            <option value="other">その他</option>
-        </select>
+        <label>
+            試験種別
+            <select name="examtype" required>
+                <option value="">--試験種別--</option>
+                <option value="quiz">小テスト</option>
+                <option value="midterm">中間試験</option>
+                <option value="final">期末試験</option>
+                <option value="other">その他</option>
+            </select>
+        </label>
 
-        <label for="year">年度</label>
-        <input type="number" id="year" name="year" min="1949" required>
+        <label>
+            年度
+            <input
+                type="number"
+                name="year"
+                min="1949"
+                placeholder="2026"
+                required
+            >
+        </label>
 
-        <label for="teacher">教員名</label>
-        <input type="text" id="teacher" name="teacher" required>
+        <label>
+            教員名
+            <input
+                type="text"
+                name="teacher"
+                placeholder="電算 太郎"
+                required
+                aria-describedby="teacher-desc"
+            >
+            <small id="teacher-desc"
+                >姓名等の要素ごとに半角スペースを入れてください．複数教員の場合はシラバス先頭の教員名を入力してください．</small
+            >
+        </label>
 
-        <label for="num">何回目のテストか</label>
-        <input type="number" id="num" name="num" min="1" required>
+        <label>
+            何回目のテストか
+            <input
+                type="number"
+                name="num"
+                min="1"
+                placeholder="1"
+                required
+                aria-describedby="num-desc"
+            >
+            <small id="num-desc"
+                >第n回小テストの場合はn．期末試験は1，再試験は2としてください．</small
+            >
+        </label>
 
-        <label for="isanswer">これは解答ですか？</label>
-        <input type="checkbox" id="isanswer" name="isanswer">
+        <label>
+            <input type="checkbox" name="isanswer">
+            これは解答ですか？
+        </label>
 
-        <label for="file">ファイルを選択してください</label>
-        <input type="file" id="file" multiple>
+        <label>
+            ファイルを選択してください
+            <input type="file" id="file" multiple required>
+        </label>
 
+        <proc-message id="proc-message"></proc-message>
         <div class="drop-area" id="drop-area">
             <p id="message">ここにファイルをドラッグしてください</p>
             <ul id="makelist"></ul>
         </div>
 
         <button id="uploadbtn" type="submit">送信</button>
-        <p id="thank"></p>
     </form>
 </main>
 

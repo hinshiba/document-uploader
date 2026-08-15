@@ -1,0 +1,26 @@
+@use "../var" as *;
+
+proc-message {
+    // 空のメッセージも読み上げ対象として残す必要があるのでdisplay:noneにはせず，
+    // 視覚的に隠しつつフローから外して余白やgapを生まないようにする
+    p.visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    p[role="status"] {
+        color: $text-weak-color;
+    }
+
+    p[role="alert"] {
+        color: $error-color;
+        font-weight: bold;
+    }
+}

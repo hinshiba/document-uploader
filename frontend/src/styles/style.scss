@@ -1,8 +1,12 @@
 @use "var" as *;
-@use "tags/footer" as *;
-@use "tags/form" as *;
-@use "tags/header" as *;
-@use "tags/nav" as *;
+@use "tags/a";
+@use "tags/button";
+@use "tags/footer";
+@use "tags/form";
+@use "tags/header";
+@use "tags/main";
+@use "tags/nav";
+@use "tags/proc-message";
 
 * {
     margin: 0;
@@ -12,10 +16,13 @@
 
 html {
     scroll-behavior: smooth;
+
+    // フォーム部品の既定の見た目を配色に合わせる
+    color-scheme: light;
 }
 
 body {
-    line-height: 1.6;
+    line-height: $line-height;
     color: $text-color;
     background-color: $bg-color;
 }

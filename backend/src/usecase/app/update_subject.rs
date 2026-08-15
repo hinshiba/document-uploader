@@ -3,7 +3,7 @@ use crate::domain::{
     Grade,
     Term,
     faculty::Faculty,
-    subject::Subject,
+    subject::{CourseCode, Subject},
     major::Major,
 };
 use crate::usecase::repository::{
@@ -21,7 +21,7 @@ pub struct UpdateSubjectUseCase<I> {
 pub struct UpdateSubjectInput {
     pub id: Id<Subject>,
     pub name: String,
-    pub course_code: String,
+    pub course_code: CourseCode,
     pub faculty_id: Id<Faculty>,
     pub major_id: Id<Major>,
     pub grade: Grade<Subject>,
@@ -31,7 +31,7 @@ pub struct UpdateSubjectInput {
 #[derive(Debug, Hash)]
 pub enum UpdateSubjectOutput {
     Updated(Subject),
-    ErrCourseCodeNonUnique(String),
+    ErrCourseCodeNonUnique(CourseCode),
     ErrFacultyNotExist(Id<Faculty>),
     ErrMajorNotExist(Id<Major>),
     ErrSubjectNotExist(Id<Subject>),
@@ -62,6 +62,7 @@ impl<I: SubjectRepository> UpdateSubjectUseCase<I> {
 
         let content = UpdateSubjectContent {
             name: input.name,
+            course_code: input.course_code,
             faculty_id: input.faculty_id,
             major_id: input.major_id,
             grade: input.grade,

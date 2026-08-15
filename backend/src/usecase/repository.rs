@@ -12,7 +12,7 @@ use crate::domain::{
     },
     faculty::Faculty,
     major::Major,
-    subject::Subject,
+    subject::{CourseCode, Subject},
 };
 
 #[derive(Debug, Hash)]
@@ -49,6 +49,7 @@ impl SearchDocumentOption {
 #[derive(Debug, Hash)]
 pub struct UpdateSubjectContent {
     pub name: String,
+    pub course_code: CourseCode,
     pub faculty_id: Id<Faculty>,
     pub major_id: Id<Major>,
     pub grade: Grade<Subject>,
