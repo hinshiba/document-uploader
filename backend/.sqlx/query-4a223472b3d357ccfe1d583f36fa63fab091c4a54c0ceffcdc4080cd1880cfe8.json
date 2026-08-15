@@ -1,0 +1,152 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                d.id, d.year, d.teacher, d.exam_type, d.is_answer, d.num,\n                s.id AS \"subject_id!\", s.faculty_id AS \"faculty_id!\",\n                s.major_id AS \"major_id!\", s.grade AS \"grade!\", s.term AS \"term!\"\n            FROM documents AS d\n                INNER JOIN subject_details AS s ON s.id = d.subject_id\n            WHERE\n                d.subject_id = $1 AND\n                ($2::bigint IS NULL OR d.year = $2) AND\n                ($3::text IS NULL OR d.teacher = $3) AND\n                ($4::bigint IS NULL OR d.exam_type = $4) AND\n                ($5::boolean IS NULL OR d.is_answer = $5)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "year",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "year"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "teacher",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "teacher"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "exam_type",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "exam_type"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_answer",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "is_answer"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "num",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "documents",
+            "name": "num"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "subject_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "faculty_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "faculty_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "major_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "major_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "grade!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "grade"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "term!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subject_details",
+            "name": "term"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Text",
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "4a223472b3d357ccfe1d583f36fa63fab091c4a54c0ceffcdc4080cd1880cfe8"
+}

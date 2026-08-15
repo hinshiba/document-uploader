@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT\n                d.id,\n                d.year,\n                d.teacher,\n                d.exam_type,\n                d.is_answer,\n                d.num,\n                s.id AS subject_id,\n                s.major_id,\n                s.grade,\n                s.term,\n                m.faculty_id\n            FROM documents AS d\n                INNER JOIN subjects AS s ON s.id = d.subject_id\n                INNER JOIN majors AS m ON m.id = s.major_id\n            WHERE d.id = $1\n        ",
+  "query": "\n            SELECT\n                d.id,\n                d.year,\n                d.teacher,\n                d.exam_type,\n                d.is_answer,\n                d.num,\n                s.id AS \"subject_id!\",\n                s.faculty_id AS \"faculty_id!\",\n                s.major_id AS \"major_id!\",\n                s.grade AS \"grade!\",\n                s.term AS \"term!\"\n            FROM documents AS d\n                INNER JOIN subject_details AS s ON s.id = d.subject_id\n            WHERE d.id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -71,56 +71,56 @@
       },
       {
         "ordinal": 6,
-        "name": "subject_id",
+        "name": "subject_id!",
         "type_info": "Uuid",
         "origin": {
           "Table": {
-            "table": "subjects",
+            "table": "subject_details",
             "name": "id"
           }
         }
       },
       {
         "ordinal": 7,
-        "name": "major_id",
+        "name": "faculty_id!",
         "type_info": "Uuid",
         "origin": {
           "Table": {
-            "table": "subjects",
-            "name": "major_id"
+            "table": "subject_details",
+            "name": "faculty_id"
           }
         }
       },
       {
         "ordinal": 8,
-        "name": "grade",
-        "type_info": "Int8",
+        "name": "major_id!",
+        "type_info": "Uuid",
         "origin": {
           "Table": {
-            "table": "subjects",
-            "name": "grade"
+            "table": "subject_details",
+            "name": "major_id"
           }
         }
       },
       {
         "ordinal": 9,
-        "name": "term",
+        "name": "grade!",
         "type_info": "Int8",
         "origin": {
           "Table": {
-            "table": "subjects",
-            "name": "term"
+            "table": "subject_details",
+            "name": "grade"
           }
         }
       },
       {
         "ordinal": 10,
-        "name": "faculty_id",
-        "type_info": "Uuid",
+        "name": "term!",
+        "type_info": "Int8",
         "origin": {
           "Table": {
-            "table": "majors",
-            "name": "faculty_id"
+            "table": "subject_details",
+            "name": "term"
           }
         }
       }
@@ -137,12 +137,12 @@
       false,
       false,
       false,
-      false,
-      false,
-      false,
-      false,
-      false
+      true,
+      true,
+      true,
+      true,
+      true
     ]
   },
-  "hash": "f90309c2fc072d2d605ce639969726a40a585e6062fa42d4f69eec70844ca66c"
+  "hash": "2de5df6ac281f1072dcaecccf3d19e266389daafa68bfe34b7f9e7a325ecf26d"
 }
