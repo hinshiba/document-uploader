@@ -25,14 +25,13 @@ impl DocumentRepository for PostgresRepository {
                 d.exam_type,
                 d.is_answer,
                 d.num,
-                s.id AS subject_id,
-                s.major_id,
-                s.grade,
-                s.term,
-                m.faculty_id
+                s.id AS "subject_id!",
+                s.faculty_id AS "faculty_id!",
+                s.major_id AS "major_id!",
+                s.grade AS "grade!",
+                s.term AS "term!"
             FROM documents AS d
-                INNER JOIN subjects AS s ON s.id = d.subject_id
-                INNER JOIN majors AS m ON m.id = s.major_id
+                INNER JOIN subject_details AS s ON s.id = d.subject_id
             WHERE d.id = $1
         "#,
             document_id.id(),
@@ -176,6 +175,10 @@ impl DocumentRepository for PostgresRepository {
         )
         .fetch_all(&self.pool)
         .await?;
+
+        if rows.is_empty() {
+            return Ok(Vec::new());
+        }
 
         // 紐づくファイル情報をまとめて取得する
         let document_ids: Vec<uuid::Uuid> = rows.iter().map(|r| r.id).collect();
