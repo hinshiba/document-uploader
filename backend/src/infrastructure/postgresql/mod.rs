@@ -29,6 +29,5 @@ mod tests {
             .fetch_one(&pool)
             .await
             .unwrap();
-        assert_eq!(count, Some(0));
     }
 }

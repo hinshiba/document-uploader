@@ -56,63 +56,63 @@ impl FacultyRepository for PostgresRepository {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use super::*;
+    use crate::infrastructure::postgresql::test_util::insert_faculty_majors;
     use sqlx::PgPool;
-    use uuid::Uuid;
 
     // list_facultiesについて
     /// 専攻が0の要素の列挙可能性を確認
     #[sqlx::test]
-    async fn list_faculties_groups_majors(pool: PgPool) {
+    async fn list_faculties_zero_majors(pool: PgPool) {
         // 初期値の生成
-        let eng_id = Uuid::new_v4();
-        let sci_id = Uuid::new_v4();
-        sqlx::query!(
-            r#"
-        INSERT INTO faculties (id, name)
-            VALUES ($1, $2), ($3, $4)
-        "#,
-            eng_id,
-            "工学部",
-            sci_id,
-            "理学部"
-        )
-        .execute(&pool)
-        .await
-        .unwrap();
-
-        sqlx::query!(
-            "INSERT INTO majors (id, name, faculty_id) 
-                VALUES ($1, $2, $3), ($4, $5, $6)",
-            Uuid::new_v4(),
-            "情報工学コース",
-            eng_id,
-            Uuid::new_v4(),
-            "ネットワーク工学コース",
-            eng_id
-        )
-        .execute(&pool)
-        .await
-        .unwrap();
+        let (fid, _mids) = insert_faculty_majors(&pool, "専攻ゼロ学部", vec![]).await;
 
         // 実行
         let repo = PostgresRepository::new(pool);
         let faculties = repo.list_faculties().await.unwrap();
 
-        assert_eq!(faculties.len(), 2);
+        // 検査
+        let faculty = faculties.iter().find(|f| f.id().id() == &fid).unwrap();
+        assert_eq!(faculty.name(), "専攻ゼロ学部");
+        assert!(faculty.majors().is_empty());
+    }
 
-        let eng_faculty = faculties
-            .iter()
-            .find(|f| f.id().id() == &eng_id)
-            .expect("工学部なし");
-        let mut major_names: Vec<_> = eng_faculty.majors().iter().map(|m| m.name()).collect();
-        major_names.sort();
-        assert_eq!(major_names, ["ネットワーク工学コース", "情報工学コース"]);
+    /// 学部と専攻が適切な組になっているか確認
+    #[sqlx::test]
+    async fn list_faculties_pairs_majors_with_own_faculty(pool: PgPool) {
+        // 初期値の生成
+        let (faculty_a_id, faculty_a_major_ids) =
+            insert_faculty_majors(&pool, "テスト学部A", vec!["テスト専攻A1", "テスト専攻A2"]).await;
+        let (faculty_b_id, faculty_b_major_ids) =
+            insert_faculty_majors(&pool, "テスト学部B", vec!["テスト専攻B1"]).await;
 
-        let sci_faculty = faculties
+        // 実行
+        let repo = PostgresRepository::new(pool);
+        let faculties = repo.list_faculties().await.unwrap();
+
+        // 検査
+        let faculty_a = faculties
             .iter()
-            .find(|f| f.id().id() == &sci_id)
-            .expect("理学部なし");
-        assert!(sci_faculty.majors().is_empty());
+            .find(|f| f.id().id() == &faculty_a_id)
+            .unwrap();
+        assert_eq!(faculty_a.name(), "テスト学部A");
+        let faculty_a_majors: HashSet<_> = faculty_a.majors().iter().map(|m| *m.id().id()).collect();
+        assert_eq!(faculty_a_majors, faculty_a_major_ids.into_iter().collect());
+        for m in faculty_a.majors() {
+            assert_eq!(m.faculty_id().id(), &faculty_a_id);
+        }
+
+        let faculty_b = faculties
+            .iter()
+            .find(|f| f.id().id() == &faculty_b_id)
+            .unwrap();
+        assert_eq!(faculty_b.name(), "テスト学部B");
+        let faculty_b_majors: HashSet<_> = faculty_b.majors().iter().map(|m| *m.id().id()).collect();
+        assert_eq!(faculty_b_majors, faculty_b_major_ids.into_iter().collect());
+        for m in faculty_b.majors() {
+            assert_eq!(m.faculty_id().id(), &faculty_b_id);
+        }
     }
 }

@@ -5,41 +5,35 @@ use uuid::Uuid;
 
 use crate::domain::{Grade, Id, Term, subject::Subject};
 
-/// 工学部/情報工学コースと理学部/数学科を投入する
-///
-/// 戻り値は`(工学部id, 情報工学コースid, 理学部id, 数学科id)`
-pub(super) async fn seed_faculties_and_majors(pool: &PgPool) -> (Uuid, Uuid, Uuid, Uuid) {
-    let eng_id = Uuid::new_v4();
-    let sci_id = Uuid::new_v4();
+/// 指定した学部と学科群のペアを挿入する
+pub(super) async fn insert_faculty_majors(pool: &PgPool, faculty: &str, majors: Vec<&str>) -> (Uuid, Vec<Uuid>) {
+    let faculty_id = Uuid::new_v4();
     sqlx::query!(
         "INSERT INTO faculties (id, name)
-            VALUES ($1, $2), ($3, $4)",
-        eng_id,
-        "工学部",
-        sci_id,
-        "理学部"
+            VALUES ($1, $2)",
+        faculty_id,
+        faculty
     )
     .execute(pool)
     .await
     .unwrap();
 
-    let eng_major = Uuid::new_v4();
-    let sci_major = Uuid::new_v4();
-    sqlx::query!(
-        "INSERT INTO majors (id, name, faculty_id)
-            VALUES ($1, $2, $3), ($4, $5, $6)",
-        eng_major,
-        "情報工学コース",
-        eng_id,
-        sci_major,
-        "数学科",
-        sci_id
-    )
-    .execute(pool)
-    .await
-    .unwrap();
-
-    (eng_id, eng_major, sci_id, sci_major)
+    let mut major_ids = vec![];
+    for major in majors {
+        let major_id = Uuid::new_v4();
+        major_ids.push(major_id);
+        sqlx::query!(
+            "INSERT INTO majors (id, name, faculty_id)
+                VALUES ($1, $2, $3)",
+            major_id,
+            major,
+            faculty_id
+        )
+        .execute(pool)
+        .await
+        .unwrap();
+    }
+    (faculty_id, major_ids)
 }
 
 pub(super) fn subject_of(
