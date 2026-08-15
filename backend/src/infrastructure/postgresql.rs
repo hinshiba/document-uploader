@@ -9,9 +9,12 @@ use crate::{
         faculty::Faculty,
         major::Major,
         subject::Subject,
-    },
-    usecase::repository::{
-        DocumentRepository, FacultyRepository, SearchSubjectOption, SubjectRepository,
+    }, usecase::repository::{
+        DocumentRepository, 
+        FacultyRepository, 
+        SearchDocumentOption, 
+        SearchSubjectOption, 
+        SubjectRepository, 
         UpdateSubjectContent,
     },
 };
@@ -387,6 +390,10 @@ impl DocumentRepository for PostgresRepository {
         transaction.commit().await?;
 
         Ok(())
+    }
+    
+    async fn search_documents(&self, option: SearchDocumentOption)-> anyhow::Result<Vec<Document>> {
+        todo!()
     }
 }
 
