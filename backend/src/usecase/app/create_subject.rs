@@ -26,7 +26,7 @@ pub struct CreateSubjectInput {
 #[derive(Debug, Hash)]
 pub enum CreateSubjectOutput {
     Created(Subject),
-    ErrCourseCodeNonUnique(String),
+    ErrCourseCodeNonUnique(CourseCode),
     ErrFacultyNotExist(Id<Faculty>),
     ErrMajorNotExist(Id<Major>),
     ErrFacultyMajorRelation(Id<Faculty>, Id<Major>),
