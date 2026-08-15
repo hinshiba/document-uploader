@@ -391,9 +391,78 @@ impl DocumentRepository for PostgresRepository {
 
         Ok(())
     }
-    
-    async fn search_documents(&self, option: SearchDocumentOption)-> anyhow::Result<Vec<Document>> {
-        todo!()
+
+    #[tracing::instrument(skip(self), err(Display))]
+    async fn search_documents(&self, option: SearchDocumentOption) -> anyhow::Result<Vec<Document>> {
+        // subject_idは必須, それ以外はNULLなら絞り込みに寄与させない
+        let rows = sqlx::query!(
+            r#"
+            SELECT
+                d.id, d.year, d.teacher, d.exam_type, d.is_answer, d.num,
+                s.id AS "subject_id!", s.faculty_id AS "faculty_id!",
+                s.major_id AS "major_id!", s.grade AS "grade!", s.term AS "term!"
+            FROM documents AS d
+                INNER JOIN subject_details AS s ON s.id = d.subject_id
+            WHERE
+                d.subject_id = $1 AND
+                ($2::bigint IS NULL OR d.year = $2) AND
+                ($3::text IS NULL OR d.teacher = $3) AND
+                ($4::bigint IS NULL OR d.exam_type = $4) AND
+                ($5::boolean IS NULL OR d.is_answer = $5)
+        "#,
+            option.subject_id.id(),
+            option.year.as_ref().map(|year| *year.year()),
+            option.teacher.as_deref(),
+            option.exam_type.map(|exam_type| exam_type.to_int()),
+            option.is_answer,
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        // 紐づくファイル情報をまとめて取得する
+        let document_ids: Vec<uuid::Uuid> = rows.iter().map(|r| r.id).collect();
+        let mut file_map: HashMap<uuid::Uuid, Vec<DocumentFile>> = HashMap::new();
+        for f in sqlx::query!(
+            r#"
+            SELECT document_id, file_type, path
+            FROM document_files
+            WHERE document_id = ANY($1)
+        "#,
+            &document_ids,
+        )
+        .fetch_all(&self.pool)
+        .await?
+        {
+            file_map
+                .entry(f.document_id)
+                .or_default()
+                .push(DocumentFile::new(f.file_type.parse()?, f.path.into()));
+        }
+
+        // mapをremoveしながら生成
+        rows.into_iter()
+            .map(|r| {
+                let metadata = DocumentMetadata::new(
+                    Id::new(r.faculty_id),
+                    Id::new(r.major_id),
+                    Year::new(r.year)?,
+                    Term::new(r.term)?,
+                    Grade::new(r.grade)?,
+                    Id::new(r.subject_id),
+                    r.teacher,
+                    ExamType::from_int(r.exam_type)
+                        .ok_or_else(|| anyhow::anyhow!("Invalid exam_type stored in database."))?,
+                    r.is_answer,
+                    Num::new(r.num)?,
+                );
+
+                Ok(Document::new(
+                    Id::new(r.id),
+                    metadata,
+                    file_map.remove(&r.id).unwrap_or_default(),
+                )?)
+            })
+            .collect::<anyhow::Result<Vec<_>>>()
     }
 }
 
