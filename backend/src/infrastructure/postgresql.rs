@@ -535,8 +535,8 @@ mod tests {
     #[sqlx::test]
     async fn search_subjects_returns_all_when_option_is_empty(pool: PgPool) {
         let (_, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
-        insert_subject(&pool, Uuid::new_v4(), "線形代数", "C001", eng_major, 1, 1).await;
-        insert_subject(&pool, Uuid::new_v4(), "解析学", "C002", sci_major, 2, 3).await;
+        insert_subject(&pool, Uuid::new_v4(), "線形代数", "090219", eng_major, 1, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "解析学", "090220", sci_major, 2, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -552,8 +552,8 @@ mod tests {
     async fn search_subjects_filters_by_faculty(pool: PgPool) {
         let (eng_id, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
         let eng_subject = Uuid::new_v4();
-        insert_subject(&pool, eng_subject, "線形代数", "C001", eng_major, 1, 1).await;
-        insert_subject(&pool, Uuid::new_v4(), "解析学", "C002", sci_major, 2, 3).await;
+        insert_subject(&pool, eng_subject, "線形代数", "090219", eng_major, 1, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "解析学", "090220", sci_major, 2, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -574,11 +574,11 @@ mod tests {
     async fn search_subjects_filters_by_grade_and_term(pool: PgPool) {
         let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let target = Uuid::new_v4();
-        insert_subject(&pool, target, "線形代数", "C001", eng_major, 2, 3).await;
+        insert_subject(&pool, target, "線形代数", "090219", eng_major, 2, 3).await;
         // 学年のみ一致
-        insert_subject(&pool, Uuid::new_v4(), "電磁気学", "C002", eng_major, 2, 1).await;
+        insert_subject(&pool, Uuid::new_v4(), "電磁気学", "090220", eng_major, 2, 1).await;
         // 学期のみ一致
-        insert_subject(&pool, Uuid::new_v4(), "熱力学", "C003", eng_major, 1, 3).await;
+        insert_subject(&pool, Uuid::new_v4(), "熱力学", "090221", eng_major, 1, 3).await;
 
         let repo = PostgresRepository::new(pool);
         let subjects = repo
@@ -602,7 +602,7 @@ mod tests {
         let subject_id = Uuid::new_v4();
 
         let repo = PostgresRepository::new(pool);
-        repo.create_subject(subject_of(subject_id, "線形代数", "C001", eng_id, eng_major, 1, 2))
+        repo.create_subject(subject_of(subject_id, "線形代数", "090219", eng_id, eng_major, 1, 2))
             .await
             .unwrap();
 
@@ -617,7 +617,7 @@ mod tests {
         assert_eq!(subjects.len(), 1);
         let subject = &subjects[0];
         assert_eq!(subject.name(), "線形代数");
-        assert_eq!(subject.course_code().code(), "C001");
+        assert_eq!(subject.course_code().code(), "090219");
         assert_eq!(subject.faculty_id().id(), &eng_id);
         assert_eq!(subject.major_id().id(), &eng_major);
         assert_eq!(subject.grade().grade(), &1);
@@ -631,12 +631,12 @@ mod tests {
         let subject_id = Uuid::new_v4();
 
         let repo = PostgresRepository::new(pool);
-        repo.create_subject(subject_of(subject_id, "線形代数", "C001", eng_id, eng_major, 1, 2))
+        repo.create_subject(subject_of(subject_id, "線形代数", "090219", eng_id, eng_major, 1, 2))
             .await
             .unwrap();
 
         let result = repo
-            .create_subject(subject_of(subject_id, "解析学", "C002", eng_id, eng_major, 3, 4))
+            .create_subject(subject_of(subject_id, "解析学", "090220", eng_id, eng_major, 3, 4))
             .await;
         assert!(result.is_err());
 
@@ -662,7 +662,7 @@ mod tests {
             .create_subject(subject_of(
                 Uuid::new_v4(),
                 "線形代数",
-                "C001",
+                "090219",
                 eng_id,
                 sci_major,
                 1,
@@ -685,7 +685,7 @@ mod tests {
     async fn update_subject_returns_updated_subject(pool: PgPool) {
         let (eng_id, eng_major, sci_id, sci_major) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", "C001", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let updated = repo
@@ -693,7 +693,7 @@ mod tests {
                 Id::new(subject_id),
                 UpdateSubjectContent {
                     name: "解析学".to_owned(),
-                    course_code: CourseCode::new("C002").unwrap(),
+                    course_code: CourseCode::new("090220").unwrap(),
                     faculty_id: Id::new(sci_id),
                     major_id: Id::new(sci_major),
                     grade: Grade::new(3).unwrap(),
@@ -705,7 +705,7 @@ mod tests {
 
         assert_eq!(updated.id().id(), &subject_id);
         assert_eq!(updated.name(), "解析学");
-        assert_eq!(updated.course_code().code(), "C002");
+        assert_eq!(updated.course_code().code(), "090220");
         assert_eq!(updated.faculty_id().id(), &sci_id);
         assert_eq!(updated.major_id().id(), &sci_major);
         assert_eq!(updated.grade().grade(), &3);
@@ -734,7 +734,7 @@ mod tests {
                 Id::new(Uuid::new_v4()),
                 UpdateSubjectContent {
                     name: "線形代数".to_owned(),
-                    course_code: CourseCode::new("C001").unwrap(),
+                    course_code: CourseCode::new("090219").unwrap(),
                     faculty_id: Id::new(eng_id),
                     major_id: Id::new(eng_major),
                     grade: Grade::new(1).unwrap(),
@@ -751,7 +751,7 @@ mod tests {
     async fn update_subject_rejects_major_faculty_mismatch(pool: PgPool) {
         let (eng_id, eng_major, _, sci_major) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", "C001", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let result = repo
@@ -759,7 +759,7 @@ mod tests {
                 Id::new(subject_id),
                 UpdateSubjectContent {
                     name: "解析学".to_owned(),
-                    course_code: CourseCode::new("C002").unwrap(),
+                    course_code: CourseCode::new("090220").unwrap(),
                     faculty_id: Id::new(eng_id),
                     major_id: Id::new(sci_major),
                     grade: Grade::new(3).unwrap(),
@@ -786,14 +786,14 @@ mod tests {
     async fn delete_subject_returns_deleted_subject(pool: PgPool) {
         let (eng_id, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", "C001", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         let repo = PostgresRepository::new(pool);
         let deleted = repo.delete_subject(Id::new(subject_id)).await.unwrap();
 
         assert_eq!(deleted.id().id(), &subject_id);
         assert_eq!(deleted.name(), "線形代数");
-        assert_eq!(deleted.course_code().code(), "C001");
+        assert_eq!(deleted.course_code().code(), "090219");
         assert_eq!(deleted.faculty_id().id(), &eng_id);
         assert_eq!(deleted.major_id().id(), &eng_major);
         assert_eq!(deleted.grade().grade(), &1);
@@ -820,7 +820,7 @@ mod tests {
     async fn delete_subject_errors_when_referenced_by_document(pool: PgPool) {
         let (_, eng_major, _, _) = seed_faculties_and_majors(&pool).await;
         let subject_id = Uuid::new_v4();
-        insert_subject(&pool, subject_id, "線形代数", "C001", eng_major, 1, 2).await;
+        insert_subject(&pool, subject_id, "線形代数", "090219", eng_major, 1, 2).await;
 
         sqlx::query!(
             "INSERT INTO documents (id, subject_id, year, teacher, exam_type, is_answer, num)
@@ -883,7 +883,7 @@ mod tests {
                 VALUES ($1, $2, $3, $4, $5, $6)",
             subject_id,
             "線形代数",
-            "C001",
+            "090219",
             major_id,
             1i64,
             2i64
