@@ -9,7 +9,7 @@ use crate::{
 };
 
 /// ローカルファイルシステムにドキュメントの実体を保存するためのリポジトリ実装
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LocalFileSystem {
     /// 保存のルートとなるディレクトリ
     save_dir: PathBuf,

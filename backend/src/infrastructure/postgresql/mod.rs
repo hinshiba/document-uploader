@@ -7,7 +7,7 @@ mod test_util;
 
 use sqlx::PgPool;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PostgresRepository {
     pool: sqlx::PgPool,
 }
