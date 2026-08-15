@@ -160,6 +160,7 @@ impl ExampleRepository {
         Subject::new(
             subject.id().clone(),
             subject.name().to_owned(),
+            subject.course_code().clone(),
             subject.faculty_id().clone(),
             subject.major_id().clone(),
             subject.grade().clone(),
@@ -285,6 +286,7 @@ impl SubjectRepository for ExampleRepository {
         *subject = Subject::new(
             subject.id().clone(),
             content.name,
+            content.course_code,
             content.faculty_id,
             content.major_id,
             content.grade,

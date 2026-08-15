@@ -13,7 +13,7 @@ use crate::{
         Id,
         Grade,
         Term,
-        subject::Subject,
+        subject::{CourseCode, Subject},
     },
     usecase::{
         app::{
@@ -52,7 +52,7 @@ impl PutSubjectsIdInput {
         let update_subject_input = UpdateSubjectInput {
             id: Id::new(subject_id),
             name: self.name.clone(),
-            course_code: self.course_code.clone(),
+            course_code: CourseCode::new(&self.course_code).map_err(parse_error_to_endpoint_error)?,
             faculty_id: Id::new(self.faculty),
             major_id: Id::new(self.major),
             grade: Grade::new(self.grade).map_err(parse_error_to_endpoint_error)?,
@@ -144,7 +144,7 @@ fn convert_update_subject_output(o: UpdateSubjectOutput) -> Result<Subject, (Sta
             StatusCode::CONFLICT,
             EndpointError {
                 message: "duplicate check failed".to_owned(),
-                details: Some(format!("subject which have course_code '{}' already exists", course_code)),
+                details: Some(format!("subject which have course_code '{}' already exists", course_code.code())),
             }
         )),
         ErrSubjectNotExist(_subject_id) => Err((
