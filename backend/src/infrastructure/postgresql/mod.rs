@@ -22,10 +22,10 @@ impl PostgresRepository {
 mod tests {
     use super::*;
 
-    /// 空のDBがあるか確認
+    /// DBがあるか確認
     #[sqlx::test]
     async fn migrations_run(pool: PgPool) {
-        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM faculties")
+        let _ = sqlx::query_scalar!("SELECT 1 FROM faculties")
             .fetch_one(&pool)
             .await
             .unwrap();
