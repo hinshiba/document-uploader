@@ -4,6 +4,7 @@ CREATE VIEW subject_details AS
 SELECT
     s.id,
     s.name,
+    s.course_code,
     m.faculty_id,
     s.major_id,
     s.grade,
