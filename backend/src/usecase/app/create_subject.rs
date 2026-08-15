@@ -3,7 +3,7 @@ use crate::domain::{
     Grade,
     Term,
     faculty::Faculty,
-    subject::Subject,
+    subject::{CourseCode, Subject},
     major::Major,
 };
 use crate::usecase::repository::SubjectRepository;
@@ -16,7 +16,7 @@ pub struct CreateSubjectUseCase<I> {
 #[derive(Debug, Clone, Hash)]
 pub struct CreateSubjectInput {
     pub name: String,
-    pub course_code: String,
+    pub course_code: CourseCode,
     pub faculty_id: Id<Faculty>,
     pub major_id: Id<Major>,
     pub grade: Grade<Subject>,
@@ -48,6 +48,8 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
         let subject_create = Subject::new(
             subject_create_id.clone(),
             input.name,
+            // TODO: `course_code`が一意であることを検証する
+            input.course_code,
             // TODO: `faculty_id`を持つFacultyが存在することを検証する
             input.faculty_id,
             // TODO: `major_id`を持つMajorが存在し、それが`faculty_id`を持つFacultyに属することを検証する
@@ -60,6 +62,7 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
         let subject_ret = Subject::new(
             subject_create_id,
             subject_create.name().to_owned(),
+            subject_create.course_code().clone(),
             subject_create.faculty_id().clone(),
             subject_create.major_id().clone(),
             subject_create.grade().clone(),

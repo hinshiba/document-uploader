@@ -45,6 +45,9 @@ impl Subject {
     pub fn name(&self) -> &str {
         &self.name
     }
+    pub fn course_code(&self) -> &CourseCode {
+        &self.course_code
+    }
     pub fn faculty_id(&self) -> &Id<Faculty> {
         &self.faculty_id
     }
