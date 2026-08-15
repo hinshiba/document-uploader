@@ -48,7 +48,6 @@ impl<I: SubjectRepository> CreateSubjectUseCase<I> {
         let subject_create = Subject::new(
             subject_create_id.clone(),
             input.name,
-            // TODO: `course_code`が一意であることを検証する
             input.course_code,
             // TODO: `faculty_id`を持つFacultyが存在することを検証する
             input.faculty_id,
