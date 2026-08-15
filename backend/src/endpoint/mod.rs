@@ -10,6 +10,7 @@ pub mod docs_id;
 pub mod faculties;
 pub mod subjects;
 pub mod subjects_id;
+pub mod api;
 
 pub type EndpointResult<T> = (axum::http::StatusCode, Result<T, EndpointError>);
 
