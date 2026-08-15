@@ -21,7 +21,9 @@ const logLevel: LogLevel =
 configureSync({
     reset: true,
     sinks: {
-        console: getConsoleSink(),
+        console: getConsoleSink({
+            formatter: (r) => [...defaultConsoleFormatter(r), r.properties],
+        }),
     },
     loggers: [
         // logtape自身のログを分離する
