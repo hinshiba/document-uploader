@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            UPDATE subjects\n                SET name = $2, major_id = $3, grade = $4, term = $5\n                WHERE id = $1\n                RETURNING id, name, major_id, grade, term\n        ",
+  "query": "\n            DELETE FROM subjects AS s\n                USING majors AS m\n                WHERE s.major_id = m.id AND s.id = $1\n                RETURNING s.id, s.name, s.course_code, m.faculty_id, s.major_id, s.grade, s.term\n        ",
   "describe": {
     "columns": [
       {
@@ -27,6 +27,28 @@
       },
       {
         "ordinal": 2,
+        "name": "course_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subjects",
+            "name": "course_code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "faculty_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "majors",
+            "name": "faculty_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
         "name": "major_id",
         "type_info": "Uuid",
         "origin": {
@@ -37,7 +59,7 @@
         }
       },
       {
-        "ordinal": 3,
+        "ordinal": 5,
         "name": "grade",
         "type_info": "Int8",
         "origin": {
@@ -48,7 +70,7 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 6,
         "name": "term",
         "type_info": "Int8",
         "origin": {
@@ -61,11 +83,7 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Text",
-        "Uuid",
-        "Int8",
-        "Int8"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -73,8 +91,10 @@
       false,
       false,
       false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "f31d12b4a3af0e5a4a321c028cf6f195b04bdfcf99bc54a7915f6308a8ed0d12"
+  "hash": "a8d6daab7a18cf4f65160aedcd91923b3183f9e6ff38d45b6d8179ba6fd14bc9"
 }
