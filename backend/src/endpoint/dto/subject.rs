@@ -10,6 +10,7 @@ pub struct SubjectDto {
     #[serde(with="uuid::serde::hyphenated")]
     pub id: uuid::Uuid,
     pub name: String,
+    pub course_code: String,
     #[serde(with="uuid::serde::hyphenated")]
     pub faculty: uuid::Uuid,
     #[serde(with="uuid::serde::hyphenated")]
@@ -23,6 +24,7 @@ impl SubjectDto {
         Self {
             id: subject.id().id().clone(),
             name: subject.name().to_owned(),
+            course_code: subject.course_code().code().to_owned(),
             faculty: subject.faculty_id().id().clone(),
             major: subject.major_id().id().clone(),
             grade: *subject.grade().grade(),
@@ -43,6 +45,7 @@ mod tests {
             {
                 "id": "9b2e4c6a-1f3d-4e5b-8a7c-0d1e2f3a4b5c",
                 "name": "線形代数",
+                "course_code": "090219",
                 "faculty": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
                 "major": "550e8400-e29b-41d4-a716-446655440000",
                 "grade": 1,
